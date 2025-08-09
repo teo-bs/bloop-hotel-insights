@@ -38,8 +38,8 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
       }}
     >
       <SidebarContent className="p-4">
-        <div className="relative h-full flex flex-col text-primary-foreground">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none rounded-r-2xl" aria-hidden="true" />
+        <div className="relative h-full flex flex-col text-sidebar-foreground">
+          <div className="absolute inset-0 bg-gradient-to-b from-sidebar-foreground/10 to-transparent pointer-events-none rounded-r-2xl" aria-hidden="true" />
 
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -50,7 +50,7 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
             <button
               id="btn-sidebar-toggle"
               onClick={toggleSidebar}
-              className="p-2 rounded-md hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="p-2 rounded-md hover:bg-sidebar-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Toggle sidebar"
               aria-controls="app-sidebar"
               aria-expanded={state !== "collapsed"}
@@ -70,8 +70,8 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
               const baseCls =
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ";
               const stateCls = active
-                ? "font-bold text-primary-foreground border-l-4 border-accent pl-2 -ml-1 bg-white/5"
-                : "text-primary-foreground/90 hover:bg-white/10 border-l-4 border-transparent pl-3";
+                ? "font-bold text-sidebar-foreground bg-sidebar-foreground/10 pl-3"
+                : "text-sidebar-foreground/90 hover:bg-sidebar-foreground/10 pl-3";
 
               const linkEl = (
                 <a
@@ -94,7 +94,7 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
                       (active ? "scale-y-100" : "scale-y-0")
                     }
                   />
-                  <Icon className={`h-4 w-4 transition-transform duration-200 ${state === "collapsed" ? "translate-x-0" : "translate-x-0.5"}`} />
+                  <Icon className={`h-4 w-4 text-sidebar-foreground/80 transition-transform duration-200 ${state === "collapsed" ? "translate-x-0" : "translate-x-0.5"}`} />
                   <span className={state === "collapsed" ? "hidden" : "block"}>{label}</span>
                 </a>
               );
@@ -111,11 +111,11 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
           </nav>
 
           {/* Footer user + logout */}
-          <div className="mt-4 border-t border-white/10 pt-3">
+          <div className="mt-4 border-t border-sidebar-foreground/10 pt-3">
             {state === "collapsed" ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div id="sidebar-user" className="h-8 w-8 rounded-full bg-white/20 grid place-items-center text-xs font-bold select-none">
+                  <div id="sidebar-user" className="h-8 w-8 rounded-full bg-sidebar-foreground/20 grid place-items-center text-xs font-bold select-none">
                     {String(name).charAt(0).toUpperCase()}
                   </div>
                 </TooltipTrigger>
@@ -123,13 +123,13 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
               </Tooltip>
             ) : (
               <div id="sidebar-user" className="flex items-center gap-3 rounded-md px-3 py-2">
-                <div className="h-8 w-8 rounded-full bg-white/20 grid place-items-center text-xs font-bold select-none">
+                <div className="h-8 w-8 rounded-full bg-sidebar-foreground/20 grid place-items-center text-xs font-bold select-none">
                   {String(name).charAt(0).toUpperCase()}
                 </div>
                 <div className="text-sm font-medium truncate">{name}</div>
               </div>
             )}
-            <Button variant="ghost" className="justify-start w-full mt-2 text-primary-foreground hover:bg-white/10" onClick={async () => { await supabase.auth.signOut(); navigate("/auth?mode=signin", { replace: true }); }}>
+            <Button variant="ghost" className="justify-start w-full mt-2 text-sidebar-foreground hover:bg-sidebar-foreground/10" onClick={async () => { await supabase.auth.signOut(); navigate("/auth?mode=signin", { replace: true }); }}>
               <LogOut className="h-4 w-4 mr-2" />
               {state === "collapsed" ? <span className="hidden">Log out</span> : "Log out"}
             </Button>
