@@ -189,10 +189,10 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 md:p-10 animate-fade-in">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Upload Reviews (CSV)</CardTitle>
+          <CardTitle className="text-2xl font-bold">Upload Reviews (CSV)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -201,7 +201,7 @@ export default function UploadPage() {
             </p>
           </div>
           <Input type="file" accept=".csv,text/csv" onChange={onFileChange} />
-          <Button onClick={handleUpload} disabled={!file || processing}>
+          <Button onClick={handleUpload} variant="hero" disabled={!file || processing}>
             {processing ? "Processing..." : "Start upload"}
           </Button>
         </CardContent>

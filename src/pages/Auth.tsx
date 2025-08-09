@@ -49,10 +49,10 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6 md:p-10 bg-royal-diagonal animate-fade-in">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-xl">{mode === "signin" ? "Sign in" : "Create an account"}</CardTitle>
+          <CardTitle className="text-2xl font-bold">{mode === "signin" ? "Sign in" : "Create an account"}</CardTitle>
           <CardDescription>Use email and password to {mode === "signin" ? "continue" : "get started"}.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,7 +65,7 @@ export default function AuthPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" variant="hero" className="w-full" disabled={loading}>
               {loading ? "Please wait..." : mode === "signin" ? "Sign in" : "Sign up"}
             </Button>
           </form>
