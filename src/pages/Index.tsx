@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, MessageSquareText, TrendingUp, ArrowDown, Link2, Brain, Lightbulb, BarChart3, Sparkles, Globe, Download } from "lucide-react";
 import TopNav from "@/components/layout/TopNav";
+import Reveal from "@/components/motion/Reveal";
 import { openIntegrationsModal } from "@/lib/actions";
 export default function Index() {
   
@@ -101,7 +102,7 @@ export default function Index() {
               type="button"
               onClick={() => document.getElementById("how-padu-works")?.scrollIntoView({ behavior: "smooth" })}
               aria-label="Scroll to How Padu Works"
-              className="rounded-full border bg-card/70 backdrop-blur px-3 py-2 hover-scale"
+              className="rounded-full border bg-card/70 backdrop-blur px-3 py-2 hover-scale focus-ring"
             >
               <ArrowDown className="h-5 w-5" />
             </button>
@@ -110,7 +111,7 @@ export default function Index() {
 
         {/* How Padu Works */}
         <section id="how-padu-works" className="bg-royal-tint">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
+          <Reveal><div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
             <h2 className="text-2xl md:text-3xl font-bold mb-8">How Padu Works</h2>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Step 1 */}
@@ -144,13 +145,13 @@ export default function Index() {
                 </div>
               </Card>
             </div>
-          </div>
+          </div></Reveal>
         </section>
 
 
         {/* Why Hotels Choose Padu */}
         <section className="bg-royal-tint">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
+          <Reveal><div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
             <h2 className="text-2xl md:text-3xl font-bold mb-8">Why Hotels Choose Padu</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Feature 1 */}
@@ -197,12 +198,12 @@ export default function Index() {
                 </div>
               </Card>
             </div>
-          </div>
+          </div></Reveal>
         </section>
 
         {/* See Padu in Action */}
         <section className="w-full">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
+          <Reveal><div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
             <h2 className="text-2xl md:text-3xl font-bold mb-8">See Padu in Action</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               {/* Text (mobile first) */}
@@ -217,12 +218,12 @@ export default function Index() {
                 <div className="rounded-xl border overflow-hidden">
                   <img src="/placeholder.svg" alt="Padu dashboard screenshot (blurred)" className="w-full h-auto object-cover blur-[1px]" loading="lazy" />
                 </div>
-                <button aria-label="Play demo" className="absolute inset-0 m-auto h-14 w-14 grid place-items-center rounded-full bg-background/80 border shadow-lg hover-scale">
+                <button aria-label="Play demo" className="absolute inset-0 m-auto h-14 w-14 grid place-items-center rounded-full bg-background/80 border shadow-lg hover-scale focus-ring">
                   <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
                 </button>
               </div>
             </div>
-          </div>
+          </div></Reveal>
         </section>
 
         {/* Testimonials */}
@@ -359,7 +360,7 @@ export default function Index() {
                 <h3 className="text-2xl md:text-3xl font-bold">Ready to see what your guests really think?</h3>
                 <p className="mt-2 text-primary-foreground/90">Join hundreds of hotel managers using Padu to delight guests and boost reviews.</p>
               </div>
-              <Button className="bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] rounded-2xl px-6 py-6 hover:shadow-2xl">Get Started Free</Button>
+              <Button className="bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] rounded-2xl px-6 py-6 hover:shadow-2xl focus-ring">Get Started Free</Button>
             </div>
           </div>
         </section>

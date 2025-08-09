@@ -190,4 +190,7 @@ All colors MUST be HSL.
 
   /* Very light Royal Blue tint background */
   .bg-royal-tint { background-color: hsl(var(--primary) / 0.06); }
+
+  /* Consistent focus outline for a11y */
+  .focus-ring { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background; }
 }
