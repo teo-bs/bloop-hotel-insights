@@ -1,14 +1,15 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Bell } from "lucide-react";
+import { Calendar, Bell, Menu } from "lucide-react";
 
 export default function AppLayout({ children }: PropsWithChildren) {
   const navigate = useNavigate();
+  const { toggleSidebar } = useSidebar();
   type RouteKey = "dashboard" | "reviews" | "insights" | "reports" | "settings";
   const [currentRoute, setCurrentRoute] = useState<RouteKey>("dashboard");
 
@@ -33,7 +34,10 @@ export default function AppLayout({ children }: PropsWithChildren) {
           <div className="px-6 md:px-8 xl:px-10 h-16 grid grid-cols-1 md:grid-cols-3 items-center gap-3">
             {/* Left: Breadcrumbs */}
             <div className="flex items-center gap-3">
-              <SidebarTrigger />
+              <button id="btn-mobile-menu" className="md:hidden p-2 rounded-md hover:bg-accent/40" onClick={() => toggleSidebar()} aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </button>
+              <SidebarTrigger className="hidden md:inline-flex" />
               <nav id="breadcrumbs" aria-label="Breadcrumb">
                 <Breadcrumb>
                   <BreadcrumbList>
