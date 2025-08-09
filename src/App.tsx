@@ -12,6 +12,8 @@ import UploadPage from "./pages/Upload";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
 import GlobalActions from "./components/GlobalActions";
+import IntegrationsModal from "@/components/integrations/IntegrationsModal";
+import CSVUploadModal from "@/components/upload/CSVUploadModal";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +23,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <GlobalActions />
+      <IntegrationsModal />
+      <CSVUploadModal />
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<AuthPage />} />

@@ -1,3 +1,4 @@
+import Papa from "papaparse";
 import { toast } from "sonner";
 import {
   connectSourceAction,
@@ -11,11 +12,13 @@ export function openIntegrationsModal() {
   window.dispatchEvent(new CustomEvent("open-integrations-modal"));
 }
 
-// CSV Upload modal placeholder (not implemented yet)
+// Open the CSV Upload Modal via a global event
 export function openCsvUploadModal() {
-  toast.info("CSV Upload modal (placeholder)");
+  window.dispatchEvent(new CustomEvent("open-csv-modal"));
 }
 
+// Alias to match wiring notes
+export const openCsvModal = openCsvUploadModal;
 // Placeholder: connect to a source (MVP logic lives in store actions)
 export async function connectSource(platform: Platform, key: string) {
   try {
@@ -40,3 +43,36 @@ export async function syncAllSources() {
   await syncAllSourcesAction();
   toast.success("All sources synced");
 }
+
+export type ParsedCsvRow = {
+  date: string;
+  platform: string;
+  rating: string | number;
+  text: string;
+  title?: string;
+};
+
+export async function parseCsv(file: File): Promise<{ rows: ParsedCsvRow[]; headers: string[] }> {
+  return new Promise((resolve, reject) => {
+    Papa.parse<ParsedCsvRow>(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (res) => {
+        const headers = res.meta.fields || [];
+        resolve({ rows: (res.data as any) || [], headers });
+      },
+      error: (err) => reject(err),
+    });
+  });
+}
+
+export async function importReviews(rows: ParsedCsvRow[]): Promise<number> {
+  // Simulate an import with a small delay; returns number of accepted rows
+  await new Promise((res) => setTimeout(res, 1200));
+  return rows.length;
+}
+
+export function emitReviewsUpdated() {
+  window.dispatchEvent(new CustomEvent("reviews-updated"));
+}
+
