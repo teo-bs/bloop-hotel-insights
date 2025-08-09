@@ -29,7 +29,7 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
     <Sidebar
       id="app-sidebar"
       collapsible="icon"
-      className="rounded-r-2xl"
+      className="rounded-r-2xl transition-[width] duration-200 ease-out"
       style={{
         ["--sidebar-width" as any]: "15rem",
         ["--sidebar-width-icon" as any]: "4.5rem",
@@ -85,9 +85,16 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
                     e.preventDefault();
                     onRouteChange(route);
                   }}
-                  className={baseCls + stateCls}
+                  className={baseCls + stateCls + " relative"}
                 >
-                  <Icon className="h-4 w-4" />
+                  <span
+                    aria-hidden
+                    className={
+                      "absolute left-0 top-0 h-full w-1 rounded-r bg-accent origin-top transform transition-transform duration-200 " +
+                      (active ? "scale-y-100" : "scale-y-0")
+                    }
+                  />
+                  <Icon className={`h-4 w-4 transition-transform duration-200 ${state === "collapsed" ? "translate-x-0" : "translate-x-0.5"}`} />
                   <span className={state === "collapsed" ? "hidden" : "block"}>{label}</span>
                 </a>
               );

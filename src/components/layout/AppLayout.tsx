@@ -83,7 +83,9 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
         <div id="state-currentRoute" data-value={currentRoute} className="hidden" />
         <div id="app-content" className="px-6 md:px-8 xl:px-10 py-6 md:py-8 xl:py-10">
-          {children}
+          <div key={currentRoute} className="animate-[fade-in_0.18s_ease-out] motion-reduce:animate-none">
+            {children}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
