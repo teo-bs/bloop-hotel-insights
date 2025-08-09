@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import Papa from "papaparse";
-import { supabase } from "@/integrations/supabase/client";
+import { unsafeSupabase } from "@/integrations/supabase/unsafe";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,7 +65,7 @@ export default function UploadPage() {
     });
 
   const createBatch = async (total: number) => {
-    const { data, error } = await supabase
+    const { data, error } = await unsafeSupabase
       .from("ingestion_batches")
       .insert([
         {
@@ -81,11 +81,14 @@ export default function UploadPage() {
       .single();
 
     if (error) throw error;
+    if (!data) {
+      throw new Error("Failed to create ingestion batch (no data returned)");
+    }
     return data.id as string;
   };
 
   const updateBatch = async (batchId: string, fields: Record<string, any>) => {
-    const { error } = await supabase.from("ingestion_batches").update(fields).eq("id", batchId);
+    const { error } = await unsafeSupabase.from("ingestion_batches").update(fields).eq("id", batchId);
     if (error) throw error;
   };
 
@@ -111,7 +114,7 @@ export default function UploadPage() {
       url: row.url ?? null,
     };
 
-    const res = await supabase.from("reviews").insert([payload]);
+    const res = await unsafeSupabase.from("reviews").insert([payload]);
     return res;
   };
 
@@ -166,7 +169,7 @@ export default function UploadPage() {
       });
 
       // Refresh materialized view to make dashboard instant
-      const { error: refreshError } = await supabase.rpc("refresh_mv_metrics_daily");
+      const { error: refreshError } = await unsafeSupabase.rpc("refresh_mv_metrics_daily");
       if (refreshError) {
         console.error("[Upload] refresh MV error", refreshError);
       }
@@ -206,4 +209,3 @@ export default function UploadPage() {
     </div>
   );
 }
-

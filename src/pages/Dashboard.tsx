@@ -1,7 +1,7 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { unsafeSupabase } from "@/integrations/supabase/unsafe";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -36,8 +36,7 @@ export default function Dashboard() {
     queryKey: ["mv_metrics_daily", startStr, endStr],
     queryFn: async () => {
       console.log("[Dashboard] fetching mv_metrics_daily", { startStr, endStr });
-      // Bypass strict typing because matview may not be in generated types yet.
-      const res = await (supabase as any)
+      const res = await unsafeSupabase
         .from("mv_metrics_daily")
         .select("*")
         .gte("day", startStr)
@@ -54,7 +53,7 @@ export default function Dashboard() {
 
   const handleRefreshMetrics = async () => {
     console.log("[Dashboard] refreshing materialized view");
-    const { error } = await supabase.rpc("refresh_mv_metrics_daily");
+    const { error } = await unsafeSupabase.rpc("refresh_mv_metrics_daily");
     if (error) {
       console.error("[Dashboard] refresh error", error);
       toast({ title: "Refresh failed", description: error.message, variant: "destructive" });
@@ -127,4 +126,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
