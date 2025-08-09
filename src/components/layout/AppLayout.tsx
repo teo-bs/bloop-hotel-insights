@@ -22,7 +22,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
   }, [currentRoute]);
 
   return (
-    <SidebarProvider id="app-layout" className="md:grid md:grid-cols-[15rem_1fr]" style={{ ["--sidebar-width" as any]: "15rem", ["--sidebar-width-icon" as any]: "4.5rem" }}>
+    <SidebarProvider id="app-layout" className="md:grid md:grid-cols-[var(--sidebar-width)_1fr] has-[[data-state=collapsed][data-collapsible=icon]]:md:grid-cols-[var(--sidebar-width-icon)_1fr]" style={{ ["--sidebar-width" as any]: "15rem", ["--sidebar-width-icon" as any]: "4.5rem" }}>
       <AppSidebar currentRoute={currentRoute} onRouteChange={setCurrentRoute} />
       <SidebarInset className="min-h-screen">
         {/* Sticky header inside content */}
