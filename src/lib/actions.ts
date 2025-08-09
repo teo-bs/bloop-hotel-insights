@@ -67,9 +67,18 @@ export async function parseCsv(file: File): Promise<{ rows: ParsedCsvRow[]; head
 }
 
 export async function importReviews(rows: ParsedCsvRow[]): Promise<number> {
-  // Simulate an import with a small delay; returns number of accepted rows
-  await new Promise((res) => setTimeout(res, 1200));
-  return rows.length;
+  // Convert rows to normalized ReviewRow and persist
+  const normalized = rows.map((r) => ({
+    date: String(r.date).trim(),
+    platform: String(r.platform).toLowerCase().trim() as any,
+    rating: Number(r.rating),
+    text: String(r.text).trim(),
+    title: r.title ? String(r.title) : undefined,
+  }));
+  const { addReviews } = await import("@/stores/reviews");
+  await new Promise((res) => setTimeout(res, 800));
+  addReviews(normalized as any);
+  return normalized.length;
 }
 
 export function emitReviewsUpdated() {
