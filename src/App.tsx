@@ -23,9 +23,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <GlobalActions />
-      <IntegrationsModal />
-      <CSVUploadModal />
       <BrowserRouter>
+        <IntegrationsModal />
+        <CSVUploadModal />
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/" element={<Index />} />
