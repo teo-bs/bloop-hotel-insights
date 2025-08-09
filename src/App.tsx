@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import UploadPage from "./pages/Upload";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import TopNav from "./components/layout/TopNav";
+import AppLayout from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
 
@@ -35,7 +36,9 @@ const App = () => (
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
               </ProtectedRoute>
             }
           />
@@ -43,7 +46,9 @@ const App = () => (
             path="/upload"
             element={
               <ProtectedRoute>
-                <UploadPage />
+                <AppLayout>
+                  <UploadPage />
+                </AppLayout>
               </ProtectedRoute>
             }
           />
