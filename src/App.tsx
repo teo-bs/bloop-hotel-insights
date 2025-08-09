@@ -10,7 +10,6 @@ import AuthPage from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import UploadPage from "./pages/Upload";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import TopNav from "./components/layout/TopNav";
 import AppLayout from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -20,18 +19,9 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <TopNav />
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<Index />} />
           <Route
             path="/dashboard"
             element={

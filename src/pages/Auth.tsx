@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import TopNav from "@/components/layout/TopNav";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -57,37 +57,40 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 md:p-10 bg-royal-diagonal animate-fade-in">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">{mode === "signin" ? "Sign in" : "Create an account"}</CardTitle>
-          <CardDescription>Use email and password to {mode === "signin" ? "continue" : "get started"}.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <Button type="submit" variant="hero" className="w-full" disabled={loading}>
-              {loading ? "Please wait..." : mode === "signin" ? "Sign in" : "Sign up"}
-            </Button>
-          </form>
+    <>
+      <TopNav />
+      <div className="min-h-[calc(100vh-56px)] flex items-center justify-center p-6 md:p-10 bg-royal-diagonal animate-fade-in">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">{mode === "signin" ? "Sign in" : "Create an account"}</CardTitle>
+            <CardDescription>Use email and password to {mode === "signin" ? "continue" : "get started"}.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </div>
+              <Button type="submit" variant="hero" className="w-full" disabled={loading}>
+                {loading ? "Please wait..." : mode === "signin" ? "Sign in" : "Sign up"}
+              </Button>
+            </form>
 
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? (
-              <button className="underline" onClick={() => setMode("signup")}>Need an account? Sign up</button>
-            ) : (
-              <button className="underline" onClick={() => setMode("signin")}>Already have an account? Sign in</button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              {mode === "signin" ? (
+                <button className="underline" onClick={() => setMode("signup")}>Need an account? Sign up</button>
+              ) : (
+                <button className="underline" onClick={() => setMode("signin")}>Already have an account? Sign in</button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
 

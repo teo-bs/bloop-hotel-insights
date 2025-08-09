@@ -2,109 +2,113 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, MessageSquareText, TrendingUp } from "lucide-react";
+import TopNav from "@/components/layout/TopNav";
 
 export default function Index() {
   const navigate = useNavigate();
 
   return (
-    <main>
-      <section className="relative overflow-hidden bg-royal-diagonal">
-        {/* subtle texture overlay */}
-        <div className="absolute inset-0 texture-dots pointer-events-none" aria-hidden="true" />
+    <>
+      <TopNav />
+      <main>
+        <section className="relative overflow-hidden bg-royal-diagonal">
+          {/* subtle texture overlay */}
+          <div className="absolute inset-0 texture-dots pointer-events-none" aria-hidden="true" />
 
-        <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20 xl:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-14 items-center">
-            {/* Copy column */}
-            <div className="text-center lg:text-left space-y-6 md:space-y-8 animate-fade-in">
-              <h1 className="text-4xl sm:text-5xl xl:text-6xl font-bold tracking-tight">
-                Your Reviews, All in One Place.
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0">
-                Padu turns feedback into clear, AI-powered hotel insights.
-              </p>
+          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20 xl:py-24">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-14 items-center">
+              {/* Copy column */}
+              <div className="text-center lg:text-left space-y-6 md:space-y-8 animate-fade-in">
+                <h1 className="text-4xl sm:text-5xl xl:text-6xl font-bold tracking-tight">
+                  Your Reviews, All in One Place.
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0">
+                  Padu turns feedback into clear, AI-powered hotel insights.
+                </p>
 
-              {/* KPI chips */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4">
-                <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
-                  <Star className="h-4 w-4 text-accent" />
-                  <span>Avg Rating <span className="font-bold">★ 4.3</span></span>
-                </div>
-                <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
-                  <MessageSquareText className="h-4 w-4 text-primary" />
-                  <span><span className="font-bold">12,482</span> Reviews</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  <span><span className="font-bold">72%</span> Positive</span>
-                </div>
-              </div>
-
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 pt-2">
-                <Button
-                  variant="hero"
-                  size="lg"
-                  data-id="cta-connect-sources"
-                  onClick={() => navigate("/upload")}
-                  className="px-6 py-3 text-base"
-                >
-                  Connect My Review Sources
-                </Button>
-                <Link
-                  to="/auth?mode=signin"
-                  data-id="link-signin"
-                  className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
-                >
-                  Sign in
-                </Link>
-              </div>
-
-              {/* Trust logos */}
-              <div className="pt-4 md:pt-6">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground text-center lg:text-left mb-3">Trusted sources</p>
-                <div className="flex items-center justify-center lg:justify-start gap-6 opacity-80">
-                  <img src="/logos/google.svg" alt="Google reviews logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                  <img src="/logos/tripadvisor.svg" alt="TripAdvisor logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                  <img src="/logos/booking.svg" alt="Booking.com logo" className="h-5 md:h-6 lg:h-7 grayscale" loading="lazy" />
-                </div>
-              </div>
-            </div>
-
-            {/* Illustration column */}
-            <div className="relative order-first lg:order-none animate-slide-up">
-              {/* floating glass insight card */}
-              <div className="relative mx-auto lg:ml-8 w-full max-w-md">
-                <div className="rounded-2xl border border-accent/50 bg-background/40 backdrop-blur-md shadow-xl p-6 md:p-8 animate-float-slow">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Sentiment</span>
-                      <span className="text-sm font-bold text-accent">+72%</span>
-                    </div>
-                    <div className="h-24 rounded-md bg-gradient-to-b from-primary/20 to-transparent" />
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      <div className="rounded-md border p-3">
-                        <div className="text-xs text-muted-foreground">Avg Rating</div>
-                        <div className="text-xl font-bold">4.3</div>
-                      </div>
-                      <div className="rounded-md border p-3">
-                        <div className="text-xs text-muted-foreground">Reviews</div>
-                        <div className="text-xl font-bold">12,482</div>
-                      </div>
-                      <div className="rounded-md border p-3">
-                        <div className="text-xs text-muted-foreground">Positive</div>
-                        <div className="text-xl font-bold">72%</div>
-                      </div>
-                    </div>
+                {/* KPI chips */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4">
+                  <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
+                    <Star className="h-4 w-4 text-accent" />
+                    <span>Avg Rating <span className="font-bold">★ 4.3</span></span>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
+                    <MessageSquareText className="h-4 w-4 text-primary" />
+                    <span><span className="font-bold">12,482</span> Reviews</span>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                    <span><span className="font-bold">72%</span> Positive</span>
                   </div>
                 </div>
 
-                {/* subtle glow */}
-                <div className="absolute -inset-2 -z-10 rounded-3xl bg-gradient-to-tr from-primary/20 via-transparent to-transparent blur-2xl" />
+                {/* CTAs */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 pt-2">
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    data-id="cta-connect-sources"
+                    onClick={() => navigate("/upload")}
+                    className="px-6 py-3 text-base"
+                  >
+                    Connect My Review Sources
+                  </Button>
+                  <Link
+                    to="/auth?mode=signin"
+                    data-id="link-signin"
+                    className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+                  >
+                    Sign in
+                  </Link>
+                </div>
+
+                {/* Trust logos */}
+                <div className="pt-4 md:pt-6">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground text-center lg:text-left mb-3">Trusted sources</p>
+                  <div className="flex items-center justify-center lg:justify-start gap-6 opacity-80">
+                    <img src="/logos/google.svg" alt="Google reviews logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
+                    <img src="/logos/tripadvisor.svg" alt="TripAdvisor logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
+                    <img src="/logos/booking.svg" alt="Booking.com logo" className="h-5 md:h-6 lg:h-7 grayscale" loading="lazy" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Illustration column */}
+              <div className="relative order-first lg:order-none animate-slide-up">
+                {/* floating glass insight card */}
+                <div className="relative mx-auto lg:ml-8 w-full max-w-md">
+                  <div className="rounded-2xl border border-accent/50 bg-background/40 backdrop-blur-md shadow-xl p-6 md:p-8 animate-float-slow">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Sentiment</span>
+                        <span className="text-sm font-bold text-accent">+72%</span>
+                      </div>
+                      <div className="h-24 rounded-md bg-gradient-to-b from-primary/20 to-transparent" />
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div className="rounded-md border p-3">
+                          <div className="text-xs text-muted-foreground">Avg Rating</div>
+                          <div className="text-xl font-bold">4.3</div>
+                        </div>
+                        <div className="rounded-md border p-3">
+                          <div className="text-xs text-muted-foreground">Reviews</div>
+                          <div className="text-xl font-bold">12,482</div>
+                        </div>
+                        <div className="rounded-md border p-3">
+                          <div className="text-xs text-muted-foreground">Positive</div>
+                          <div className="text-xl font-bold">72%</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* subtle glow */}
+                  <div className="absolute -inset-2 -z-10 rounded-3xl bg-gradient-to-tr from-primary/20 via-transparent to-transparent blur-2xl" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </>
   );
 }
