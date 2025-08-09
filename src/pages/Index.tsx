@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Star, MessageSquareText, TrendingUp } from "lucide-react";
+import { Star, MessageSquareText, TrendingUp, ArrowDown } from "lucide-react";
 import TopNav from "@/components/layout/TopNav";
 import { openIntegrationsModal } from "@/lib/actions";
 export default function Index() {
@@ -9,9 +9,9 @@ export default function Index() {
   return <>
       <TopNav />
       <main>
-        <section className="relative overflow-hidden bg-royal-diagonal">
+        <section className="relative overflow-hidden bg-royal-diagonal-animated">
           {/* subtle texture overlay */}
-          <div className="absolute inset-0 texture-dots pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-0 texture-dots texture-dots-animate pointer-events-none" aria-hidden="true" />
 
           <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20 xl:py-24">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-14 items-center">
@@ -42,7 +42,7 @@ export default function Index() {
 
                 {/* CTAs */}
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 pt-2">
-                  <Button variant="hero" size="lg" id="cta-connect-sources" onClick={openIntegrationsModal} className="px-6 py-3 text-base">
+                  <Button variant="hero" size="lg" id="cta-connect-sources" onClick={openIntegrationsModal} className="px-6 py-3 text-base animate-pulse-8s">
                     Connect My Review Sources
                   </Button>
                   
@@ -50,11 +50,13 @@ export default function Index() {
 
                 {/* Trust logos */}
                 <div className="pt-4 md:pt-6">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground text-center lg:text-left mb-3">Trusted sources</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground text-center lg:text-left mb-3">Trusted by 200+ hotel managers worldwide</p>
                   <div className="flex items-center justify-center lg:justify-start gap-6 opacity-80">
-                    <img src="/logos/google.svg" alt="Google reviews logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                    <img src="/logos/tripadvisor.svg" alt="TripAdvisor logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                    <img src="/logos/booking.svg" alt="Booking.com logo" className="h-5 md:h-6 lg:h-7 grayscale" loading="lazy" />
+                    <img src="/logos/hotels/marriott.svg" alt="Marriott logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
+                    <img src="/logos/hotels/hilton.svg" alt="Hilton logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
+                    <img src="/logos/hotels/hyatt.svg" alt="Hyatt logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
+                    <img src="/logos/hotels/accor.svg" alt="Accor logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
+                    <img src="/logos/hotels/ihg.svg" alt="IHG logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
                   </div>
                 </div>
               </div>
@@ -93,6 +95,23 @@ export default function Index() {
               </div>
             </div>
           </div>
+          {/* Down arrow scroll */}
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-6">
+            <button
+              type="button"
+              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+              aria-label="Scroll to How it Works"
+              className="rounded-full border bg-card/70 backdrop-blur px-3 py-2 hover-scale"
+            >
+              <ArrowDown className="h-5 w-5" />
+            </button>
+          </div>
+        </section>
+
+        {/* How it Works */}
+        <section id="how-it-works" className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">How it Works</h2>
+          <p className="text-muted-foreground max-w-2xl">Connect your review sources or import a CSV. Padu aggregates feedback, analyzes sentiment and topics, and surfaces actionable insights.</p>
         </section>
       </main>
     </>;
