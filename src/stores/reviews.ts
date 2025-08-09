@@ -1,12 +1,16 @@
 import { useSyncExternalStore } from "react";
 
 export type ReviewPlatform = "google" | "tripadvisor" | "booking";
+export type Sentiment = "positive" | "neutral" | "negative";
 export interface ReviewRow {
-  date: string; // string date
+  id: string;
+  date: string; // ISO date string
   platform: ReviewPlatform;
-  rating: number;
+  rating: number; // 1..5
   text: string;
   title?: string;
+  sentiment: Sentiment;
+  topics: string[];
 }
 
 const STORAGE_KEY = "reviews_data";

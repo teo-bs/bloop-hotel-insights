@@ -67,14 +67,54 @@ export async function parseCsv(file: File): Promise<{ rows: ParsedCsvRow[]; head
 }
 
 export async function importReviews(rows: ParsedCsvRow[]): Promise<number> {
-  // Convert rows to normalized ReviewRow and persist
-  const normalized = rows.map((r) => ({
-    date: String(r.date).trim(),
-    platform: String(r.platform).toLowerCase().trim() as any,
-    rating: Number(r.rating),
-    text: String(r.text).trim(),
-    title: r.title ? String(r.title) : undefined,
-  }));
+  // Normalize, enrich with id, sentiment, topics, and persist
+  const toIsoDay = (s: string) => {
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    // fallback for mm/dd/yyyy (validated earlier)
+    const m = s.match(/^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/);
+    if (m) {
+      const mm = Number(m[1]);
+      const dd = Number(m[2]);
+      const yyyy = Number(m[3]);
+      const d2 = new Date(yyyy, mm - 1, dd);
+      return d2.toISOString().slice(0, 10);
+    }
+    return s;
+  };
+
+  const keywords: Record<string, string[]> = {
+    cleanliness: ["clean", "dirty", "spotless", "hygiene"],
+    staff: ["staff", "service", "team", "host"],
+    breakfast: ["breakfast", "buffet"],
+    wifi: ["wifi", "wi-fi", "internet"],
+    room: ["room", "bed", "bathroom", "suite"],
+    location: ["location", "walk", "near", "close", "area"],
+    noise: ["noise", "noisy", "loud", "quiet"],
+  };
+
+  const normalized = rows.map((r) => {
+    const rating = Number(r.rating);
+    const sentiment = rating >= 4 ? "positive" : rating === 3 ? "neutral" : "negative";
+    const text = String(r.text || "");
+    const t = text.toLowerCase();
+    const topics: string[] = [];
+    for (const [topic, kws] of Object.entries(keywords)) {
+      if (kws.some((k) => t.includes(k))) topics.push(topic);
+    }
+    const id = (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2));
+    return {
+      id,
+      date: toIsoDay(String(r.date).trim()),
+      platform: String(r.platform).toLowerCase().trim() as any,
+      rating,
+      text: text.trim(),
+      title: r.title ? String(r.title) : undefined,
+      sentiment,
+      topics,
+    };
+  });
+
   const { addReviews } = await import("@/stores/reviews");
   await new Promise((res) => setTimeout(res, 800));
   addReviews(normalized as any);

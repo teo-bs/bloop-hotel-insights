@@ -19,20 +19,23 @@ function inRange(dateStr: string, start: string, end: string) {
   return ds >= start && ds <= end;
 }
 
-function getSentiment(rating: number): "pos" | "neu" | "neg" {
+// Fallback helpers (for legacy rows without sentiment/topics)
+function fallbackSentiment(rating: number): "pos" | "neu" | "neg" {
   if (rating >= 4) return "pos";
   if (rating <= 2) return "neg";
   return "neu";
 }
 
-function inferTopic(text: string): string {
-  const t = text.toLowerCase();
+function fallbackTopic(text: string): string {
+  const t = text?.toLowerCase() || "";
   const topics: { key: string; kws: string[] }[] = [
-    { key: "staff", kws: ["staff", "service", "team", "host"] },
     { key: "cleanliness", kws: ["clean", "dirty", "spotless", "hygiene"] },
-    { key: "location", kws: ["location", "walk", "near", "close", "area"] },
+    { key: "staff", kws: ["staff", "service", "team", "host"] },
+    { key: "breakfast", kws: ["breakfast", "buffet"] },
+    { key: "wifi", kws: ["wifi", "wi-fi", "internet"] },
     { key: "room", kws: ["room", "bed", "bathroom", "suite"] },
-    { key: "food", kws: ["breakfast", "food", "restaurant", "dinner"] },
+    { key: "location", kws: ["location", "walk", "near", "close", "area"] },
+    { key: "noise", kws: ["noise", "noisy", "loud", "quiet"] },
   ];
   for (const tp of topics) {
     if (tp.kws.some((k) => t.includes(k))) return tp.key;
@@ -58,7 +61,8 @@ export default function Dashboard() {
       const b = byDay[day];
       b.reviews_count += 1;
       b.sum += r.rating;
-      const s = getSentiment(r.rating);
+      const sRaw = (r as any).sentiment as "positive" | "neutral" | "negative" | undefined;
+      const s = sRaw ? (sRaw === "positive" ? "pos" : sRaw === "neutral" ? "neu" : "neg") : fallbackSentiment(r.rating);
       if (s === "pos") b.pos_cnt += 1; else if (s === "neu") b.neu_cnt += 1; else b.neg_cnt += 1;
     }
     return Object.values(byDay)
@@ -74,9 +78,16 @@ export default function Dashboard() {
     const topicCounts: Record<string, number> = {};
     for (const r of filtered) {
       sum += r.rating;
-      if (getSentiment(r.rating) === "pos") pos += 1;
-      const topic = inferTopic(r.text);
-      topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+      const sRaw = (r as any).sentiment as "positive" | "neutral" | "negative" | undefined;
+      const s = sRaw ? (sRaw === "positive" ? "pos" : sRaw === "neutral" ? "neu" : "neg") : fallbackSentiment(r.rating);
+      if (s === "pos") pos += 1;
+      const topics = (r as any).topics as string[] | undefined;
+      if (topics && topics.length) {
+        for (const t of topics) topicCounts[t] = (topicCounts[t] || 0) + 1;
+      } else {
+        const t = fallbackTopic(r.text);
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      }
     }
     const topTopic = Object.entries(topicCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
     return {
