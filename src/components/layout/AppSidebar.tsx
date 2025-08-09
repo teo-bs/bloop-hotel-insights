@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { LayoutDashboard, UploadCloud, LineChart, LogOut, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,30 +11,18 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-export function AppSidebar() {
-  const location = useLocation();
+export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "dashboard" | "reviews" | "insights" | "reports" | "settings"; onRouteChange: (r: "dashboard" | "reviews" | "insights" | "reports" | "settings") => void; }) {
   const navigate = useNavigate();
-  const currentPath = location.pathname;
-  const isActive = (path: string) => currentPath === path;
-
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth?mode=signin", { replace: true });
-  };
-
   const { state, toggleSidebar } = useSidebar();
   const { user } = useAuth();
   const name = (user?.user_metadata as any)?.name || user?.email || "User";
 
   const items = [
-    { id: "nav-dashboard", label: "Dashboard", to: "/dashboard", Icon: LayoutDashboard, active: location.pathname === "/dashboard" },
-    { id: "nav-reviews", label: "Reviews", to: "/upload", Icon: UploadCloud, active: location.pathname === "/upload" },
-    { id: "nav-insights", label: "Insights", to: "/dashboard?tab=insights", Icon: LineChart, active: location.pathname === "/dashboard" && new URLSearchParams(location.search).get("tab") === "insights" },
-    { id: "nav-reports", label: "Reports", to: "/dashboard?tab=reports", Icon: LineChart, active: location.pathname === "/dashboard" && new URLSearchParams(location.search).get("tab") === "reports" },
-    { id: "nav-settings", label: "Settings", to: "/auth?mode=signin", Icon: Settings, active: false },
+    { id: "nav-dashboard", route: "dashboard" as const, label: "Dashboard", Icon: LayoutDashboard },
+    { id: "nav-reviews", route: "reviews" as const, label: "Reviews", Icon: UploadCloud },
+    { id: "nav-insights", route: "insights" as const, label: "Insights", Icon: LineChart },
+    { id: "nav-reports", route: "reports" as const, label: "Reports", Icon: LineChart },
+    { id: "nav-settings", route: "settings" as const, label: "Settings", Icon: Settings },
   ];
 
   return (
@@ -75,22 +63,29 @@ export function AppSidebar() {
 
           {/* Nav */}
           <nav className="flex-1 space-y-1">
-            {items.map(({ id, label, to, Icon, active }) => (
-              <NavLink
-                key={id}
-                id={id}
-                to={to}
-                className={
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition " +
-                  (active
-                    ? "font-bold text-primary-foreground border-l-4 border-accent pl-2 -ml-1 bg-white/5"
-                    : "text-primary-foreground/90 hover:bg-white/10 border-l-4 border-transparent pl-3")
-                }
-              >
-                <Icon className="h-4 w-4" />
-                <span className={state === "collapsed" ? "hidden" : "block"}>{label}</span>
-              </NavLink>
-            ))}
+            {items.map(({ id, route, label, Icon }) => {
+              const active = currentRoute === route;
+              return (
+                <a
+                  key={id}
+                  id={id}
+                  href={`#${route}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onRouteChange(route);
+                  }}
+                  className={
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition " +
+                    (active
+                      ? "font-bold text-primary-foreground border-l-4 border-accent pl-2 -ml-1 bg-white/5"
+                      : "text-primary-foreground/90 hover:bg-white/10 border-l-4 border-transparent pl-3")
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className={state === "collapsed" ? "hidden" : "block"}>{label}</span>
+                </a>
+              );
+            })}
           </nav>
 
           {/* Footer user + logout */}
