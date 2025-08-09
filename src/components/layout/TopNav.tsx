@@ -1,0 +1,59 @@
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+
+export default function TopNav() {
+  const navigate = useNavigate();
+  const linkCls = ({ isActive }: { isActive: boolean }) =>
+    `px-3 py-2 rounded-md text-sm ${isActive ? "text-primary" : "text-foreground/80 hover:text-foreground"}`;
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50">
+      <div className="container mx-auto px-4 md:px-6 xl:px-10 h-14 flex items-center justify-between">
+        {/* Brand */}
+        <Link to="/" className="inline-flex items-center gap-2 font-bold text-lg">
+          <span>Padu</span>
+          <span className="inline-block h-2 w-2 rounded-full bg-accent" aria-hidden="true" />
+        </Link>
+
+        {/* Desktop actions */}
+        <nav className="hidden md:flex items-center gap-1">
+          <NavLink to="/#pricing" className={linkCls}>Pricing</NavLink>
+          <NavLink to="/#docs" className={linkCls}>Docs</NavLink>
+          <Button asChild variant="ghost">
+            <Link to="/auth?mode=signin">Sign in</Link>
+          </Button>
+          <Button
+            variant="hero"
+            onClick={() => navigate("/auth?mode=signup")}
+            className="ml-1"
+          >
+            Get Started
+          </Button>
+        </nav>
+
+        {/* Mobile menu */}
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <div className="mt-8 flex flex-col gap-2">
+                <NavLink to="/#pricing" className={linkCls}>Pricing</NavLink>
+                <NavLink to="/#docs" className={linkCls}>Docs</NavLink>
+                <Button asChild variant="ghost" className="justify-start">
+                  <Link to="/auth?mode=signin">Sign in</Link>
+                </Button>
+                <Button variant="hero" onClick={() => navigate("/auth?mode=signup")}>Get Started</Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
+  );
+}

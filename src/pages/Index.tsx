@@ -51,7 +51,7 @@ export default function Index() {
                   Connect My Review Sources
                 </Button>
                 <Link
-                  to="/auth"
+                  to="/auth?mode=signin"
                   data-id="link-signin"
                   className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
                 >

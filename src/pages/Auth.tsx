@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,14 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation() as any;
   const redirectTo = location.state?.from?.pathname ?? "/dashboard";
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const m = params.get("mode");
+    if (m === "signup" || m === "signin") {
+      setMode(m as "signin" | "signup");
+    }
+  }, [location.search]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

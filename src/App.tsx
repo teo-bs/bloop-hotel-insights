@@ -10,6 +10,7 @@ import AuthPage from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import UploadPage from "./pages/Upload";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import TopNav from "./components/layout/TopNav";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <TopNav />
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
           <Route
