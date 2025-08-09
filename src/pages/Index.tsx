@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Star, MessageSquareText, TrendingUp, ArrowDown, Link2, Brain, Lightbulb } from "lucide-react";
+import { Star, MessageSquareText, TrendingUp, ArrowDown, Link2, Brain, Lightbulb, BarChart3, Sparkles, Globe, Download } from "lucide-react";
 import TopNav from "@/components/layout/TopNav";
 import { openIntegrationsModal } from "@/lib/actions";
 export default function Index() {
@@ -141,6 +141,58 @@ export default function Index() {
                     <h3 className="text-xl font-semibold">Get Clear Insights</h3>
                   </div>
                   <p className="text-muted-foreground">Receive prioritized recommendations to improve guest satisfaction.</p>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Hotels Choose Padu */}
+        <section className="bg-royal-tint">
+          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
+            <h2 className="text-2xl md:text-3xl font-bold mb-8">Why Hotels Choose Padu</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Feature 1 */}
+              <Card className="group transition hover:bg-primary/5">
+                <div className="p-6 md:p-8 space-y-3">
+                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
+                    <BarChart3 className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                  </div>
+                  <h3 className="text-lg font-semibold">KPI Dashboard</h3>
+                  <p className="text-sm text-muted-foreground">Track key performance metrics at a glance with clear, executive dashboards.</p>
+                </div>
+              </Card>
+
+              {/* Feature 2 */}
+              <Card className="group transition hover:bg-primary/5">
+                <div className="p-6 md:p-8 space-y-3">
+                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
+                    <Sparkles className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                  </div>
+                  <h3 className="text-lg font-semibold">AI Insights</h3>
+                  <p className="text-sm text-muted-foreground">Uncover sentiment trends and guest themes—no manual tagging required.</p>
+                </div>
+              </Card>
+
+              {/* Feature 3 */}
+              <Card className="group transition hover:bg-primary/5">
+                <div className="p-6 md:p-8 space-y-3">
+                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
+                    <Globe className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Multi-Platform Aggregation</h3>
+                  <p className="text-sm text-muted-foreground">Consolidate Google, TripAdvisor, Booking.com and more into one view.</p>
+                </div>
+              </Card>
+
+              {/* Feature 4 */}
+              <Card className="group transition hover:bg-primary/5">
+                <div className="p-6 md:p-8 space-y-3">
+                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
+                    <Download className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                  </div>
+                  <h3 className="text-lg font-semibold">PDF/CSV Exports</h3>
+                  <p className="text-sm text-muted-foreground">Export reports and raw data for presentations, audits, and analysis.</p>
                 </div>
               </Card>
             </div>
