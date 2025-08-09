@@ -50,8 +50,10 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
             <button
               id="btn-sidebar-toggle"
               onClick={toggleSidebar}
-              className="p-2 rounded-md hover:bg-white/10"
+              className="p-2 rounded-md hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Toggle sidebar"
+              aria-controls="app-sidebar"
+              aria-expanded={state !== "collapsed"}
             >
               {state === "collapsed" ? (
                 <ChevronRight className="h-4 w-4" />
@@ -65,25 +67,38 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
           <nav className="flex-1 space-y-1">
             {items.map(({ id, route, label, Icon }) => {
               const active = currentRoute === route;
-              return (
+              const baseCls =
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ";
+              const stateCls = active
+                ? "font-bold text-primary-foreground border-l-4 border-accent pl-2 -ml-1 bg-white/5"
+                : "text-primary-foreground/90 hover:bg-white/10 border-l-4 border-transparent pl-3";
+
+              const linkEl = (
                 <a
                   key={id}
                   id={id}
                   href={`#${route}`}
+                  title={label}
+                  aria-label={label}
+                  aria-current={active ? "page" : undefined}
                   onClick={(e) => {
                     e.preventDefault();
                     onRouteChange(route);
                   }}
-                  className={
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition " +
-                    (active
-                      ? "font-bold text-primary-foreground border-l-4 border-accent pl-2 -ml-1 bg-white/5"
-                      : "text-primary-foreground/90 hover:bg-white/10 border-l-4 border-transparent pl-3")
-                  }
+                  className={baseCls + stateCls}
                 >
                   <Icon className="h-4 w-4" />
                   <span className={state === "collapsed" ? "hidden" : "block"}>{label}</span>
                 </a>
+              );
+
+              return state === "collapsed" ? (
+                <Tooltip key={id}>
+                  <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                  <TooltipContent side="right">{label}</TooltipContent>
+                </Tooltip>
+              ) : (
+                linkEl
               );
             })}
           </nav>
