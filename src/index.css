@@ -187,4 +187,7 @@ All colors MUST be HSL.
     99% { transform: scale(1); box-shadow: 0 0 0 hsl(var(--primary) / 0); }
   }
   .animate-pulse-8s { animation: subtle-pulse 8s ease-in-out infinite; }
+
+  /* Very light Royal Blue tint background */
+  .bg-royal-tint { background-color: hsl(var(--primary) / 0.06); }
 }

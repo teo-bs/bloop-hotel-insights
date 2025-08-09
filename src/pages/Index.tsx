@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Star, MessageSquareText, TrendingUp, ArrowDown } from "lucide-react";
+import { Star, MessageSquareText, TrendingUp, ArrowDown, Link2, Brain, Lightbulb } from "lucide-react";
 import TopNav from "@/components/layout/TopNav";
 import { openIntegrationsModal } from "@/lib/actions";
 export default function Index() {
@@ -99,8 +99,8 @@ export default function Index() {
           <div className="absolute left-1/2 -translate-x-1/2 bottom-6">
             <button
               type="button"
-              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-              aria-label="Scroll to How it Works"
+              onClick={() => document.getElementById("how-padu-works")?.scrollIntoView({ behavior: "smooth" })}
+              aria-label="Scroll to How Padu Works"
               className="rounded-full border bg-card/70 backdrop-blur px-3 py-2 hover-scale"
             >
               <ArrowDown className="h-5 w-5" />
@@ -108,10 +108,43 @@ export default function Index() {
           </div>
         </section>
 
-        {/* How it Works */}
-        <section id="how-it-works" className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6">How it Works</h2>
-          <p className="text-muted-foreground max-w-2xl">Connect your review sources or import a CSV. Padu aggregates feedback, analyzes sentiment and topics, and surfaces actionable insights.</p>
+        {/* How Padu Works */}
+        <section id="how-padu-works" className="bg-royal-tint">
+          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
+            <h2 className="text-2xl md:text-3xl font-bold mb-8">How Padu Works</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Step 1 */}
+              <Card className="hover-scale">
+                <div className="p-6 md:p-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Link2 className="h-6 w-6 text-accent" />
+                    <h3 className="text-xl font-semibold">Connect Review Sources</h3>
+                  </div>
+                  <p className="text-muted-foreground">Link Google, TripAdvisor, Booking.com or upload CSV.</p>
+                </div>
+              </Card>
+              {/* Step 2 */}
+              <Card className="hover-scale">
+                <div className="p-6 md:p-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Brain className="h-6 w-6 text-accent" />
+                    <h3 className="text-xl font-semibold">Analyze Sentiment & Trends</h3>
+                  </div>
+                  <p className="text-muted-foreground">Our AI detects patterns and guest themes automatically.</p>
+                </div>
+              </Card>
+              {/* Step 3 */}
+              <Card className="hover-scale">
+                <div className="p-6 md:p-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Lightbulb className="h-6 w-6 text-accent" />
+                    <h3 className="text-xl font-semibold">Get Clear Insights</h3>
+                  </div>
+                  <p className="text-muted-foreground">Receive prioritized recommendations to improve guest satisfaction.</p>
+                </div>
+              </Card>
+            </div>
+          </div>
         </section>
       </main>
     </>;
