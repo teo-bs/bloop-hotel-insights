@@ -66,15 +66,15 @@ export default function Dashboard() {
   const chartData = useMemo(() => data ?? [], [data]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 md:p-8 xl:p-10 space-y-6 md:space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard (Last 90 Days)</h1>
+        <h1 className="text-3xl font-bold">Dashboard (Last 90 Days)</h1>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={handleRefreshMetrics}>Refresh metrics</Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8">
         <Card>
           <CardHeader>
             <CardTitle>Average Rating (Normalized to 5)</CardTitle>
