@@ -3,12 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, MessageSquareText, TrendingUp } from "lucide-react";
 import TopNav from "@/components/layout/TopNav";
-
 export default function Index() {
   const navigate = useNavigate();
-
-  return (
-    <>
+  return <>
       <TopNav />
       <main>
         <section className="relative overflow-hidden bg-royal-diagonal">
@@ -44,22 +41,10 @@ export default function Index() {
 
                 {/* CTAs */}
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 pt-2">
-                  <Button
-                    variant="hero"
-                    size="lg"
-                    data-id="cta-connect-sources"
-                    onClick={() => navigate("/upload")}
-                    className="px-6 py-3 text-base"
-                  >
+                  <Button variant="hero" size="lg" data-id="cta-connect-sources" onClick={() => navigate("/upload")} className="px-6 py-3 text-base">
                     Connect My Review Sources
                   </Button>
-                  <Link
-                    to="/auth?mode=signin"
-                    data-id="link-signin"
-                    className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
-                  >
-                    Sign in
-                  </Link>
+                  
                 </div>
 
                 {/* Trust logos */}
@@ -109,6 +94,5 @@ export default function Index() {
           </div>
         </section>
       </main>
-    </>
-  );
+    </>;
 }
