@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, Bell } from "lucide-react";
 
 export default function AppLayout({ children }: PropsWithChildren) {
   const navigate = useNavigate();
@@ -27,16 +30,51 @@ export default function AppLayout({ children }: PropsWithChildren) {
       <SidebarInset className="min-h-screen">
         {/* Sticky header inside content */}
         <header id="app-header" className="sticky top-0 z-40 bg-background/70 backdrop-blur border-b">
-          <div className="px-6 md:px-8 xl:px-10 h-14 flex items-center justify-between">
+          <div className="px-6 md:px-8 xl:px-10 h-16 grid grid-cols-1 md:grid-cols-3 items-center gap-3">
+            {/* Left: Breadcrumbs */}
             <div className="flex items-center gap-3">
               <SidebarTrigger />
-              <div className="text-sm text-muted-foreground">
-                {currentRoute.charAt(0).toUpperCase() + currentRoute.slice(1)}
+              <nav id="breadcrumbs" aria-label="Breadcrumb">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href="#dashboard">Home</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href={`#${currentRoute}`}>{currentRoute.charAt(0).toUpperCase() + currentRoute.slice(1)}</BreadcrumbLink>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </nav>
+            </div>
+
+            {/* Center: Date filter */}
+            <div className="hidden md:flex items-center justify-center">
+              <div id="global-date-filter" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Select defaultValue="90" onValueChange={(v) => {/* expose globally later */}}>
+                  <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Last 90 days" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-popover">
+                    <SelectItem value="7">Last 7 days</SelectItem>
+                    <SelectItem value="30">Last 30 days</SelectItem>
+                    <SelectItem value="90">Last 90 days</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => navigate('/upload')}>New Upload</Button>
-              <Button variant="hero" onClick={() => navigate('/dashboard')}>Refresh</Button>
+
+            {/* Right: Actions */}
+            <div className="flex items-center justify-end gap-2">
+              <Button id="btn-upload-csv-header" variant="secondary" onClick={() => navigate('/upload')}>Upload CSV</Button>
+              <Button id="btn-connect-sources-header" variant="hero" onClick={() => navigate('/upload')}>Connect Sources</Button>
+              <button className="relative p-2 rounded-md hover:bg-accent/40" aria-label="Notifications">
+                <Bell className="h-5 w-5" />
+                {/* Badge example: */}
+                {/* <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive"></span> */}
+              </button>
             </div>
           </div>
         </header>
