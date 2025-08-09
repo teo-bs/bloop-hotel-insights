@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, MessageSquareText, TrendingUp } from "lucide-react";
 import TopNav from "@/components/layout/TopNav";
+import { openIntegrationsModal } from "@/lib/actions";
 export default function Index() {
-  const navigate = useNavigate();
+  
   return <>
       <TopNav />
       <main>
@@ -41,7 +42,7 @@ export default function Index() {
 
                 {/* CTAs */}
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 pt-2">
-                  <Button variant="hero" size="lg" data-id="cta-connect-sources" onClick={() => navigate("/upload")} className="px-6 py-3 text-base">
+                  <Button variant="hero" size="lg" id="cta-connect-sources" onClick={openIntegrationsModal} className="px-6 py-3 text-base">
                     Connect My Review Sources
                   </Button>
                   

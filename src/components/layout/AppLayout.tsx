@@ -1,14 +1,15 @@
 import { PropsWithChildren, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Bell } from "lucide-react";
+import { openIntegrationsModal, openCsvUploadModal } from "@/lib/actions";
 
 export default function AppLayout({ children }: PropsWithChildren) {
-  const navigate = useNavigate();
+  
   
   type RouteKey = "dashboard" | "reviews" | "insights" | "reports" | "settings";
   const [currentRoute, setCurrentRoute] = useState<RouteKey>("dashboard");
@@ -70,8 +71,8 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
             {/* Right: Actions */}
             <div className="flex items-center justify-end gap-2">
-              <Button id="btn-upload-csv-header" variant="secondary" onClick={() => navigate('/upload')}>Upload CSV</Button>
-              <Button id="btn-connect-sources-header" variant="hero" onClick={() => navigate('/upload')}>Connect Sources</Button>
+              <Button id="btn-upload-csv-header" variant="secondary" onClick={openCsvUploadModal}>Upload CSV</Button>
+              <Button id="btn-connect-sources-header" variant="hero" onClick={openIntegrationsModal}>Connect Sources</Button>
               <button className="relative p-2 rounded-md hover:bg-accent/40" aria-label="Notifications">
                 <Bell className="h-5 w-5" />
                 {/* Badge example: */}
