@@ -284,7 +284,7 @@ export default function CSVUploadModal() {
             <Button
               onClick={() => {
                 setOpen(false);
-                navigate("/dashboard");
+                navigate("/dashboard#metrics");
               }}
               aria-label="View in Dashboard"
             >

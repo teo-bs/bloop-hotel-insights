@@ -36,6 +36,7 @@ function fallbackTopic(text: string): string {
     { key: "room", kws: ["room", "bed", "bathroom", "suite"] },
     { key: "location", kws: ["location", "walk", "near", "close", "area"] },
     { key: "noise", kws: ["noise", "noisy", "loud", "quiet"] },
+    { key: "check-in", kws: ["check-in", "check in", "checkin"] },
   ];
   for (const tp of topics) {
     if (tp.kws.some((k) => t.includes(k))) return tp.key;
@@ -111,17 +112,25 @@ export default function Dashboard() {
     return () => window.removeEventListener("reviews-updated", onUpdated);
   }, []);
 
+  useEffect(() => {
+    document.title = "Hotel Reviews Dashboard – Padu";
+    if (typeof window !== "undefined" && window.location.hash === "#metrics") {
+      const el = document.getElementById("metrics");
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
   return (
     <div className="p-6 md:p-8 xl:p-10 space-y-6 md:space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">Hotel Reviews Dashboard</h1>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={handleRefreshMetrics}>Refresh metrics</Button>
         </div>
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div id="metrics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader><CardTitle>Avg Rating</CardTitle></CardHeader>
           <CardContent>

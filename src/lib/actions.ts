@@ -178,6 +178,7 @@ export async function importReviews(rows: ParsedCsvRow[]): Promise<number> {
     room: ["room", "bed", "bathroom", "suite"],
     location: ["location", "walk", "near", "close", "area"],
     noise: ["noise", "noisy", "loud", "quiet"],
+    "check-in": ["check-in", "check in", "checkin"],
   };
 
   const normalized = rows.map((r) => {
@@ -203,6 +204,26 @@ export async function importReviews(rows: ParsedCsvRow[]): Promise<number> {
   });
 
   const { addReviews } = await import("@/stores/reviews");
+  // Best-effort persistence to Supabase if authenticated
+  try {
+    const uid = await getUserId();
+    if (uid) {
+      const toInsert = normalized.map((n) => ({
+        user_id: uid,
+        date: n.date,
+        platform: n.platform,
+        rating: n.rating,
+        title: n.title ?? null,
+        text: n.text,
+        sentiment: n.sentiment,
+        topics: n.topics,
+      }));
+      const { error } = await (supabase as any).from("reviews").insert(toInsert);
+      if (error) console.warn("[importReviews] supabase insert error", error);
+    }
+  } catch (err) {
+    console.warn("[importReviews] supabase insert failed", err);
+  }
   await new Promise((res) => setTimeout(res, 800));
   addReviews(normalized as any);
   return normalized.length;

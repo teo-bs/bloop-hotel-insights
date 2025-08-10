@@ -13,12 +13,19 @@ export interface ReviewRow {
   topics: string[];
 }
 
-const STORAGE_KEY = "reviews_data";
+const LEGACY_KEY = "reviews_data";
+const STORAGE_KEY = "padu.reviews";
 
 function load(): ReviewRow[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as ReviewRow[];
+    const existing = localStorage.getItem(STORAGE_KEY);
+    if (existing) return JSON.parse(existing) as ReviewRow[];
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      localStorage.setItem(STORAGE_KEY, legacy);
+      localStorage.removeItem(LEGACY_KEY);
+      return JSON.parse(legacy) as ReviewRow[];
+    }
   } catch {}
   return [];
 }
