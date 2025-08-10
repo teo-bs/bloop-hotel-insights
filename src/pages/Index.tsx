@@ -156,7 +156,7 @@ export default function Index() {
       <section className="relative z-10 flex min-h-screen items-center justify-center px-6">
         <div className="w-full max-w-2xl text-center">
           {/* Padu logo */}
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg animate-[float-y_4s_ease-in-out_infinite_alternate]">
             <img
               id="padu-logo"
               src="/lovable-uploads/10e2e94b-0e70-490d-bc29-2f836e6ddf32.png"
@@ -180,6 +180,7 @@ export default function Index() {
               aria-autocomplete="list"
               aria-controls="search-suggestions"
               aria-expanded={showSuggestions}
+              aria-activedescendant={activeIndex >= 0 ? `suggestion-${activeIndex}` : undefined}
               placeholder="Start typing your hotel name…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -264,6 +265,8 @@ export default function Index() {
               </div>
             )}
           </div>
+
+          <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-muted-foreground">We’ll instantly pull your last 5 Google reviews — no signup needed.</p>
 
           {/* Floating KPIs + logos */}
           <div className="mx-auto mt-6 max-w-2xl animate-[float-y_4s_ease-in-out_infinite_alternate]">
