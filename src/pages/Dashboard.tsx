@@ -1,15 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviews } from "@/stores/reviews";
 import { useGlobalDateFilter } from "@/stores/filters";
-import {
-  ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend,
-} from "recharts";
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
 import { filterReviews, calcAvgRating, calcTotals, calcTopTopic, calcTrendSeries, calcTopicCounts } from "@/lib/metrics";
 
-// Helpers for charts
+// Helper to compute daily average series for the first chart
 function buildDailyAvgData(revs: Array<{ date: string; rating: number }>) {
   const byDay: Record<string, { day: string; sum: number; count: number; avg_norm_rating: number }> = {};
   for (const r of revs) {
@@ -23,7 +21,6 @@ function buildDailyAvgData(revs: Array<{ date: string; rating: number }>) {
     .sort((a, b) => a.day.localeCompare(b.day))
     .map((d) => ({ day: d.day, avg_norm_rating: d.count ? d.sum / d.count : 0 }));
 }
-
 
 export default function Dashboard() {
   const reviews = useReviews();
@@ -53,7 +50,7 @@ export default function Dashboard() {
     setTopicBars(calcTopicCounts(filtered).slice(0, 8));
   };
 
-  // Debounced recompute
+  // Debounced recompute on dependencies and manual refresh
   useEffect(() => {
     setIsRecomputing(true);
     const t = setTimeout(() => {
@@ -62,64 +59,21 @@ export default function Dashboard() {
     }, 150);
     return () => clearTimeout(t);
   }, [reviews, start, end, refreshNonce]);
-    const byDay: Record<string, { day: string; reviews_count: number; avg_norm_rating: number; pos_cnt: number; neu_cnt: number; neg_cnt: number; sum: number }>
-      = {} as any;
-    for (const r of filtered) {
-      const day = toDayStr(new Date(r.date));
-      byDay[day] ||= { day, reviews_count: 0, avg_norm_rating: 0, pos_cnt: 0, neu_cnt: 0, neg_cnt: 0, sum: 0 };
-      const b = byDay[day];
-      b.reviews_count += 1;
-      b.sum += r.rating;
-      const sRaw = (r as any).sentiment as "positive" | "neutral" | "negative" | undefined;
-      const s = sRaw ? (sRaw === "positive" ? "pos" : sRaw === "neutral" ? "neu" : "neg") : fallbackSentiment(r.rating);
-      if (s === "pos") b.pos_cnt += 1; else if (s === "neu") b.neu_cnt += 1; else b.neg_cnt += 1;
-    }
-    return Object.values(byDay)
-      .sort((a, b) => a.day.localeCompare(b.day))
-      .map((d) => ({ ...d, avg_norm_rating: d.reviews_count ? d.sum / d.reviews_count : 0 }));
-  }, [filtered]);
 
-  // KPIs
-  const { avgRating, totalReviews, pctPositive, topTopic } = useMemo(() => {
-    const total = filtered.length;
-    let sum = 0;
-    let pos = 0;
-    const topicCounts: Record<string, number> = {};
-    for (const r of filtered) {
-      sum += r.rating;
-      const sRaw = (r as any).sentiment as "positive" | "neutral" | "negative" | undefined;
-      const s = sRaw ? (sRaw === "positive" ? "pos" : sRaw === "neutral" ? "neu" : "neg") : fallbackSentiment(r.rating);
-      if (s === "pos") pos += 1;
-      const topics = (r as any).topics as string[] | undefined;
-      if (topics && topics.length) {
-        for (const t of topics) topicCounts[t] = (topicCounts[t] || 0) + 1;
-      } else {
-        const t = fallbackTopic(r.text);
-        topicCounts[t] = (topicCounts[t] || 0) + 1;
-      }
-    }
-    const topTopic = Object.entries(topicCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
-    return {
-      avgRating: total ? (sum / total) : 0,
-      totalReviews: total,
-      pctPositive: total ? (pos / total) * 100 : 0,
-      topTopic,
-    };
-  }, [filtered]);
-
-  // Refresh handler with micro loading on KPI cards only
-  const handleRefreshMetrics = async () => {
+  // Manual refresh handler
+  const handleRefreshMetrics = () => {
     setIsRecomputing(true);
-    await new Promise((r) => setTimeout(r, 400));
-    setIsRecomputing(false);
+    setRefreshNonce((n) => n + 1);
   };
 
+  // Listen for global updates
   useEffect(() => {
-    const onUpdated = () => handleRefreshMetrics();
+    const onUpdated = () => setRefreshNonce((n) => n + 1);
     window.addEventListener("reviews-updated", onUpdated);
     return () => window.removeEventListener("reviews-updated", onUpdated);
   }, []);
 
+  // SEO + anchor scroll
   useEffect(() => {
     document.title = "Hotel Reviews Dashboard – Padu";
     if (typeof window !== "undefined" && window.location.hash === "#metrics") {
@@ -133,7 +87,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Hotel Reviews Dashboard</h1>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={handleRefreshMetrics}>Refresh metrics</Button>
+          <Button id="btn-refresh-metrics" variant="secondary" onClick={handleRefreshMetrics}>Refresh metrics</Button>
         </div>
       </div>
 
@@ -142,7 +96,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader><CardTitle>Avg Rating</CardTitle></CardHeader>
           <CardContent>
-            {isRecomputing ? <Skeleton className="h-8 w-24" /> : <div className="text-3xl font-semibold">{avgRating.toFixed(2)}</div>}
+            {isRecomputing ? <Skeleton className="h-8 w-24" /> : <div className="text-3xl font-semibold">{avgRating.toFixed(1)}</div>}
           </CardContent>
         </Card>
         <Card>
@@ -173,7 +127,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
+              <LineChart data={dailyAvgData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
                 <YAxis domain={[0, 5]} />
@@ -186,24 +140,57 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Review Volume by Sentiment</CardTitle>
+            <CardTitle>Review Volume by Sentiment (Weekly)</CardTitle>
           </CardHeader>
           <CardContent className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <BarChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
+                <XAxis dataKey="weekStartISO" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="pos_cnt" stackId="a" fill="hsl(var(--chart-1))" name="Positive" />
-                <Bar dataKey="neu_cnt" stackId="a" fill="hsl(var(--chart-2))" name="Neutral" />
-                <Bar dataKey="neg_cnt" stackId="a" fill="hsl(var(--chart-3))" name="Negative" />
+                <Bar dataKey="positive" stackId="a" fill="hsl(var(--chart-1))" name="Positive" />
+                <Bar dataKey="neutral" stackId="a" fill="hsl(var(--chart-2))" name="Neutral" />
+                <Bar dataKey="negative" stackId="a" fill="hsl(var(--chart-3))" name="Negative" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
+
+      {/* Topic bars */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Top Topics</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {isRecomputing ? (
+            <>
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-11/12" />
+              <Skeleton className="h-5 w-9/12" />
+            </>
+          ) : (
+            <div className="space-y-2">
+              {topicBars.slice(0, 8).map((t) => (
+                <div key={t.topic} className="flex items-center gap-3">
+                  <div className="w-28 text-sm capitalize">{t.topic}</div>
+                  <div className="flex-1 h-2 rounded bg-muted">
+                    <div
+                      className="h-2 rounded bg-primary"
+                      style={{ width: `${Math.min(100, (t.count / (topicBars[0]?.count || 1)) * 100)}%` }}
+                      aria-label={`${t.topic} count`}
+                    />
+                  </div>
+                  <div className="w-8 text-right text-sm tabular-nums">{t.count}</div>
+                </div>
+              ))}
+              {topicBars.length === 0 && <div className="text-sm text-muted-foreground">No topics yet</div>}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
