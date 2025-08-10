@@ -9,11 +9,14 @@ import TopNav from "@/components/layout/TopNav";
 import Reveal from "@/components/motion/Reveal";
 import { openIntegrationsModal, openIntegrationsModalWithHint } from "@/lib/actions";
 import { onSavePreviewGuard } from "@/lib/savePreview";
+import { useToast } from "@/hooks/use-toast";
 export default function Index() {
   const [mapsLink, setMapsLink] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any | null>(null);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
   function parsePlaceId(input: string): string | null {
     const trimmed = input.trim();
     // Direct place id pasted
@@ -76,6 +79,21 @@ export default function Index() {
       platform: "google",
       placeId: id
     });
+  }
+  
+  async function handleSaveClick() {
+    setSaving(true);
+    try {
+      await onSavePreviewGuard(mapsLink, result);
+    } catch (e: any) {
+      toast({
+        title: "Save failed",
+        description: e?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   }
   return <>
       <TopNav />
@@ -239,8 +257,15 @@ export default function Index() {
                       <div className="pt-2 text-xs text-muted-foreground">Data from Google</div>
 
                       <div className="pt-4 space-y-2">
-                        <Button id="btn-save-preview" variant="hero" onClick={() => onSavePreviewGuard(mapsLink, result)}>
-                          Save to dashboard (free)
+                        <Button id="btn-save-preview" variant="hero" onClick={handleSaveClick} disabled={saving}>
+                          {saving ? (
+                            <span className="inline-flex items-center gap-2">
+                              <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
+                              Saving...
+                            </span>
+                          ) : (
+                            "Save to dashboard (free)"
+                          )}
                         </Button>
                         <Button id="btn-upgrade-gbp" variant="secondary" onClick={handleUpgrade}>
                           Connect Business Profile to import all reviews

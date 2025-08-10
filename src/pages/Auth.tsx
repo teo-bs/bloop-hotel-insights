@@ -58,11 +58,14 @@ export default function AuthPage() {
 
     // Notify app and resume any pending action
     document.dispatchEvent(new CustomEvent("auth:success"));
-    try {
-      await resumePendingAfterAuth();
-    } catch {}
-
+try {
+  const did = await resumePendingAfterAuth();
+  if (!did) {
     navigate(redirectTo, { replace: true });
+  }
+} catch {
+  navigate(redirectTo, { replace: true });
+}
   };
 
   return (

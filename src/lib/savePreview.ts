@@ -13,7 +13,7 @@ export async function actuallySavePreview(pending: PendingSave) {
   // Notify app and jump to reviews section
   window.dispatchEvent(new CustomEvent("events.reviewsUpdated"));
   try {
-    window.location.hash = "#reviews";
+    window.location.href = "/reviews#reviews";
   } catch {}
   return data as any;
 }
@@ -33,14 +33,17 @@ export async function onSavePreviewGuard(currentInputUrl: string, lastPreview: a
   await actuallySavePreview(pending);
 }
 
-export async function resumePendingAfterAuth() {
+export async function resumePendingAfterAuth(): Promise<boolean> {
   const raw = localStorage.getItem("padu.pending");
-  if (!raw) return;
+  if (!raw) return false;
+  let did = false;
   try {
     const pending = JSON.parse(raw);
     if (pending?.type === "savePreview") {
       await actuallySavePreview(pending);
+      did = true;
     }
   } catch {}
   localStorage.removeItem("padu.pending");
+  return did;
 }
