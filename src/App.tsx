@@ -14,6 +14,7 @@ import AppLayout from "./components/layout/AppLayout";
 import GlobalActions from "./components/GlobalActions";
 import IntegrationsModal from "@/components/integrations/IntegrationsModal";
 import CSVUploadModal from "@/components/upload/CSVUploadModal";
+import ReviewsPage from "./pages/Reviews";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,16 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <UploadPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ReviewsPage />
                 </AppLayout>
               </ProtectedRoute>
             }
