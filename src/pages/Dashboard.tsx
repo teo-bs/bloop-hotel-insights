@@ -6,6 +6,8 @@ import { useReviews } from "@/stores/reviews";
 import { useGlobalDateFilter } from "@/stores/filters";
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
 import { filterReviews, calcAvgRating, calcTotals, calcTopTopic, calcTrendSeries, calcTopicCounts } from "@/lib/metrics";
+import { generateInsights, type Insight } from "@/lib/insights";
+import { Lightbulb } from "lucide-react";
 
 // Helper to compute daily average series for the first chart
 function buildDailyAvgData(revs: Array<{ date: string; rating: number }>) {
@@ -36,6 +38,10 @@ export default function Dashboard() {
   const [trendData, setTrendData] = useState<Array<{ weekStartISO: string; positive: number; neutral: number; negative: number }>>([]);
   const [topicBars, setTopicBars] = useState<Array<{ topic: string; count: number }>>([]);
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [insights, setInsights] = useState<Insight[]>([]);
+  const [smallData, setSmallData] = useState(false);
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+
 
   const recompute = () => {
     const window = { from: start, to: end };
@@ -48,6 +54,15 @@ export default function Dashboard() {
     setDailyAvgData(buildDailyAvgData(filtered as any));
     setTrendData(calcTrendSeries(filtered));
     setTopicBars(calcTopicCounts(filtered).slice(0, 8));
+
+    // Insights
+    setSmallData(filtered.length < 30);
+    const allInsights = generateInsights(filtered as any);
+    const weight: Record<Insight["impact"], number> = { High: 3, Medium: 2, Low: 1 };
+    const top = allInsights
+      .sort((a, b) => (weight[b.impact] - weight[a.impact]) || (b.evidence.mentions - a.evidence.mentions))
+      .slice(0, 3);
+    setInsights(top);
   };
 
   // Debounced recompute on dependencies and manual refresh
@@ -118,6 +133,59 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Insights */}
+      <Card id="insights-panel">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-yellow-500" /> Insights</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {smallData && (
+            <div className="text-xs text-muted-foreground">Limited data (&lt;30 reviews). Insights may be less reliable.</div>
+          )}
+          {isRecomputing ? (
+            <>
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </>
+          ) : insights.length ? (
+            <div className="grid gap-3 md:grid-cols-3">
+              {insights.map((ins, i) => (
+                <div id={`insight-card-${i + 1}`} key={ins.id} className="rounded-lg border p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold">{ins.title}</div>
+                      <div className="text-sm text-muted-foreground">{ins.recommendation}</div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setExpanded((prev) => ({ ...prev, [i]: !prev[i] }))}
+                      aria-expanded={!!expanded[i]}
+                      aria-controls={`insight-details-${i}`}
+                    >
+                      {expanded[i] ? "Hide details" : "View details"}
+                    </Button>
+                  </div>
+                  {expanded[i] && (
+                    <div id={`insight-details-${i}`} className="mt-2 text-sm">
+                      <div className="text-muted-foreground mb-1">Mentions: {ins.evidence.mentions}</div>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {ins.evidence.recentExamples.map((ex, idx) => (
+                          <li key={idx}>{ex}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No insights available for the current selection.</div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8">
