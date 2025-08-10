@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star } from "lucide-react";
+import { Star, Lightbulb } from "lucide-react";
 import { onSavePreviewGuard } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
 import { getPlacesPreview, getPlaceSuggestions } from "@/lib/api/googlePlaces";
@@ -94,6 +94,7 @@ export default function Index() {
         );
       }
       setResult(data);
+      (window as any).__paduLastPreview = data;
     } catch (e: any) {
       setError(e?.message || "Failed to fetch preview. Please try again.");
     } finally {
@@ -128,6 +129,20 @@ export default function Index() {
       setSaving(false);
     }
   }
+
+  // Derived KPIs and simple insight from preview
+  const revs = (result?.reviews as any[]) || [];
+  const avgVal = revs.length ? revs.reduce((s: number, r: any) => s + (Number(r.rating) || 0), 0) / revs.length : 4.3;
+  const avgDisplay = avgVal.toFixed(1);
+  const totalDisplay = (result?.place?.totalReviews as number) ?? (revs.length || 12482);
+  const positivePct = revs.length ? Math.round((revs.filter((r: any) => Number(r.rating) >= 4).length / revs.length) * 100) : 72;
+  const textBlob = revs.map((r: any) => String(r.text || "")).join(" ").toLowerCase();
+  const hasLow = revs.some((r: any) => Number(r.rating) <= 3);
+  let insight = "Standardize breakfast quality";
+  let badge = "Medium impact";
+  if (/(check-?in|reception|queue)/.test(textBlob) && hasLow) { insight = "Improve check‑in speed"; badge = "High impact"; }
+  else if (/(wifi|wi-?fi|internet)/.test(textBlob) && hasLow) { insight = "Upgrade Wi‑Fi reliability"; badge = "High impact"; }
+  else if (/(clean|dirty|smell|mold)/.test(textBlob)) { insight = "Deepen housekeeping checks"; badge = "Medium impact"; }
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gpt5-gradient animate-gpt5-pan font-sans">
@@ -171,6 +186,46 @@ export default function Index() {
 
           <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Understand your guests with Padu.</h1>
           <p className="mt-3 text-base text-muted-foreground">AI review consolidation & insights — one clear picture.</p>
+
+          {/* Floating mini-cards */}
+          <div className="relative mt-4">
+            <div
+              id="float-box-a"
+              role="status"
+              aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
+              className="mx-auto mb-3 w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5 hover:shadow-glow lg:absolute lg:-left-56 lg:-top-6 animate-[float-y_4s_ease-in-out_infinite_alternate]"
+            >
+              <div className="text-xs text-muted-foreground">Last 90 days</div>
+              <div className="mt-1 text-xl font-semibold">
+                Avg <span aria-hidden>★</span> <span id="kpi-avg">{avgDisplay}</span>
+              </div>
+              <div className="mt-1 text-sm">
+                Reviews <span id="kpi-total">{(Number(totalDisplay) as any)?.toLocaleString?.() || totalDisplay}</span> ·
+                Positive <span id="kpi-positive">{positivePct}%</span>
+              </div>
+              <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
+                <img src="/logos/google.svg" alt="" className="h-4" />
+                <img src="/logos/tripadvisor.svg" alt="" className="h-4" />
+                <img src="/logos/booking.svg" alt="" className="h-4" />
+              </div>
+            </div>
+
+            <div
+              id="float-box-b"
+              role="status"
+              aria-label={`Top insight: ${insight} (${badge})`}
+              className="mx-auto w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5 hover:shadow-glow lg:absolute lg:-bottom-8 lg:right-[-14rem] animate-[float-y_4s_ease-in-out_infinite_alternate]"
+              style={{ animationDelay: "2s" }}
+            >
+              <div className="text-xs text-muted-foreground">Top insight</div>
+              <div className="mt-1 flex items-start gap-2">
+                <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
+                <div className="text-sm" id="insight-title">{insight}</div>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">Based on recurring themes</div>
+              <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
+            </div>
+          </div>
 
           {/* Search capsule */}
           <div className="relative mx-auto mt-6 max-w-2xl">
