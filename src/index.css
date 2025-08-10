@@ -193,4 +193,40 @@ All colors MUST be HSL.
 
   /* Consistent focus outline for a11y */
   .focus-ring { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background; }
+
+  /* GPT-5 style gradient and motion */
+  .bg-gpt5-gradient {
+    background-image:
+      radial-gradient(60% 60% at 20% 20%, hsl(20 100% 92% / 0.9), transparent 60%),
+      radial-gradient(60% 60% at 80% 30%, hsl(260 100% 94% / 0.9), transparent 60%),
+      radial-gradient(70% 70% at 50% 90%, hsl(200 100% 92% / 0.9), transparent 60%),
+      linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
+    background-attachment: fixed;
+    filter: saturate(1.05);
+  }
+  @keyframes gpt5-pan {
+    0% { background-position: 0% 0%, 80% 10%, 50% 100%, 0% 0%; }
+    100% { background-position: 30% 20%, 60% 20%, 60% 90%, 0% 0%; }
+  }
+  .animate-gpt5-pan {
+    animation: gpt5-pan 30s ease-in-out infinite alternate;
+    background-size: 120% 120%, 120% 120%, 140% 140%, auto;
+  }
+
+  /* Subtle noise overlay */
+  .noise-overlay {
+    background-image:
+      radial-gradient(hsl(0 0% 100% / 0.04) 1px, transparent 1px),
+      radial-gradient(hsl(0 0% 0% / 0.03) 1px, transparent 1px);
+    background-size: 24px 24px, 36px 36px;
+    background-position: 0 0, 12px 12px;
+    mix-blend-mode: overlay;
+    opacity: 0.5;
+  }
+
+  /* Hover glow utility */
+  .hover\:shadow-glow:hover {
+    box-shadow: 0 12px 46px hsl(var(--primary) / 0.35), 0 0 0 1px hsl(var(--primary) / 0.28);
+  }
 }
+

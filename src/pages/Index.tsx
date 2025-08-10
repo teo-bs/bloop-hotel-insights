@@ -1,54 +1,39 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, MessageSquareText, TrendingUp, ArrowDown, Link2, Brain, Lightbulb, BarChart3, Sparkles, Globe, Download } from "lucide-react";
-import TopNav from "@/components/layout/TopNav";
-import Reveal from "@/components/motion/Reveal";
-import { openIntegrationsModal, openIntegrationsModalWithHint } from "@/lib/actions";
+import { Star } from "lucide-react";
 import { onSavePreviewGuard } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
+
 export default function Index() {
-  const [mapsLink, setMapsLink] = useState("");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
-  function parsePlaceId(input: string): string | null {
-    const trimmed = input.trim();
-    // Direct place id pasted
-    if (/^[A-Za-z0-9_-]{10,}$/.test(trimmed)) return trimmed;
-    try {
-      const u = new URL(trimmed);
-      const p = u.searchParams.get("place_id");
-      if (p) return p;
-      const q = u.searchParams.get("q");
-      if (q && q.includes("place_id:")) {
-        const m = q.match(/place_id:([A-Za-z0-9_-]+)/);
-        if (m) return m[1];
-      }
-    } catch {
-      // not a URL
-    }
-    const m2 = trimmed.match(/!1s([A-Za-z0-9_-]{10,})/);
-    if (m2) return m2[1];
-    return null;
-  }
+
   async function handlePreview() {
     setError(null);
     setResult(null);
-    const raw = mapsLink.trim();
+    const raw = query.trim();
     if (!raw) {
-      setError("Paste a Google Maps link first.");
+      setError("Please enter a business name.");
       return;
     }
     setLoading(true);
     try {
-      const FUNCTION_URL = "https://hewcaikalseorcmmjark.supabase.co/functions/v1/google-places-preview";
-      const url = `${FUNCTION_URL}?url=${encodeURIComponent(raw)}`;
+      const isUrl = /^(https?:)\/\//i.test(raw);
+      const searchUrl = isUrl
+        ? raw
+        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(raw)}`;
+
+      const FUNCTION_URL =
+        "https://hewcaikalseorcmmjark.supabase.co/functions/v1/google-places-preview";
+      const url = `${FUNCTION_URL}?url=${encodeURIComponent(searchUrl)}`;
+
       const res = await fetch(url, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -57,14 +42,16 @@ export default function Index() {
       if (!res.ok) {
         const status = data?.details?.status || data?.status || data?.error || "";
         const map: Record<string, string> = {
-          REQUEST_DENIED: "Request denied – check API key or permissions.",
+          REQUEST_DENIED: "Request denied – please try again later.",
           OVER_QUERY_LIMIT: "Over daily quota – try again later.",
-          INVALID_REQUEST: "Invalid request – please paste a full place link.",
-          NOT_FOUND: "Place not found – try another link.",
+          INVALID_REQUEST: "Invalid request – try a more specific name.",
+          NOT_FOUND: "Place not found – try another name.",
           UNKNOWN_ERROR: "Temporary error – try again.",
-          NO_PLACE_ID: "Could not resolve a Place ID from that link.",
+          NO_PLACE_ID: "We couldn't resolve that business. Try including the city.",
         };
-        throw new Error(map[status] || data?.details?.message || data?.error || `Request failed (${status || res.status})`);
+        throw new Error(
+          map[status] || data?.details?.message || data?.error || `Request failed (${status || res.status})`
+        );
       }
       setResult(data);
     } catch (e: any) {
@@ -73,18 +60,11 @@ export default function Index() {
       setLoading(false);
     }
   }
-  function handleUpgrade() {
-    const id = result?.place?.id || parsePlaceId(mapsLink) || undefined;
-    openIntegrationsModalWithHint({
-      platform: "google",
-      placeId: id
-    });
-  }
-  
-  async function handleSaveClick() {
+
+  async function handleSave() {
     setSaving(true);
     try {
-      await onSavePreviewGuard(mapsLink, result);
+      await onSavePreviewGuard(query, result);
     } catch (e: any) {
       toast({
         title: "Save failed",
@@ -95,489 +75,144 @@ export default function Index() {
       setSaving(false);
     }
   }
-  return <>
-      <TopNav />
-      <main>
-        <section className="relative overflow-hidden bg-royal-diagonal-animated">
-          {/* subtle texture overlay */}
-          <div className="absolute inset-0 texture-dots texture-dots-animate pointer-events-none" aria-hidden="true" />
 
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20 xl:py-24">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-14 items-center">
-              {/* Copy column */}
-              <div className="text-center lg:text-left space-y-6 md:space-y-8 animate-fade-in">
-                <h1 className="text-4xl sm:text-5xl xl:text-6xl font-bold tracking-tight">
-                  Your Reviews, All in One Place.
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0">
-                  Padu turns feedback into clear, AI-powered hotel insights.
-                </p>
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-gpt5-gradient animate-gpt5-pan font-sans">
+      {/* subtle noise overlay */}
+      <div className="pointer-events-none absolute inset-0 noise-overlay" aria-hidden="true" />
 
-                {/* KPI chips */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4">
-                  <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
+      {/* Glassmorphic centered nav */}
+      <nav aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
+        <div className="flex items-center gap-6 rounded-full border border-input bg-card/70 px-5 py-2 backdrop-blur-md shadow-lg">
+          <div className="h-3 w-3 rounded-full bg-foreground/50" aria-hidden="true" />
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <a href="/#docs" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Docs</a>
+            <a href="/#pricing" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Pricing</a>
+            <Link to="/auth?mode=signin" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Login</Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Centered Hero */}
+      <section className="relative z-10 flex min-h-screen items-center justify-center px-6">
+        <div className="w-full max-w-2xl text-center">
+          {/* Padu logo */}
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg">
+            <svg id="padu-logo" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-label="Padu logo">
+              <defs>
+                <linearGradient id="padu-g" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" />
+                </linearGradient>
+              </defs>
+              <path d="M4 6a2 2 0 0 1 2-2h6.2a5.8 5.8 0 1 1 0 11.6H8v4.4H4V6Z" stroke="url(#padu-g)" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Understand your guests with Padu.</h1>
+          <p className="mt-3 text-base text-muted-foreground">AI review consolidation & insights — all in one place.</p>
+
+          {/* Search capsule */}
+          <div className="relative mx-auto mt-6 max-w-2xl">
+            <Input
+              id="business-name-input"
+              aria-label="Business name"
+              placeholder="Enter your business name to preview 5 recent Google reviews"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handlePreview(); }}
+              className="h-12 rounded-full px-5 pr-36 text-base shadow-inner focus-ring"
+            />
+            <Button
+              id="btn-preview-reviews"
+              onClick={handlePreview}
+              disabled={loading}
+              aria-label="Preview reviews"
+              className="absolute right-1 top-1 h-10 rounded-full px-6 hover:shadow-glow"
+            >
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
+                  Previewing…
+                </span>
+              ) : (
+                "Preview"
+              )}
+            </Button>
+          </div>
+
+          {/* Preview results */}
+          <div id="preview-reviews-container" aria-live="polite" className="mx-auto mt-6 max-w-2xl text-left">
+            {error && (
+              <p role="alert" className="text-sm text-destructive">{error}</p>
+            )}
+
+            {result && (
+              <div className="rounded-2xl border bg-background/80 p-5 backdrop-blur-md shadow-xl">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-lg font-semibold">{result.place?.name ?? "Unnamed place"}</div>
+                    <div className="text-sm text-muted-foreground">{result.place?.address ?? ""}</div>
+                  </div>
+                  <div className="mt-2 inline-flex items-center gap-2 text-sm sm:mt-0">
                     <Star className="h-4 w-4 text-accent" />
-                    <span>Avg Rating <span className="font-bold">★ 4.3</span></span>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
-                    <MessageSquareText className="h-4 w-4 text-primary" />
-                    <span><span className="font-bold">12,482</span> Reviews</span>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-full border bg-card/70 backdrop-blur px-3 py-2 text-sm shadow-sm">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                    <span><span className="font-bold">72%</span> Positive</span>
+                    <span className="font-medium">{result.place?.rating ?? "-"}</span>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">{result.place?.totalReviews ?? 0} total reviews</span>
                   </div>
                 </div>
 
-                {/* CTAs */}
-                <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 pt-2">
-                  <Button variant="hero" size="lg" id="cta-connect-sources" onClick={openIntegrationsModal} className="px-6 py-3 text-base animate-pulse-8s">
-                    Connect My Review Sources
-                  </Button>
-                  
-                </div>
-
-                {/* Trust logos */}
-                <div className="pt-4 md:pt-6">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground text-center lg:text-left mb-3">Trusted by 200+ hotel managers worldwide</p>
-                  <div className="flex items-center justify-center lg:justify-start gap-6 opacity-80">
-                    <img src="/logos/hotels/marriott.svg" alt="Marriott logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                    <img src="/logos/hotels/hilton.svg" alt="Hilton logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                    <img src="/logos/hotels/hyatt.svg" alt="Hyatt logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                    <img src="/logos/hotels/accor.svg" alt="Accor logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                    <img src="/logos/hotels/ihg.svg" alt="IHG logo" className="h-6 md:h-7 lg:h-8 grayscale" loading="lazy" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Illustration column */}
-              <div className="relative order-first lg:order-none animate-slide-up">
-                {/* floating glass insight card */}
-                <div className="relative mx-auto lg:ml-8 w-full max-w-md">
-                  <div className="rounded-2xl border border-accent/50 bg-background/40 backdrop-blur-md shadow-xl p-6 md:p-8 animate-float-slow">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Sentiment</span>
-                        <span className="text-sm font-bold text-accent">+72%</span>
-                      </div>
-                      <div className="h-24 rounded-md bg-gradient-to-b from-primary/20 to-transparent" />
-                      <div className="grid grid-cols-3 gap-3 text-center">
-                        <div className="rounded-md border p-3">
-                          <div className="text-xs text-muted-foreground">Avg Rating</div>
-                          <div className="text-xl font-bold">4.3</div>
-                        </div>
-                        <div className="rounded-md border p-3">
-                          <div className="text-xs text-muted-foreground">Reviews</div>
-                          <div className="text-xl font-bold">12,482</div>
-                        </div>
-                        <div className="rounded-md border p-3">
-                          <div className="text-xs text-muted-foreground">Positive</div>
-                          <div className="text-xl font-bold">72%</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* subtle glow */}
-                  <div className="absolute -inset-2 -z-10 rounded-3xl bg-gradient-to-tr from-primary/20 via-transparent to-transparent blur-2xl" />
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Down arrow scroll */}
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-6">
-            <button type="button" onClick={() => document.getElementById("how-padu-works")?.scrollIntoView({
-            behavior: "smooth"
-          })} aria-label="Scroll to How Padu Works" className="rounded-full border bg-card/70 backdrop-blur px-3 py-2 hover-scale focus-ring">
-              <ArrowDown className="h-5 w-5" />
-            </button>
-          </div>
-        </section>
-
-        {/* Preview with a Google Maps link */}
-        <section className="bg-royal-tint/40">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-10 md:py-12">
-            <Card className="rounded-2xl shadow-xl">
-              <div className="p-6 md:p-8">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <h2 className="text-xl md:text-2xl font-semibold">Preview with a Google Maps link</h2>
-                  
-                </div>
-                <div className="flex flex-col md:flex-row items-stretch gap-3">
-                  <Input id="mapslink-input" placeholder="Paste your Google Maps place link…" value={mapsLink} onChange={e => setMapsLink(e.target.value)} aria-label="Google Maps place link" />
-                  <Button id="btn-preview-reviews" onClick={handlePreview} disabled={loading}>
-                    {loading ? <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
-                        Fetching preview…
-                      </span> : "Preview reviews"}
-                  </Button>
-                </div>
-
-                {error && <p className="mt-3 text-sm text-destructive" role="alert">{error}</p>}
-
-                <div id="preview-results" className="mt-6 space-y-4">
-                  {result ? <div className="space-y-4">
-                      {/* Place summary */}
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                        <div>
-                          <div className="text-lg font-semibold">{result.place?.name ?? "Unnamed place"}</div>
-                          <div className="text-sm text-muted-foreground">{result.place?.address ?? ""}</div>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="inline-flex items-center gap-1">
-                            <Star className="h-4 w-4 text-accent" />
-                            <span className="font-medium">{result.place?.rating ?? "-"}</span>
+                <ul className="mt-4 space-y-4">
+                  {(result.reviews || []).slice(0, 5).map((r: any, i: number) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Avatar className="h-8 w-8">
+                        {r.profile_photo_url ? (
+                          <AvatarImage src={r.profile_photo_url} alt={`${r.author_name || "Reviewer"} avatar`} />
+                        ) : (
+                          <AvatarFallback>{(r.author_name || "").slice(0, 2).toUpperCase() || "G"}</AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="truncate text-sm font-medium max-w-[200px]">{r.author_name || "Anonymous"}</div>
+                          <div className="inline-flex items-center gap-1 text-accent">
+                            {Array.from({ length: Number(r.rating || 0) }).map((_, j) => (
+                              <Star key={j} className="h-3.5 w-3.5 fill-current" />
+                            ))}
                           </div>
-                          <span className="text-muted-foreground">•</span>
-                          <div className="text-muted-foreground">{result.place?.totalReviews ?? 0} total reviews</div>
+                          <span className="text-xs text-muted-foreground">{r.relative_time_description || ""}</span>
                         </div>
+                        <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{r.text || ""}</p>
                       </div>
+                    </li>
+                  ))}
+                </ul>
 
-                      {/* Reviews list */}
-                      <ul className="space-y-4">
-                        {(result.reviews || []).slice(0, 5).map((r: any, i: number) => <li key={i} className="flex items-start gap-3">
-                            <Avatar className="h-8 w-8">
-                              {r.profile_photo_url ? <AvatarImage src={r.profile_photo_url} alt={`${r.author_name || "Reviewer"} avatar`} /> : <AvatarFallback>{(r.author_name || "").slice(0, 2).toUpperCase() || "G"}</AvatarFallback>}
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <div className="text-sm font-medium truncate max-w-[200px]">{r.author_name || "Anonymous"}</div>
-                                <div className="inline-flex items-center gap-1 text-accent">
-                                  {Array.from({
-                              length: Number(r.rating || 0)
-                            }).map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-current" />)}
-                                </div>
-                                <span className="text-xs text-muted-foreground">{r.relative_time_description || ""}</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-3">{r.text || ""}</p>
-                            </div>
-                          </li>)}
-                      </ul>
-
-                      <div className="pt-2 text-xs text-muted-foreground">Data from Google</div>
-
-                      <div className="pt-4 space-y-2">
-                        <Button id="btn-save-preview" variant="hero" onClick={handleSaveClick} disabled={saving}>
-                          {saving ? (
-                            <span className="inline-flex items-center gap-2">
-                              <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
-                              Saving...
-                            </span>
-                          ) : (
-                            "Save to dashboard (free)"
-                          )}
-                        </Button>
-                        <Button id="btn-upgrade-gbp" variant="secondary" onClick={handleUpgrade}>
-                          Connect Business Profile to import all reviews
-                        </Button>
-                      </div>
-                    </div> : <p className="text-sm text-muted-foreground">Paste a Google Maps link and preview up to 5 recent reviews.</p>}
-                </div>
-              </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* How Padu Works */}
-        <section id="how-padu-works" className="bg-royal-tint">
-          <Reveal><div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">How Padu Works</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Step 1 */}
-              <Card className="hover-scale">
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Link2 className="h-6 w-6 text-accent" />
-                    <h3 className="text-xl font-semibold">Connect Review Sources</h3>
-                  </div>
-                  <p className="text-muted-foreground">Link Google, TripAdvisor, Booking.com or upload CSV.</p>
-                </div>
-              </Card>
-              {/* Step 2 */}
-              <Card className="hover-scale">
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Brain className="h-6 w-6 text-accent" />
-                    <h3 className="text-xl font-semibold">Analyze Sentiment & Trends</h3>
-                  </div>
-                  <p className="text-muted-foreground">Our AI detects patterns and guest themes automatically.</p>
-                </div>
-              </Card>
-              {/* Step 3 */}
-              <Card className="hover-scale">
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Lightbulb className="h-6 w-6 text-accent" />
-                    <h3 className="text-xl font-semibold">Get Clear Insights</h3>
-                  </div>
-                  <p className="text-muted-foreground">Receive prioritized recommendations to improve guest satisfaction.</p>
-                </div>
-              </Card>
-            </div>
-          </div></Reveal>
-        </section>
-
-
-        {/* Why Hotels Choose Padu */}
-        <section className="bg-royal-tint">
-          <Reveal><div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Why Hotels Choose Padu</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Feature 1 */}
-              <Card className="group transition hover:bg-primary/5">
-                <div className="p-6 md:p-8 space-y-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
-                    <BarChart3 className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
-                  </div>
-                  <h3 className="text-lg font-semibold">KPI Dashboard</h3>
-                  <p className="text-sm text-muted-foreground">Track key performance metrics at a glance with clear, executive dashboards.</p>
-                </div>
-              </Card>
-
-              {/* Feature 2 */}
-              <Card className="group transition hover:bg-primary/5">
-                <div className="p-6 md:p-8 space-y-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
-                    <Sparkles className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
-                  </div>
-                  <h3 className="text-lg font-semibold">AI Insights</h3>
-                  <p className="text-sm text-muted-foreground">Uncover sentiment trends and guest themes—no manual tagging required.</p>
-                </div>
-              </Card>
-
-              {/* Feature 3 */}
-              <Card className="group transition hover:bg-primary/5">
-                <div className="p-6 md:p-8 space-y-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
-                    <Globe className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
-                  </div>
-                  <h3 className="text-lg font-semibold">Multi-Platform Aggregation</h3>
-                  <p className="text-sm text-muted-foreground">Consolidate Google, TripAdvisor, Booking.com and more into one view.</p>
-                </div>
-              </Card>
-
-              {/* Feature 4 */}
-              <Card className="group transition hover:bg-primary/5">
-                <div className="p-6 md:p-8 space-y-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent grid place-items-center">
-                    <Download className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
-                  </div>
-                  <h3 className="text-lg font-semibold">PDF/CSV Exports</h3>
-                  <p className="text-sm text-muted-foreground">Export reports and raw data for presentations, audits, and analysis.</p>
-                </div>
-              </Card>
-            </div>
-          </div></Reveal>
-        </section>
-
-        {/* See Padu in Action */}
-        <section className="w-full">
-          <Reveal><div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">See Padu in Action</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              {/* Text (mobile first) */}
-              <div className="order-1 lg:order-2 space-y-4">
-                <p className="text-muted-foreground max-w-prose">
-                  Explore the dashboard that turns scattered guest feedback into clear trends and action steps. Save time, spot issues early, and consistently delight your guests.
-                </p>
-                <Button size="lg">Start Your Free Trial</Button>
-              </div>
-              {/* Screenshot */}
-              <div className="order-2 lg:order-1 relative">
-                <div className="rounded-xl border overflow-hidden">
-                  <img src="/placeholder.svg" alt="Padu dashboard screenshot (blurred)" className="w-full h-auto object-cover blur-[1px]" loading="lazy" />
-                </div>
-                <button aria-label="Play demo" className="absolute inset-0 m-auto h-14 w-14 grid place-items-center rounded-full bg-background/80 border shadow-lg hover-scale focus-ring">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
-                </button>
-              </div>
-            </div>
-          </div></Reveal>
-        </section>
-
-        {/* Testimonials */}
-        <section className="bg-royal-tint">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Loved by Hotel Managers</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[{
-              name: "Amelia Brown",
-              hotel: "Seaside Resort",
-              quote: "Padu helped us double our 5-star reviews in just 60 days.",
-              initials: "AB"
-            }, {
-              name: "Liam Chen",
-              hotel: "Urban Loft Hotel",
-              quote: "Our team finally has one place to understand what guests really say.",
-              initials: "LC"
-            }, {
-              name: "Sofia Martinez",
-              hotel: "Mountain View Lodge",
-              quote: "The AI insights are spot on and easy to act on.",
-              initials: "SM"
-            }].map((t, i) => <Card key={i} className="relative overflow-hidden">
-                  <div className="absolute -top-4 -right-2 text-accent/10" aria-hidden="true">“</div>
-                  <div className="p-6 md:p-8 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-accent/20 grid place-items-center font-bold">{t.initials}</div>
-                      <div>
-                        <div className="font-semibold">{t.name}</div>
-                        <div className="text-sm text-muted-foreground">{t.hotel}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-accent">
-                      {Array.from({
-                    length: 5
-                  }).map((_, j) => <svg key={j} viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.787 1.402 8.168L12 18.897l-7.336 3.869 1.402-8.168L.132 9.211l8.2-1.193z" /></svg>)}
-                    </div>
-                    <p className="text-muted-foreground">{t.quote}</p>
-                  </div>
-                </Card>)}
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <section>
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Simple, Transparent Pricing</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-              {/* Starter */}
-              <Card className="flex flex-col">
-                <div className="p-6 md:p-8 space-y-4 flex-1">
-                  <div className="text-sm text-muted-foreground">Starter</div>
-                  <div className="text-3xl font-bold">$19<span className="text-base font-medium">/mo</span></div>
-                  <ul className="text-sm space-y-2">
-                    <li>• 1 hotel</li>
-                    <li>• Weekly AI insights</li>
-                    <li>• Google, TripAdvisor, Booking.com</li>
-                    <li>• Email support</li>
-                  </ul>
-                </div>
-                <div className="p-6 pt-0">
-                  <Button className="w-full">Get Started</Button>
-                </div>
-              </Card>
-
-              {/* Pro */}
-              <Card className="flex flex-col ring-2 ring-accent scale-[1.02]">
-                <div className="p-6 md:p-8 space-y-4 flex-1">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">Pro</div>
-                    <span className="text-xs rounded-full bg-accent/20 text-accent px-2 py-1">Most Popular</span>
-                  </div>
-                  <div className="text-3xl font-bold">$49<span className="text-base font-medium">/mo</span></div>
-                  <ul className="text-sm space-y-2">
-                    <li>• Up to 5 hotels</li>
-                    <li>• Daily AI insights</li>
-                    <li>• All integrations</li>
-                    <li>• Priority support</li>
-                  </ul>
-                </div>
-                <div className="p-6 pt-0">
-                  <Button className="w-full">Get Started</Button>
-                </div>
-              </Card>
-
-              {/* Enterprise */}
-              <Card className="flex flex-col">
-                <div className="p-6 md:p-8 space-y-4 flex-1">
-                  <div className="text-sm text-muted-foreground">Enterprise</div>
-                  <div className="text-3xl font-bold">Custom</div>
-                  <ul className="text-sm space-y-2">
-                    <li>• Unlimited hotels</li>
-                    <li>• Real-time AI insights</li>
-                    <li>• Custom integrations</li>
-                    <li>• Dedicated success manager</li>
-                  </ul>
-                </div>
-                <div className="p-6 pt-0 flex items-center gap-2">
-                  <Button className="flex-1">Get Started</Button>
-                  <Button variant="secondary" className="flex-1">Contact Sales</Button>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="bg-royal-tint">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Frequently Asked Questions</h2>
-            <div className="rounded-2xl bg-card shadow-sm border p-2 md:p-4">
-              <div className="grid grid-cols-1 gap-2">
-                {[{
-                q: "What platforms can I connect?",
-                a: "Google, TripAdvisor, Booking.com, and CSV import for custom data."
-              }, {
-                q: "How secure is my data?",
-                a: "We follow best practices for data handling and secure connectivity."
-              }, {
-                q: "Can I try before paying?",
-                a: "Yes, start a free trial—no credit card required."
-              }, {
-                q: "How often are insights updated?",
-                a: "Depending on plan: weekly, daily, or real-time for Enterprise."
-              }, {
-                q: "Can I cancel anytime?",
-                a: "Absolutely. You can cancel your subscription at any time."
-              }, {
-                q: "Do you support multi-property setups?",
-                a: "Yes, Padu supports multiple properties under one account."
-              }].map((item, idx) => <details key={idx} className="group rounded-xl bg-white p-4 border">
-                    <summary className="flex cursor-pointer list-none items-center justify-between">
-                      <span className="font-medium">{item.q}</span>
-                      <span className="ml-4 h-6 w-6 grid place-items-center rounded-md bg-muted text-foreground transition group-open:bg-accent group-open:text-accent-foreground">{/* plus/minus */}
-                        <span className="block group-open:hidden">+</span>
-                        <span className="hidden group-open:block">−</span>
+                <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-xs text-muted-foreground">Data from Google</div>
+                  <Button
+                    id="btn-save-reviews"
+                    onClick={handleSave}
+                    disabled={saving}
+                    aria-label="Save to Dashboard"
+                    className="rounded-full"
+                    variant="hero"
+                  >
+                    {saving ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
+                        Saving…
                       </span>
-                    </summary>
-                    <div className="mt-2 text-sm text-muted-foreground">{item.a}</div>
-                  </details>)}
+                    ) : (
+                      "Save to Dashboard"
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        </section>
-
-        {/* CTA Banner */}
-        <section className="bg-primary text-primary-foreground">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-12 md:py-16">
-            <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-4">
-              <div className="text-center lg:text-left">
-                <h3 className="text-2xl md:text-3xl font-bold">Ready to see what your guests really think?</h3>
-                <p className="mt-2 text-primary-foreground/90">Join hundreds of hotel managers using Padu to delight guests and boost reviews.</p>
-              </div>
-              <Button className="bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] rounded-2xl px-6 py-6 hover:shadow-2xl focus-ring">Get Started Free</Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="bg-[hsl(var(--foreground))] text-[hsl(var(--primary-foreground))]">
-          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-            <div>
-              <div className="text-xl font-bold">Padu</div>
-              <p className="text-sm text-primary-foreground/80 mt-1">AI-powered guest insights for hotels.</p>
-            </div>
-            <nav className="text-sm mx-auto">
-              <ul className="flex flex-col md:flex-row gap-3 md:gap-6">
-                <li><a className="hover:text-[hsl(var(--accent))]" href="#pricing">Pricing</a></li>
-                <li><a className="hover:text-[hsl(var(--accent))]" href="#docs">Docs</a></li>
-                <li><a className="hover:text-[hsl(var(--accent))]" href="#contact">Contact</a></li>
-                <li><a className="hover:text-[hsl(var(--accent))]" href="#privacy">Privacy</a></li>
-                <li><a className="hover:text-[hsl(var(--accent))]" href="#terms">Terms</a></li>
-              </ul>
-            </nav>
-            <div className="flex md:justify-end gap-3">
-              <a href="#" aria-label="LinkedIn" className="hover:text-[hsl(var(--accent))]">{/* LinkedIn */}
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7 0h3.8v2.2h.1c.5-1 1.8-2.2 3.7-2.2 4 0 4.8 2.6 4.8 6V24h-4v-7.2c0-1.7 0-3.8-2.3-3.8-2.3 0-2.7 1.8-2.7 3.7V24h-4V8z" /></svg>
-              </a>
-              <a href="#" aria-label="Twitter" className="hover:text-[hsl(var(--accent))]">{/* Twitter */}
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden><path d="M24 4.6a9.9 9.9 0 0 1-2.8.8 4.9 4.9 0 0 0 2.1-2.7 9.9 9.9 0 0 1-3.1 1.2 4.9 4.9 0 0 0-8.3 4.5A13.9 13.9 0 0 1 1.7 3.1a4.9 4.9 0 0 0 1.5 6.6 4.9 4.9 0 0 1-2.2-.6v.1a4.9 4.9 0 0 0 3.9 4.8 4.9 4.9 0 0 1-2.2.1 4.9 4.9 0 0 0 4.6 3.4A9.9 9.9 0 0 1 0 21.5 14 14 0 0 0 7.5 24c9 0 13.9-7.5 13.9-13.9v-.6A9.7 9.7 0 0 0 24 4.6z" /></svg>
-              </a>
-            </div>
-          </div>
-        </footer>
-      </main>
-    </>;
+        </div>
+      </section>
+    </main>
+  );
 }
