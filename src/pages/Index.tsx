@@ -36,32 +36,31 @@ export default function Index() {
   async function handlePreview() {
     setError(null);
     setResult(null);
-    const id = parsePlaceId(mapsLink);
-    if (!id) {
-      setError("Could not parse a valid Place ID from that link.");
+    const raw = mapsLink.trim();
+    if (!raw) {
+      setError("Paste a Google Maps link first.");
       return;
     }
     setLoading(true);
     try {
       const FUNCTION_URL = "https://hewcaikalseorcmmjark.supabase.co/functions/v1/google-places-preview";
-      const url = `${FUNCTION_URL}?placeId=${encodeURIComponent(id)}`;
+      const url = `${FUNCTION_URL}?url=${encodeURIComponent(raw)}`;
       const res = await fetch(url, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
+        headers: { "Content-Type": "application/json" },
       });
       const data = await res.json();
       if (!res.ok) {
-        const status = data?.details?.status || data?.status || "";
+        const status = data?.details?.status || data?.status || data?.error || "";
         const map: Record<string, string> = {
           REQUEST_DENIED: "Request denied – check API key or permissions.",
           OVER_QUERY_LIMIT: "Over daily quota – try again later.",
           INVALID_REQUEST: "Invalid request – please paste a full place link.",
           NOT_FOUND: "Place not found – try another link.",
-          UNKNOWN_ERROR: "Temporary error – try again."
+          UNKNOWN_ERROR: "Temporary error – try again.",
+          NO_PLACE_ID: "Could not resolve a Place ID from that link.",
         };
-        throw new Error(map[status] || data?.error || `Request failed (${status || res.status})`);
+        throw new Error(map[status] || data?.details?.message || data?.error || `Request failed (${status || res.status})`);
       }
       setResult(data);
     } catch (e: any) {
