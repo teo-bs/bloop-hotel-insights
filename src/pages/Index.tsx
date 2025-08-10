@@ -168,8 +168,8 @@ export default function Index() {
       </nav>
 
       {/* Centered Hero */}
-      <section className="relative z-10 flex min-h-screen items-center justify-center px-6">
-        <div className="w-full max-w-2xl text-center">
+      <section className="relative z-10 flex items-center justify-center">
+        <div className="w-full max-w-[860px] px-6 pt-16 pb-20 lg:pt-20 lg:pb-28 text-center relative">
           {/* Padu logo */}
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg animate-[float-y_4s_ease-in-out_infinite_alternate]">
             <img
@@ -193,7 +193,7 @@ export default function Index() {
               id="float-box-a"
               role="status"
               aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
-              className="mx-auto mb-3 w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5 hover:shadow-glow lg:absolute lg:-left-56 lg:-top-6 animate-[float-y_4s_ease-in-out_infinite_alternate]"
+              className="mx-auto mb-3 w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
             >
               <div className="text-xs text-muted-foreground">Last 90 days</div>
               <div className="mt-1 text-xl font-semibold">
@@ -214,8 +214,7 @@ export default function Index() {
               id="float-box-b"
               role="status"
               aria-label={`Top insight: ${insight} (${badge})`}
-              className="mx-auto w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5 hover:shadow-glow lg:absolute lg:-bottom-8 lg:right-[-14rem] animate-[float-y_4s_ease-in-out_infinite_alternate]"
-              style={{ animationDelay: "2s" }}
+              className="mx-auto w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
             >
               <div className="text-xs text-muted-foreground">Top insight</div>
               <div className="mt-1 flex items-start gap-2">
@@ -228,7 +227,7 @@ export default function Index() {
           </div>
 
           {/* Search capsule */}
-          <div className="relative mx-auto mt-6 max-w-2xl">
+          <div className="relative mx-auto mt-6 w-full max-w-[720px]">
             <Input
               id="business-name-input"
               aria-label="Business name"
@@ -272,7 +271,7 @@ export default function Index() {
               onClick={handlePreview}
               disabled={loading}
               aria-label="Preview"
-              className="absolute right-1 top-1 h-10 rounded-full px-6 hover:shadow-glow"
+              className="absolute right-1 top-1 h-10 rounded-full px-6"
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
@@ -289,7 +288,7 @@ export default function Index() {
               <div
                 id="search-suggestions"
                 role="listbox"
-                className="absolute left-0 right-0 z-50 mt-2 max-h-80 overflow-auto rounded-xl border bg-popover p-1 shadow-xl"
+                className="absolute top-full mt-2 left-0 z-20 w-full max-h-80 overflow-auto rounded-xl border bg-card/90 backdrop-blur p-1 shadow-lg"
               >
                 {suggestions.length === 0 ? (
                   <div className="px-4 py-3 text-sm text-muted-foreground">No matches. Try adding city or address.</div>
@@ -323,28 +322,9 @@ export default function Index() {
 
           <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-muted-foreground">We’ll instantly pull your last 5 Google reviews — no signup needed.</p>
 
-          {/* Floating KPIs + logos */}
-          <div className="mx-auto mt-6 max-w-2xl animate-[float-y_4s_ease-in-out_infinite_alternate]">
-            <div className="rounded-2xl border bg-background/70 px-5 py-3 backdrop-blur-md shadow-lg">
-              <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="font-medium">Avg 4.3</span>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="font-medium">Reviews 12,482</span>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="font-medium">Positive 72%</span>
-                </div>
-                <div className="flex items-center gap-4 opacity-70 grayscale">
-                  <img src="/logos/google.svg" alt="Google logo" className="h-5" />
-                  <img src="/logos/tripadvisor.svg" alt="Tripadvisor logo" className="h-5" />
-                  <img src="/logos/booking.svg" alt="Booking.com logo" className="h-5" />
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Preview results */}
-          <div id="preview-reviews-container" aria-live="polite" className="mx-auto mt-6 max-w-2xl text-left">
+          <div id="preview-results" aria-live="polite" className="mx-auto mt-[72px] w-full max-w-[760px] text-left">
             {error && (
               <p role="alert" className="text-sm text-destructive">{error}</p>
             )}
@@ -363,8 +343,9 @@ export default function Index() {
                     <span className="text-muted-foreground">{result.place?.totalReviews ?? 0} total reviews</span>
                   </div>
                 </div>
+                <div className="my-4 border-t" />
 
-                <ul className="mt-4 space-y-4">
+                <ul className="space-y-4">
                   {(result.reviews || []).slice(0, 5).map((r: any, i: number) => (
                     <li key={i} className="flex items-start gap-3">
                       <Avatar className="h-8 w-8">
@@ -394,14 +375,6 @@ export default function Index() {
                   <div className="text-xs text-muted-foreground">Data from Google. <span className="hidden sm:inline">No credit card required.</span></div>
                   <div className="flex items-center gap-2">
                     <Button
-                      id="btn-upgrade-gbp"
-                      variant="ghost"
-                      className="rounded-full"
-                      onClick={() => openIntegrationsModal()}
-                    >
-                      Connect Business Profile for full history
-                    </Button>
-                    <Button
                       id="btn-save-preview"
                       onClick={handleSave}
                       disabled={saving}
@@ -417,6 +390,14 @@ export default function Index() {
                       ) : (
                         "Save to dashboard (free)"
                       )}
+                    </Button>
+                    <Button
+                      id="btn-upgrade-gbp"
+                      variant="ghost"
+                      className="rounded-full"
+                      onClick={() => openIntegrationsModal()}
+                    >
+                      Connect Business Profile for full history
                     </Button>
                   </div>
                 </div>
