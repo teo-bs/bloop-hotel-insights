@@ -13,7 +13,6 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any | null>(null);
-
   function parsePlaceId(input: string): string | null {
     const trimmed = input.trim();
     // Direct place id pasted
@@ -34,7 +33,6 @@ export default function Index() {
     if (m2) return m2[1];
     return null;
   }
-
   async function handlePreview() {
     setError(null);
     setResult(null);
@@ -47,7 +45,12 @@ export default function Index() {
     try {
       const FUNCTION_URL = "https://hewcaikalseorcmmjark.supabase.co/functions/v1/google-places-preview";
       const url = `${FUNCTION_URL}?placeId=${encodeURIComponent(id)}`;
-      const res = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
       const data = await res.json();
       if (!res.ok) {
         const status = data?.details?.status || data?.status || "";
@@ -56,7 +59,7 @@ export default function Index() {
           OVER_QUERY_LIMIT: "Over daily quota – try again later.",
           INVALID_REQUEST: "Invalid request – please paste a full place link.",
           NOT_FOUND: "Place not found – try another link.",
-          UNKNOWN_ERROR: "Temporary error – try again.",
+          UNKNOWN_ERROR: "Temporary error – try again."
         };
         throw new Error(map[status] || data?.error || `Request failed (${status || res.status})`);
       }
@@ -67,12 +70,13 @@ export default function Index() {
       setLoading(false);
     }
   }
-
   function handleUpgrade() {
     const id = result?.place?.id || parsePlaceId(mapsLink) || undefined;
-    openIntegrationsModalWithHint({ platform: "google", placeId: id });
+    openIntegrationsModalWithHint({
+      platform: "google",
+      placeId: id
+    });
   }
-
   return <>
       <TopNav />
       <main>
@@ -164,12 +168,9 @@ export default function Index() {
           </div>
           {/* Down arrow scroll */}
           <div className="absolute left-1/2 -translate-x-1/2 bottom-6">
-            <button
-              type="button"
-              onClick={() => document.getElementById("how-padu-works")?.scrollIntoView({ behavior: "smooth" })}
-              aria-label="Scroll to How Padu Works"
-              className="rounded-full border bg-card/70 backdrop-blur px-3 py-2 hover-scale focus-ring"
-            >
+            <button type="button" onClick={() => document.getElementById("how-padu-works")?.scrollIntoView({
+            behavior: "smooth"
+          })} aria-label="Scroll to How Padu Works" className="rounded-full border bg-card/70 backdrop-blur px-3 py-2 hover-scale focus-ring">
               <ArrowDown className="h-5 w-5" />
             </button>
           </div>
@@ -182,35 +183,22 @@ export default function Index() {
               <div className="p-6 md:p-8">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <h2 className="text-xl md:text-2xl font-semibold">Preview with a Google Maps link</h2>
-                  <div className="hidden sm:block text-xs text-muted-foreground">Royal Blue accented</div>
+                  
                 </div>
                 <div className="flex flex-col md:flex-row items-stretch gap-3">
-                  <Input
-                    id="mapslink-input"
-                    placeholder="Paste your Google Maps place link…"
-                    value={mapsLink}
-                    onChange={(e) => setMapsLink(e.target.value)}
-                    aria-label="Google Maps place link"
-                  />
+                  <Input id="mapslink-input" placeholder="Paste your Google Maps place link…" value={mapsLink} onChange={e => setMapsLink(e.target.value)} aria-label="Google Maps place link" />
                   <Button id="btn-preview-reviews" onClick={handlePreview} disabled={loading}>
-                    {loading ? (
-                      <span className="inline-flex items-center gap-2">
+                    {loading ? <span className="inline-flex items-center gap-2">
                         <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
                         Fetching preview…
-                      </span>
-                    ) : (
-                      "Preview reviews"
-                    )}
+                      </span> : "Preview reviews"}
                   </Button>
                 </div>
 
-                {error && (
-                  <p className="mt-3 text-sm text-destructive" role="alert">{error}</p>
-                )}
+                {error && <p className="mt-3 text-sm text-destructive" role="alert">{error}</p>}
 
                 <div id="preview-results" className="mt-6 space-y-4">
-                  {result ? (
-                    <div className="space-y-4">
+                  {result ? <div className="space-y-4">
                       {/* Place summary */}
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                         <div>
@@ -229,29 +217,23 @@ export default function Index() {
 
                       {/* Reviews list */}
                       <ul className="space-y-4">
-                        {(result.reviews || []).slice(0, 5).map((r: any, i: number) => (
-                          <li key={i} className="flex items-start gap-3">
+                        {(result.reviews || []).slice(0, 5).map((r: any, i: number) => <li key={i} className="flex items-start gap-3">
                             <Avatar className="h-8 w-8">
-                              {r.profile_photo_url ? (
-                                <AvatarImage src={r.profile_photo_url} alt={`${r.author_name || "Reviewer"} avatar`} />
-                              ) : (
-                                <AvatarFallback>{(r.author_name || "").slice(0,2).toUpperCase() || "G"}</AvatarFallback>
-                              )}
+                              {r.profile_photo_url ? <AvatarImage src={r.profile_photo_url} alt={`${r.author_name || "Reviewer"} avatar`} /> : <AvatarFallback>{(r.author_name || "").slice(0, 2).toUpperCase() || "G"}</AvatarFallback>}
                             </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
                                 <div className="text-sm font-medium truncate max-w-[200px]">{r.author_name || "Anonymous"}</div>
                                 <div className="inline-flex items-center gap-1 text-accent">
-                                  {Array.from({ length: Number(r.rating || 0) }).map((_, j) => (
-                                    <Star key={j} className="h-3.5 w-3.5 fill-current" />
-                                  ))}
+                                  {Array.from({
+                              length: Number(r.rating || 0)
+                            }).map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-current" />)}
                                 </div>
                                 <span className="text-xs text-muted-foreground">{r.relative_time_description || ""}</span>
                               </div>
                               <p className="text-sm text-muted-foreground mt-1 line-clamp-3">{r.text || ""}</p>
                             </div>
-                          </li>
-                        ))}
+                          </li>)}
                       </ul>
 
                       <div className="pt-2 text-xs text-muted-foreground">Data from Google</div>
@@ -261,10 +243,7 @@ export default function Index() {
                           Connect Business Profile to import all reviews
                         </Button>
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Paste a Google Maps link and preview up to 5 recent reviews.</p>
-                  )}
+                    </div> : <p className="text-sm text-muted-foreground">Paste a Google Maps link and preview up to 5 recent reviews.</p>}
                 </div>
               </div>
             </Card>
@@ -393,12 +372,22 @@ export default function Index() {
           <div className="container mx-auto px-6 md:px-8 xl:px-12 py-16 md:py-20">
             <h2 className="text-2xl md:text-3xl font-bold mb-8">Loved by Hotel Managers</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { name: "Amelia Brown", hotel: "Seaside Resort", quote: "Padu helped us double our 5-star reviews in just 60 days.", initials: "AB" },
-                { name: "Liam Chen", hotel: "Urban Loft Hotel", quote: "Our team finally has one place to understand what guests really say.", initials: "LC" },
-                { name: "Sofia Martinez", hotel: "Mountain View Lodge", quote: "The AI insights are spot on and easy to act on.", initials: "SM" },
-              ].map((t, i) => (
-                <Card key={i} className="relative overflow-hidden">
+              {[{
+              name: "Amelia Brown",
+              hotel: "Seaside Resort",
+              quote: "Padu helped us double our 5-star reviews in just 60 days.",
+              initials: "AB"
+            }, {
+              name: "Liam Chen",
+              hotel: "Urban Loft Hotel",
+              quote: "Our team finally has one place to understand what guests really say.",
+              initials: "LC"
+            }, {
+              name: "Sofia Martinez",
+              hotel: "Mountain View Lodge",
+              quote: "The AI insights are spot on and easy to act on.",
+              initials: "SM"
+            }].map((t, i) => <Card key={i} className="relative overflow-hidden">
                   <div className="absolute -top-4 -right-2 text-accent/10" aria-hidden="true">“</div>
                   <div className="p-6 md:p-8 space-y-4">
                     <div className="flex items-center gap-3">
@@ -409,14 +398,13 @@ export default function Index() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 text-accent">
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <svg key={j} viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.787 1.402 8.168L12 18.897l-7.336 3.869 1.402-8.168L.132 9.211l8.2-1.193z"/></svg>
-                      ))}
+                      {Array.from({
+                    length: 5
+                  }).map((_, j) => <svg key={j} viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.787 1.402 8.168L12 18.897l-7.336 3.869 1.402-8.168L.132 9.211l8.2-1.193z" /></svg>)}
                     </div>
                     <p className="text-muted-foreground">{t.quote}</p>
                   </div>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </section>
@@ -490,15 +478,25 @@ export default function Index() {
             <h2 className="text-2xl md:text-3xl font-bold mb-8">Frequently Asked Questions</h2>
             <div className="rounded-2xl bg-card shadow-sm border p-2 md:p-4">
               <div className="grid grid-cols-1 gap-2">
-                {[
-                  { q: "What platforms can I connect?", a: "Google, TripAdvisor, Booking.com, and CSV import for custom data." },
-                  { q: "How secure is my data?", a: "We follow best practices for data handling and secure connectivity." },
-                  { q: "Can I try before paying?", a: "Yes, start a free trial—no credit card required." },
-                  { q: "How often are insights updated?", a: "Depending on plan: weekly, daily, or real-time for Enterprise." },
-                  { q: "Can I cancel anytime?", a: "Absolutely. You can cancel your subscription at any time." },
-                  { q: "Do you support multi-property setups?", a: "Yes, Padu supports multiple properties under one account." },
-                ].map((item, idx) => (
-                  <details key={idx} className="group rounded-xl bg-white p-4 border">
+                {[{
+                q: "What platforms can I connect?",
+                a: "Google, TripAdvisor, Booking.com, and CSV import for custom data."
+              }, {
+                q: "How secure is my data?",
+                a: "We follow best practices for data handling and secure connectivity."
+              }, {
+                q: "Can I try before paying?",
+                a: "Yes, start a free trial—no credit card required."
+              }, {
+                q: "How often are insights updated?",
+                a: "Depending on plan: weekly, daily, or real-time for Enterprise."
+              }, {
+                q: "Can I cancel anytime?",
+                a: "Absolutely. You can cancel your subscription at any time."
+              }, {
+                q: "Do you support multi-property setups?",
+                a: "Yes, Padu supports multiple properties under one account."
+              }].map((item, idx) => <details key={idx} className="group rounded-xl bg-white p-4 border">
                     <summary className="flex cursor-pointer list-none items-center justify-between">
                       <span className="font-medium">{item.q}</span>
                       <span className="ml-4 h-6 w-6 grid place-items-center rounded-md bg-muted text-foreground transition group-open:bg-accent group-open:text-accent-foreground">{/* plus/minus */}
@@ -507,8 +505,7 @@ export default function Index() {
                       </span>
                     </summary>
                     <div className="mt-2 text-sm text-muted-foreground">{item.a}</div>
-                  </details>
-                ))}
+                  </details>)}
               </div>
             </div>
           </div>
@@ -545,10 +542,10 @@ export default function Index() {
             </nav>
             <div className="flex md:justify-end gap-3">
               <a href="#" aria-label="LinkedIn" className="hover:text-[hsl(var(--accent))]">{/* LinkedIn */}
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7 0h3.8v2.2h.1c.5-1 1.8-2.2 3.7-2.2 4 0 4.8 2.6 4.8 6V24h-4v-7.2c0-1.7 0-3.8-2.3-3.8-2.3 0-2.7 1.8-2.7 3.7V24h-4V8z"/></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7 0h3.8v2.2h.1c.5-1 1.8-2.2 3.7-2.2 4 0 4.8 2.6 4.8 6V24h-4v-7.2c0-1.7 0-3.8-2.3-3.8-2.3 0-2.7 1.8-2.7 3.7V24h-4V8z" /></svg>
               </a>
               <a href="#" aria-label="Twitter" className="hover:text-[hsl(var(--accent))]">{/* Twitter */}
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden><path d="M24 4.6a9.9 9.9 0 0 1-2.8.8 4.9 4.9 0 0 0 2.1-2.7 9.9 9.9 0 0 1-3.1 1.2 4.9 4.9 0 0 0-8.3 4.5A13.9 13.9 0 0 1 1.7 3.1a4.9 4.9 0 0 0 1.5 6.6 4.9 4.9 0 0 1-2.2-.6v.1a4.9 4.9 0 0 0 3.9 4.8 4.9 4.9 0 0 1-2.2.1 4.9 4.9 0 0 0 4.6 3.4A9.9 9.9 0 0 1 0 21.5 14 14 0 0 0 7.5 24c9 0 13.9-7.5 13.9-13.9v-.6A9.7 9.7 0 0 0 24 4.6z"/></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden><path d="M24 4.6a9.9 9.9 0 0 1-2.8.8 4.9 4.9 0 0 0 2.1-2.7 9.9 9.9 0 0 1-3.1 1.2 4.9 4.9 0 0 0-8.3 4.5A13.9 13.9 0 0 1 1.7 3.1a4.9 4.9 0 0 0 1.5 6.6 4.9 4.9 0 0 1-2.2-.6v.1a4.9 4.9 0 0 0 3.9 4.8 4.9 4.9 0 0 1-2.2.1 4.9 4.9 0 0 0 4.6 3.4A9.9 9.9 0 0 1 0 21.5 14 14 0 0 0 7.5 24c9 0 13.9-7.5 13.9-13.9v-.6A9.7 9.7 0 0 0 24 4.6z" /></svg>
               </a>
             </div>
           </div>
