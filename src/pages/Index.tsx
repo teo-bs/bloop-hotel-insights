@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { onSavePreviewGuard } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
-
+import { getPlacesPreview, getPlaceSuggestions } from "@/lib/api/googlePlaces";
+import { openAuthModal } from "@/lib/auth";
+import { openIntegrationsModal } from "@/lib/actions";
 export default function Index() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,6 +17,44 @@ export default function Index() {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [loadingSuggest, setLoadingSuggest] = useState(false);
+  const sessionTokenRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!sessionTokenRef.current) {
+      sessionTokenRef.current = (globalThis.crypto as any)?.randomUUID?.() || String(Date.now());
+    }
+  }, []);
+
+  // Debounced fetch of suggestions
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setActiveIndex(-1);
+      return;
+    }
+    const t = setTimeout(async () => {
+      setLoadingSuggest(true);
+      try {
+        const list = await getPlaceSuggestions(q, sessionTokenRef.current);
+        setSuggestions(list);
+        setShowSuggestions(true);
+        setActiveIndex(-1);
+      } catch (e) {
+        setSuggestions([]);
+        setShowSuggestions(true); // show "no matches"
+      } finally {
+        setLoadingSuggest(false);
+      }
+    }, 200);
+    return () => clearTimeout(t);
+  }, [query]);
   async function handlePreview() {
     setError(null);
     setResult(null);
@@ -61,6 +101,19 @@ export default function Index() {
     }
   }
 
+  async function chooseSuggestion(s: any) {
+    try {
+      setError(null);
+      setLoading(true);
+      const data = await getPlacesPreview(s.place_id);
+      setResult(data);
+      setShowSuggestions(false);
+    } catch (e: any) {
+      setError(e?.message || "Failed to fetch preview.");
+    } finally {
+      setLoading(false);
+    }
+  }
   async function handleSave() {
     setSaving(true);
     try {
@@ -81,14 +134,20 @@ export default function Index() {
       {/* subtle noise overlay */}
       <div className="pointer-events-none absolute inset-0 noise-overlay" aria-hidden="true" />
 
+      {/* Top-right persistent Login */}
+      <div className="fixed right-6 top-6 z-30">
+        <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => openAuthModal({ reason: "signin" })}>
+          Login
+        </Button>
+      </div>
+
       {/* Glassmorphic centered nav */}
-      <nav aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
+      <nav id="nav-glass" aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
         <div className="flex items-center gap-6 rounded-full border border-input bg-card/70 px-5 py-2 backdrop-blur-md shadow-lg">
           <div className="h-3 w-3 rounded-full bg-foreground/50" aria-hidden="true" />
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <a href="/#docs" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Docs</a>
             <a href="/#pricing" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Pricing</a>
-            <Link to="/auth?mode=signin" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Login</Link>
           </div>
         </div>
       </nav>
@@ -110,24 +169,52 @@ export default function Index() {
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Understand your guests with Padu.</h1>
-          <p className="mt-3 text-base text-muted-foreground">AI review consolidation & insights — all in one place.</p>
+          <p className="mt-3 text-base text-muted-foreground">AI review consolidation & insights — one clear picture.</p>
 
           {/* Search capsule */}
           <div className="relative mx-auto mt-6 max-w-2xl">
             <Input
               id="business-name-input"
               aria-label="Business name"
-              placeholder="Enter your business name to preview 5 recent Google reviews"
+              aria-autocomplete="list"
+              aria-controls="search-suggestions"
+              aria-expanded={showSuggestions}
+              placeholder="Start typing your hotel name…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handlePreview(); }}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown") {
+                  setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1));
+                  e.preventDefault();
+                } else if (e.key === "ArrowUp") {
+                  setActiveIndex((i) => Math.max(i - 1, 0));
+                  e.preventDefault();
+                } else if (e.key === "Enter") {
+                  if (activeIndex >= 0 && suggestions[activeIndex]) {
+                    void chooseSuggestion(suggestions[activeIndex]);
+                    e.preventDefault();
+                  } else {
+                    void handlePreview();
+                  }
+                } else if (e.key === "Escape") {
+                  setShowSuggestions(false);
+                }
+              }}
               className="h-12 rounded-full px-5 pr-36 text-base shadow-inner focus-ring"
             />
+
+            {loadingSuggest && (
+              <span className="pointer-events-none absolute right-28 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground" aria-hidden="true" />
+                <span className="sr-only">Loading suggestions</span>
+              </span>
+            )}
+
             <Button
-              id="btn-preview-reviews"
+              id="btn-preview-by-name"
               onClick={handlePreview}
               disabled={loading}
-              aria-label="Preview reviews"
+              aria-label="Preview"
               className="absolute right-1 top-1 h-10 rounded-full px-6 hover:shadow-glow"
             >
               {loading ? (
@@ -139,6 +226,62 @@ export default function Index() {
                 "Preview"
               )}
             </Button>
+
+            {/* Suggestions dropdown */}
+            {showSuggestions && (
+              <div
+                id="search-suggestions"
+                role="listbox"
+                className="absolute left-0 right-0 z-50 mt-2 max-h-80 overflow-auto rounded-xl border bg-popover p-1 shadow-xl"
+              >
+                {suggestions.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-muted-foreground">No matches. Try adding city or address.</div>
+                ) : (
+                  suggestions.map((s, i) => {
+                    const active = i === activeIndex;
+                    const optionId = `suggestion-${i}`;
+                    return (
+                      <button
+                        key={s.place_id}
+                        id={optionId}
+                        role="option"
+                        aria-selected={active}
+                        data-idx={i}
+                        onMouseEnter={() => setActiveIndex(i)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => chooseSuggestion(s)}
+                        className={`w-full rounded-md px-4 py-3 text-left ${active ? "bg-accent/20" : "hover:bg-muted"}`}
+                      >
+                        <div className="font-medium">{s.main_text || s.description}</div>
+                        {s.secondary_text && (
+                          <div className="text-xs text-muted-foreground">{s.secondary_text}</div>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Floating KPIs + logos */}
+          <div className="mx-auto mt-6 max-w-2xl animate-[float-y_4s_ease-in-out_infinite_alternate]">
+            <div className="rounded-2xl border bg-background/70 px-5 py-3 backdrop-blur-md shadow-lg">
+              <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="font-medium">Avg 4.3</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="font-medium">Reviews 12,482</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="font-medium">Positive 72%</span>
+                </div>
+                <div className="flex items-center gap-4 opacity-70 grayscale">
+                  <img src="/logos/google.svg" alt="Google logo" className="h-5" />
+                  <img src="/logos/tripadvisor.svg" alt="Tripadvisor logo" className="h-5" />
+                  <img src="/logos/booking.svg" alt="Booking.com logo" className="h-5" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Preview results */}
@@ -188,25 +331,35 @@ export default function Index() {
                   ))}
                 </ul>
 
-                <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="text-xs text-muted-foreground">Data from Google</div>
-                  <Button
-                    id="btn-save-reviews"
-                    onClick={handleSave}
-                    disabled={saving}
-                    aria-label="Save to Dashboard"
-                    className="rounded-full"
-                    variant="hero"
-                  >
-                    {saving ? (
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
-                        Saving…
-                      </span>
-                    ) : (
-                      "Save to Dashboard"
-                    )}
-                  </Button>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-xs text-muted-foreground">Data from Google. <span className="hidden sm:inline">No credit card required.</span></div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      id="btn-upgrade-gbp"
+                      variant="ghost"
+                      className="rounded-full"
+                      onClick={() => openIntegrationsModal()}
+                    >
+                      Connect Business Profile for full history
+                    </Button>
+                    <Button
+                      id="btn-save-preview"
+                      onClick={handleSave}
+                      disabled={saving}
+                      aria-label="Save to dashboard (free)"
+                      className="rounded-full"
+                      variant="hero"
+                    >
+                      {saving ? (
+                        <span className="inline-flex items-center gap-2">
+                          <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
+                          Saving…
+                        </span>
+                      ) : (
+                        "Save to dashboard (free)"
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

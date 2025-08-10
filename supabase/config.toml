@@ -3,3 +3,7 @@ project_id = "hewcaikalseorcmmjark"
 
 [functions.google-places-preview]
 verify_jwt = false
+
+[functions.google-places-autocomplete]
+verify_jwt = false
+
