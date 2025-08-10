@@ -1,12 +1,78 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MessageSquareText, TrendingUp, ArrowDown, Link2, Brain, Lightbulb, BarChart3, Sparkles, Globe, Download } from "lucide-react";
 import TopNav from "@/components/layout/TopNav";
 import Reveal from "@/components/motion/Reveal";
-import { openIntegrationsModal } from "@/lib/actions";
+import { openIntegrationsModal, openIntegrationsModalWithHint } from "@/lib/actions";
 export default function Index() {
-  
+  const [mapsLink, setMapsLink] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<any | null>(null);
+
+  function parsePlaceId(input: string): string | null {
+    const trimmed = input.trim();
+    // Direct place id pasted
+    if (/^[A-Za-z0-9_-]{10,}$/.test(trimmed)) return trimmed;
+    try {
+      const u = new URL(trimmed);
+      const p = u.searchParams.get("place_id");
+      if (p) return p;
+      const q = u.searchParams.get("q");
+      if (q && q.includes("place_id:")) {
+        const m = q.match(/place_id:([A-Za-z0-9_-]+)/);
+        if (m) return m[1];
+      }
+    } catch {
+      // not a URL
+    }
+    const m2 = trimmed.match(/!1s([A-Za-z0-9_-]{10,})/);
+    if (m2) return m2[1];
+    return null;
+  }
+
+  async function handlePreview() {
+    setError(null);
+    setResult(null);
+    const id = parsePlaceId(mapsLink);
+    if (!id) {
+      setError("Could not parse a valid Place ID from that link.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const FUNCTION_URL = "https://hewcaikalseorcmmjark.supabase.co/functions/v1/google-places-preview";
+      const url = `${FUNCTION_URL}?placeId=${encodeURIComponent(id)}`;
+      const res = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+      const data = await res.json();
+      if (!res.ok) {
+        const status = data?.details?.status || data?.status || "";
+        const map: Record<string, string> = {
+          REQUEST_DENIED: "Request denied – check API key or permissions.",
+          OVER_QUERY_LIMIT: "Over daily quota – try again later.",
+          INVALID_REQUEST: "Invalid request – please paste a full place link.",
+          NOT_FOUND: "Place not found – try another link.",
+          UNKNOWN_ERROR: "Temporary error – try again.",
+        };
+        throw new Error(map[status] || data?.error || `Request failed (${status || res.status})`);
+      }
+      setResult(data);
+    } catch (e: any) {
+      setError(e?.message || "Failed to fetch preview. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleUpgrade() {
+    const id = result?.place?.id || parsePlaceId(mapsLink) || undefined;
+    openIntegrationsModalWithHint({ platform: "google", placeId: id });
+  }
+
   return <>
       <TopNav />
       <main>
@@ -106,6 +172,102 @@ export default function Index() {
             >
               <ArrowDown className="h-5 w-5" />
             </button>
+          </div>
+        </section>
+
+        {/* Preview with a Google Maps link */}
+        <section className="bg-royal-tint/40">
+          <div className="container mx-auto px-6 md:px-8 xl:px-12 py-10 md:py-12">
+            <Card className="rounded-2xl shadow-xl">
+              <div className="p-6 md:p-8">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <h2 className="text-xl md:text-2xl font-semibold">Preview with a Google Maps link</h2>
+                  <div className="hidden sm:block text-xs text-muted-foreground">Royal Blue accented</div>
+                </div>
+                <div className="flex flex-col md:flex-row items-stretch gap-3">
+                  <Input
+                    id="mapslink-input"
+                    placeholder="Paste your Google Maps place link…"
+                    value={mapsLink}
+                    onChange={(e) => setMapsLink(e.target.value)}
+                    aria-label="Google Maps place link"
+                  />
+                  <Button id="btn-preview-reviews" onClick={handlePreview} disabled={loading}>
+                    {loading ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
+                        Fetching preview…
+                      </span>
+                    ) : (
+                      "Preview reviews"
+                    )}
+                  </Button>
+                </div>
+
+                {error && (
+                  <p className="mt-3 text-sm text-destructive" role="alert">{error}</p>
+                )}
+
+                <div id="preview-results" className="mt-6 space-y-4">
+                  {result ? (
+                    <div className="space-y-4">
+                      {/* Place summary */}
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                        <div>
+                          <div className="text-lg font-semibold">{result.place?.name ?? "Unnamed place"}</div>
+                          <div className="text-sm text-muted-foreground">{result.place?.address ?? ""}</div>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="inline-flex items-center gap-1">
+                            <Star className="h-4 w-4 text-accent" />
+                            <span className="font-medium">{result.place?.rating ?? "-"}</span>
+                          </div>
+                          <span className="text-muted-foreground">•</span>
+                          <div className="text-muted-foreground">{result.place?.totalReviews ?? 0} total reviews</div>
+                        </div>
+                      </div>
+
+                      {/* Reviews list */}
+                      <ul className="space-y-4">
+                        {(result.reviews || []).slice(0, 5).map((r: any, i: number) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <Avatar className="h-8 w-8">
+                              {r.profile_photo_url ? (
+                                <AvatarImage src={r.profile_photo_url} alt={`${r.author_name || "Reviewer"} avatar`} />
+                              ) : (
+                                <AvatarFallback>{(r.author_name || "").slice(0,2).toUpperCase() || "G"}</AvatarFallback>
+                              )}
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <div className="text-sm font-medium truncate max-w-[200px]">{r.author_name || "Anonymous"}</div>
+                                <div className="inline-flex items-center gap-1 text-accent">
+                                  {Array.from({ length: Number(r.rating || 0) }).map((_, j) => (
+                                    <Star key={j} className="h-3.5 w-3.5 fill-current" />
+                                  ))}
+                                </div>
+                                <span className="text-xs text-muted-foreground">{r.relative_time_description || ""}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-3">{r.text || ""}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="pt-2 text-xs text-muted-foreground">Data from Google</div>
+
+                      <div className="pt-4">
+                        <Button id="btn-upgrade-gbp" variant="secondary" onClick={handleUpgrade}>
+                          Connect Business Profile to import all reviews
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Paste a Google Maps link and preview up to 5 recent reviews.</p>
+                  )}
+                </div>
+              </div>
+            </Card>
           </div>
         </section>
 

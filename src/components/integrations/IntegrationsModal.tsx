@@ -250,9 +250,14 @@ function ConnectorCard({ meta }: { meta: ConnectorMeta }) {
 
 export default function IntegrationsModal() {
   const [open, setOpen] = useState(false);
+  const [hint, setHint] = useState<{ platform?: string; placeId?: string } | null>(null);
 
   useEffect(() => {
-    const onOpen = () => setOpen(true);
+    const onOpen = (ev: Event) => {
+      const ce = ev as CustomEvent;
+      setHint((ce as any).detail || null);
+      setOpen(true);
+    };
     window.addEventListener("open-integrations-modal", onOpen as any);
     return () => window.removeEventListener("open-integrations-modal", onOpen as any);
   }, []);

@@ -16,6 +16,11 @@ export function openIntegrationsModal() {
   window.dispatchEvent(new CustomEvent("open-integrations-modal"));
 }
 
+// Open Integrations with optional hint (e.g., Google placeId)
+export function openIntegrationsModalWithHint(hint?: { platform?: string; placeId?: string }) {
+  window.dispatchEvent(new CustomEvent("open-integrations-modal", { detail: hint || {} } as any));
+}
+
 // Open the CSV Upload Modal via a global event
 export function openCsvUploadModal() {
   window.dispatchEvent(new CustomEvent("open-csv-modal"));
