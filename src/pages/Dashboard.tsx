@@ -7,53 +7,61 @@ import { useGlobalDateFilter } from "@/stores/filters";
 import {
   ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend,
 } from "recharts";
+import { filterReviews, calcAvgRating, calcTotals, calcTopTopic, calcTrendSeries, calcTopicCounts } from "@/lib/metrics";
 
-function toDayStr(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
-
-function inRange(dateStr: string, start: string, end: string) {
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return false;
-  const ds = toDayStr(d);
-  return ds >= start && ds <= end;
-}
-
-// Fallback helpers (for legacy rows without sentiment/topics)
-function fallbackSentiment(rating: number): "pos" | "neu" | "neg" {
-  if (rating >= 4) return "pos";
-  if (rating <= 2) return "neg";
-  return "neu";
-}
-
-function fallbackTopic(text: string): string {
-  const t = text?.toLowerCase() || "";
-  const topics: { key: string; kws: string[] }[] = [
-    { key: "cleanliness", kws: ["clean", "dirty", "spotless", "hygiene"] },
-    { key: "staff", kws: ["staff", "service", "team", "host"] },
-    { key: "breakfast", kws: ["breakfast", "buffet"] },
-    { key: "wifi", kws: ["wifi", "wi-fi", "internet"] },
-    { key: "room", kws: ["room", "bed", "bathroom", "suite"] },
-    { key: "location", kws: ["location", "walk", "near", "close", "area"] },
-    { key: "noise", kws: ["noise", "noisy", "loud", "quiet"] },
-    { key: "check-in", kws: ["check-in", "check in", "checkin"] },
-  ];
-  for (const tp of topics) {
-    if (tp.kws.some((k) => t.includes(k))) return tp.key;
+// Helpers for charts
+function buildDailyAvgData(revs: Array<{ date: string; rating: number }>) {
+  const byDay: Record<string, { day: string; sum: number; count: number; avg_norm_rating: number }> = {};
+  for (const r of revs) {
+    const day = r.date;
+    if (!day) continue;
+    byDay[day] ||= { day, sum: 0, count: 0, avg_norm_rating: 0 };
+    byDay[day].sum += r.rating || 0;
+    byDay[day].count += 1;
   }
-  return "general";
+  return Object.values(byDay)
+    .sort((a, b) => a.day.localeCompare(b.day))
+    .map((d) => ({ day: d.day, avg_norm_rating: d.count ? d.sum / d.count : 0 }));
 }
+
 
 export default function Dashboard() {
   const reviews = useReviews();
   const { start, end } = useGlobalDateFilter();
   const [isRecomputing, setIsRecomputing] = useState(false);
 
-  // Filtered reviews by date
-  const filtered = useMemo(() => reviews.filter((r) => inRange(r.date, start, end)), [reviews, start, end]);
+  // Metrics state
+  const [avgRating, setAvgRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [pctPositive, setPctPositive] = useState(0);
+  const [topTopic, setTopTopic] = useState("—");
+  const [dailyAvgData, setDailyAvgData] = useState<Array<{ day: string; avg_norm_rating: number }>>([]);
+  const [trendData, setTrendData] = useState<Array<{ weekStartISO: string; positive: number; neutral: number; negative: number }>>([]);
+  const [topicBars, setTopicBars] = useState<Array<{ topic: string; count: number }>>([]);
+  const [refreshNonce, setRefreshNonce] = useState(0);
 
-  // Aggregate for charts
-  const chartData = useMemo(() => {
+  const recompute = () => {
+    const window = { from: start, to: end };
+    const filtered = filterReviews(reviews as any, window, {});
+    setAvgRating(calcAvgRating(filtered));
+    const totals = calcTotals(filtered);
+    setTotalReviews(totals.total);
+    setPctPositive(totals.positivePct);
+    setTopTopic(calcTopTopic(filtered));
+    setDailyAvgData(buildDailyAvgData(filtered as any));
+    setTrendData(calcTrendSeries(filtered));
+    setTopicBars(calcTopicCounts(filtered).slice(0, 8));
+  };
+
+  // Debounced recompute
+  useEffect(() => {
+    setIsRecomputing(true);
+    const t = setTimeout(() => {
+      recompute();
+      setIsRecomputing(false);
+    }, 150);
+    return () => clearTimeout(t);
+  }, [reviews, start, end, refreshNonce]);
     const byDay: Record<string, { day: string; reviews_count: number; avg_norm_rating: number; pos_cnt: number; neu_cnt: number; neg_cnt: number; sum: number }>
       = {} as any;
     for (const r of filtered) {
