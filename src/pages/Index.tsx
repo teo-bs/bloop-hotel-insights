@@ -8,6 +8,7 @@ import { Star, MessageSquareText, TrendingUp, ArrowDown, Link2, Brain, Lightbulb
 import TopNav from "@/components/layout/TopNav";
 import Reveal from "@/components/motion/Reveal";
 import { openIntegrationsModal, openIntegrationsModalWithHint } from "@/lib/actions";
+import { onSavePreviewGuard } from "@/lib/savePreview";
 export default function Index() {
   const [mapsLink, setMapsLink] = useState("");
   const [loading, setLoading] = useState(false);
@@ -237,7 +238,10 @@ export default function Index() {
 
                       <div className="pt-2 text-xs text-muted-foreground">Data from Google</div>
 
-                      <div className="pt-4">
+                      <div className="pt-4 space-y-2">
+                        <Button id="btn-save-preview" variant="hero" onClick={() => onSavePreviewGuard(mapsLink, result)}>
+                          Save to dashboard (free)
+                        </Button>
                         <Button id="btn-upgrade-gbp" variant="secondary" onClick={handleUpgrade}>
                           Connect Business Profile to import all reviews
                         </Button>

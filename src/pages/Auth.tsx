@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import TopNav from "@/components/layout/TopNav";
+import { resumePendingAfterAuth } from "@/lib/savePreview";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -54,6 +55,13 @@ export default function AuthPage() {
       description: mode === "signin" ? "Welcome back." : "Check your email if confirmation is required.",
     });
     console.log("[Auth] success", data);
+
+    // Notify app and resume any pending action
+    document.dispatchEvent(new CustomEvent("auth:success"));
+    try {
+      await resumePendingAfterAuth();
+    } catch {}
+
     navigate(redirectTo, { replace: true });
   };
 
@@ -64,7 +72,15 @@ export default function AuthPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">{mode === "signin" ? "Sign in" : "Create an account"}</CardTitle>
-            <CardDescription>Use email and password to {mode === "signin" ? "continue" : "get started"}.</CardDescription>
+            <CardDescription>
+              Use email and password to {mode === "signin" ? "continue" : "get started"}.
+            </CardDescription>
+            {new URLSearchParams(location.search).get("note") === "savePreview" && (
+              <div className="mt-2 text-sm text-foreground">
+                Create a free account to save and track reviews. No credit card required.
+              </div>
+            )}
+
           </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="space-y-4">
