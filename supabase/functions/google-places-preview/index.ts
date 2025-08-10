@@ -32,22 +32,42 @@ Deno.serve(async (req: Request) => {
   }
 
   // Helpers
+  // Helpers
   function extractPlaceIdFromUrl(u: string): string | null {
     try {
       const url = decodeURIComponent(u);
-      // 1) ...q=place_id:ChIJ... or ...place_id%3AChIJ...
-      const m1 = url.match(/(?:[?&]q=|[=:])place_id[:=]([A-Za-z0-9_-]{10,})/i);
+      // 1) q=place_id:ChIJ... or place_id=ChIJ...
+      const m1 = url.match(/(?:[?&]q=|[?&]place_id=|place_id[:=])([A-Za-z0-9_-]{10,})/i);
       if (m1) return m1[1];
-      // 2) Long maps URLs often contain ...!1s<PLACE_ID>!...
-      const m2 = url.match(/!1s([A-Za-z0-9_-]{10,})!/);
+      // 2) Long maps URLs often contain ...!1s<PLACE_ID>! or end
+      const m2 = url.match(/!1s([A-Za-z0-9_-]{10,})(?:!|$)/);
       if (m2) return m2[1];
-      // 3) place_id parameter directly
+      // 3) Some blobs use !2s<PLACE_ID>
+      const m3 = url.match(/!2s([A-Za-z0-9_-]{10,})(?:!|$)/);
+      if (m3) return m3[1];
+      // 4) place_id parameter directly
       const uobj = new URL(url);
       const pid = uobj.searchParams.get("place_id");
       if (pid) return pid;
       return null;
     } catch {
       return null;
+    }
+  }
+
+  function extractNameAndCoords(urlStr: string) {
+    try {
+      const u = decodeURIComponent(urlStr);
+      // Name is usually between /place/ and /@
+      const nameMatch = u.match(/\/maps\/place\/([^/]+)\//);
+      const name = nameMatch ? nameMatch[1].replace(/\+/g, " ") : undefined;
+      // Coords after @lat,lng
+      const at = u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      const lat = at ? parseFloat(at[1]) : undefined;
+      const lng = at ? parseFloat(at[2]) : undefined;
+      return { name, lat, lng } as { name?: string; lat?: number; lng?: number };
+    } catch {
+      return {} as { name?: string; lat?: number; lng?: number };
     }
   }
 
@@ -60,19 +80,41 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  async function findPlaceIdFallback(text: string, key: string): Promise<string | null> {
+  async function findPlaceIdByText(input: string, key: string, lat?: number, lng?: number): Promise<string | null> {
     try {
       const endpoint = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json";
       const qs = new URLSearchParams({
-        input: text,
+        input,
         inputtype: "textquery",
         fields: "place_id",
         key,
       });
+      if (lat != null && lng != null) {
+        qs.set("locationbias", `point:${lat},${lng}`);
+      }
       const resp = await fetch(`${endpoint}?${qs.toString()}`);
       const json = await resp.json();
       if (json.status === "OK" && json.candidates?.[0]?.place_id) {
         return json.candidates[0].place_id as string;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function textSearchAsLastResort(query: string, key: string, lat?: number, lng?: number): Promise<string | null> {
+    try {
+      const endpoint = "https://maps.googleapis.com/maps/api/place/textsearch/json";
+      const qs = new URLSearchParams({ query, key });
+      if (lat != null && lng != null) {
+        qs.set("location", `${lat},${lng}`);
+        qs.set("radius", "1000");
+      }
+      const resp = await fetch(`${endpoint}?${qs.toString()}`);
+      const json = await resp.json();
+      if (json.status === "OK" && json.results?.[0]?.place_id) {
+        return json.results[0].place_id as string;
       }
       return null;
     } catch {
@@ -148,8 +190,18 @@ Deno.serve(async (req: Request) => {
     const expanded = await expandIfShort(rawUrl);
     placeId = extractPlaceIdFromUrl(expanded);
     if (!placeId) {
-      console.log("[google-places-preview] Trying fallback Find Place");
-      placeId = await findPlaceIdFallback(expanded, key);
+      const { name, lat, lng } = extractNameAndCoords(expanded);
+      console.log("[google-places-preview] No PID in URL, attempting text-based lookup", { name, lat, lng });
+      if (name) {
+        placeId = await findPlaceIdByText(name, key, lat, lng);
+        if (!placeId) {
+          placeId = await textSearchAsLastResort(name, key, lat, lng);
+        }
+      }
+      if (!placeId) {
+        console.log("[google-places-preview] Last attempt: find by expanded URL as text");
+        placeId = await findPlaceIdByText(expanded, key);
+      }
     }
   }
 
