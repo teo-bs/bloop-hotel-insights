@@ -2,10 +2,14 @@ import Papa from "papaparse";
 import { toast } from "sonner";
 import {
   connectSourceAction,
+  disconnectSourceAction,
   syncSourceAction,
   syncAllSourcesAction,
+  getReviewSourcesState,
+  hydrateSources,
   type Platform,
 } from "@/stores/reviewSources";
+import { supabase } from "@/integrations/supabase/client";
 
 // Open the Integrations Modal via a global event
 export function openIntegrationsModal() {
@@ -19,10 +23,54 @@ export function openCsvUploadModal() {
 
 // Alias to match wiring notes
 export const openCsvModal = openCsvUploadModal;
-// Placeholder: connect to a source (MVP logic lives in store actions)
+
+async function getUserId(): Promise<string | null> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function hydrateReviewSourcesFromSupabase() {
+  const uid = await getUserId();
+  if (!uid) return; // unauthenticated: rely on local storage state
+  const { data, error } = await supabase
+    .from("review_sources")
+    .select("platform,status,key_masked,last_sync_at")
+    .eq("user_id", uid);
+  if (error) {
+    console.warn("[hydrateReviewSourcesFromSupabase]", error);
+    return;
+  }
+  const partial: Partial<Record<Platform, any>> = {};
+  for (const row of data || []) {
+    const platform = row.platform as Platform;
+    partial[platform] = {
+      status: row.status,
+      keyMasked: row.key_masked ?? null,
+      lastSyncAt: row.last_sync_at ? new Date(row.last_sync_at as string).toISOString() : null,
+    };
+  }
+  hydrateSources(partial as any);
+}
+
+// Connect to a source and persist
 export async function connectSource(platform: Platform, key: string) {
   try {
-    await connectSourceAction(platform, key);
+    const newState = await connectSourceAction(platform, key);
+    const uid = await getUserId();
+    if (uid) {
+      const { error } = await supabase.from("review_sources").upsert({
+        user_id: uid,
+        platform,
+        status: newState.status,
+        key_masked: newState.keyMasked ?? null,
+        last_sync_at: newState.lastSyncAt ?? null,
+      });
+      if (error) console.warn("[connectSource] upsert error", error);
+    }
     toast.success(`${platform} connected`);
   } catch (e: any) {
     toast.error(e?.message || "Invalid key, try again");
@@ -30,17 +78,56 @@ export async function connectSource(platform: Platform, key: string) {
   }
 }
 
-// Placeholder: sync a single source
+export async function disconnectSource(platform: Platform) {
+  await disconnectSourceAction(platform);
+  const uid = await getUserId();
+  if (uid) {
+    const { error } = await supabase
+      .from("review_sources")
+      .delete()
+      .eq("user_id", uid)
+      .eq("platform", platform);
+    if (error) console.warn("[disconnectSource] delete error", error);
+  }
+  toast.message(`${platform} disconnected`);
+}
+
+// Sync a single source
 export async function syncSource(platform: Platform) {
   toast.info(`Syncing ${platform}...`);
-  await syncSourceAction(platform);
+  const nowIso = await syncSourceAction(platform);
+  const uid = await getUserId();
+  if (uid) {
+    const { error } = await supabase
+      .from("review_sources")
+      .update({ last_sync_at: nowIso })
+      .eq("user_id", uid)
+      .eq("platform", platform);
+    if (error) console.warn("[syncSource] update error", error);
+  }
   toast.success(`${platform} synced`);
 }
 
-// Placeholder: sync all sources
+// Sync all connected sources
 export async function syncAllSources() {
   toast.info("Syncing all sources...");
   await syncAllSourcesAction();
+  const uid = await getUserId();
+  if (uid) {
+    const s = getReviewSourcesState();
+    const entries = (Object.entries(s) as [Platform, any][]).filter(([, v]) => v.status === "connected");
+    if (entries.length) {
+      const rows = entries.map(([platform, v]) => ({
+        user_id: uid,
+        platform,
+        last_sync_at: v.lastSyncAt ?? null,
+        status: v.status,
+        key_masked: v.keyMasked ?? null,
+      }));
+      const { error } = await supabase.from("review_sources").upsert(rows);
+      if (error) console.warn("[syncAllSources] upsert error", error);
+    }
+  }
   toast.success("All sources synced");
 }
 
@@ -124,4 +211,3 @@ export async function importReviews(rows: ParsedCsvRow[]): Promise<number> {
 export function emitReviewsUpdated() {
   window.dispatchEvent(new CustomEvent("reviews-updated"));
 }
-

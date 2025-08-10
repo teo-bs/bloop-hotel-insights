@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle, Eye, EyeOff } from "lucide-react";
 import { useReviewSources, type Platform } from "@/stores/reviewSources";
-import { connectSource, syncSource, syncAllSources } from "@/lib/actions";
+import { connectSource, syncSource, syncAllSources, disconnectSource, hydrateReviewSourcesFromSupabase } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 
 interface ConnectorMeta {
@@ -48,7 +48,7 @@ function StatusChip({ platform }: { platform: Platform }) {
   const sources = useReviewSources();
   const s = sources[platform];
   const variant = s.status === "connected" ? "secondary" : s.status === "error" ? "destructive" : "outline";
-  const label = s.status === "connected" ? "Connected" : s.status === "error" ? "Error" : "Not connected";
+  const label = s.status === "connected" ? "Connected" : s.status === "error" ? "Error" : s.status === "connecting" ? "Connecting" : "Not connected";
   return (
     <Badge
       id={`chip-${platform}`}
@@ -127,28 +127,44 @@ function ConnectorCard({ meta }: { meta: ConnectorMeta }) {
       </CardHeader>
       <CardContent className="space-y-3">
         {s.status === "connected" ? (
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              Last sync: <span className="font-medium">{lastSyncText ?? "just now"}</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Connected as <span className="font-medium">{s.keyMasked ?? "••••"}</span>
+              </div>
+              <button
+                id={`btn-disconnect-${platform}`}
+                type="button"
+                onClick={() => disconnectSource(platform)}
+                className="text-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
+                aria-label={`Disconnect ${name}`}
+              >
+                Disconnect
+              </button>
             </div>
-            <Button
-              id={`btn-sync-${platform}`}
-              size="sm"
-              variant="secondary"
-              onClick={handleSyncNow}
-              aria-label={`Sync ${name} now`}
-              disabled={syncing}
-            >
-              {syncing ? (
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/70 animate-pulse"></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/70 animate-pulse [animation-delay:120ms]"></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/70 animate-pulse [animation-delay:240ms]"></span>
-                </span>
-              ) : (
-                "Sync now"
-              )}
-            </Button>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Last sync: <span className="font-medium">{lastSyncText ?? "just now"}</span>
+              </div>
+              <Button
+                id={`btn-sync-${platform}`}
+                size="sm"
+                variant="secondary"
+                onClick={handleSyncNow}
+                aria-label={`Sync ${name} now`}
+                disabled={syncing}
+              >
+                {syncing ? (
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/70 animate-pulse"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/70 animate-pulse [animation-delay:120ms]"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/70 animate-pulse [animation-delay:240ms]"></span>
+                  </span>
+                ) : (
+                  "Sync now"
+                )}
+              </Button>
+            </div>
           </div>
         ) : null}
 
@@ -240,6 +256,16 @@ export default function IntegrationsModal() {
     window.addEventListener("open-integrations-modal", onOpen as any);
     return () => window.removeEventListener("open-integrations-modal", onOpen as any);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    // hydrate from Supabase then focus first card/button
+    hydrateReviewSourcesFromSupabase();
+    setTimeout(() => {
+      const el = (document.getElementById("btn-connect-google") || document.getElementById("btn-sync-google") || document.getElementById("card-google")) as HTMLElement | null;
+      el?.focus?.();
+    }, 0);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
