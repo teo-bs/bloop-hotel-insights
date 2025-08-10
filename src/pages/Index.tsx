@@ -157,15 +157,16 @@ export default function Index() {
         <div className="w-full max-w-2xl text-center">
           {/* Padu logo */}
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg">
-            <svg id="padu-logo" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-label="Padu logo">
-              <defs>
-                <linearGradient id="padu-g" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" />
-                  <stop offset="100%" stopColor="hsl(var(--accent))" />
-                </linearGradient>
-              </defs>
-              <path d="M4 6a2 2 0 0 1 2-2h6.2a5.8 5.8 0 1 1 0 11.6H8v4.4H4V6Z" stroke="url(#padu-g)" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <img
+              id="padu-logo"
+              src="/lovable-uploads/10e2e94b-0e70-490d-bc29-2f836e6ddf32.png"
+              alt="Padu logo – hotel review insights"
+              className="h-12 w-12 rounded-xl object-contain"
+              width={48}
+              height={48}
+              loading="eager"
+              decoding="async"
+            />
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Understand your guests with Padu.</h1>
