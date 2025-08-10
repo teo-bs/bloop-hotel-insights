@@ -1,1 +1,5 @@
+
 project_id = "hewcaikalseorcmmjark"
+
+[functions.google-places-preview]
+verify_jwt = false
