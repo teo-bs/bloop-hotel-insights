@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import TopNav from "@/components/layout/TopNav";
 import AuthForm, { AuthMode } from "@/components/auth/AuthForm";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AuthPage() {
   const location = useLocation();
@@ -19,6 +20,19 @@ export default function AuthPage() {
     else if (mParam === "signup" || mParam === "signin" || mParam === "reset") setMode(mParam as AuthMode);
     else setMode("signin");
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    // Redirect to dashboard if already signed in or upon sign-in
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate("/dashboard", { replace: true });
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") navigate("/dashboard", { replace: true });
+    });
+    return () => {
+      sub.subscription?.unsubscribe();
+    };
+  }, [navigate]);
 
   async function handleSuccess() {
     try {

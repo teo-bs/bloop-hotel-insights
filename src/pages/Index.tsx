@@ -142,6 +142,27 @@ export default function Index() {
   else if (/(wifi|wi-?fi|internet)/.test(textBlob) && hasLow) { insight = "Upgrade Wi‑Fi reliability"; badge = "High impact"; }
   else if (/(clean|dirty|smell|mold)/.test(textBlob)) { insight = "Deepen housekeeping checks"; badge = "Medium impact"; }
 
+  // Simple count-up on reveal
+  function CountUp({ value, duration = 800, decimals = 0 }: { value: number; duration?: number; decimals?: number }) {
+    const [display, setDisplay] = useState(0);
+    useEffect(() => {
+      let raf = 0;
+      const start = performance.now();
+      const from = 0;
+      const to = Number(value) || 0;
+      const step = (t: number) => {
+        const p = Math.min(1, (t - start) / duration);
+        const current = from + (to - from) * p;
+        setDisplay(current);
+        if (p < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+      return () => cancelAnimationFrame(raf);
+    }, [value, duration]);
+    const formatted = decimals > 0 ? display.toFixed(decimals) : Math.round(display).toString();
+    return <span>{formatted}</span>;
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-gpt5-gradient animate-gpt5-pan font-sans">
       {/* subtle noise overlay */}
@@ -172,7 +193,7 @@ export default function Index() {
 
       {/* Centered Hero */}
       <section className="relative z-10 flex items-center justify-center">
-        <div className="w-full max-w-[860px] px-6 pt-16 pb-20 lg:pt-20 lg:pb-28 text-center relative">
+        <div className="w-full max-w-[860px] px-6 min-h-[calc(100vh-80px)] flex flex-col justify-center items-center gap-6 text-center relative">
           {/* Padu logo */}
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg animate-[float-y_4s_ease-in-out_infinite_alternate]">
             <img
@@ -187,49 +208,14 @@ export default function Index() {
             />
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Understand your guests with Padu.</h1>
-          <p className="mt-3 text-base text-muted-foreground">AI review consolidation & insights — one clear picture.</p>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Understand your guests with Padu.</h1>
+          <p className="mt-3 text-lg text-muted-foreground">AI review consolidation & insights — one clear picture.</p>
 
 {/* Floating mini-cards rendered relative to search area below */}
 
           {/* Search capsule */}
           <div className="relative mx-auto mt-6 w-full max-w-[720px]">
             {/* Floating mini-cards positioned around the search */}
-            <div
-              id="float-box-a"
-              role="status"
-              aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
-              className="hidden lg:block pointer-events-none absolute -top-8 right-[-120px] z-10 w-[280px] h-[140px] rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20"
-            >
-              <div className="text-xs text-muted-foreground">Last 90 days</div>
-              <div className="mt-1 text-xl font-semibold">
-                Avg <span aria-hidden>★</span> <span id="kpi-avg">{avgDisplay}</span>
-              </div>
-              <div className="mt-1 text-sm">
-                Reviews <span id="kpi-total">{(Number(totalDisplay) as any)?.toLocaleString?.() || totalDisplay}</span> ·
-                Positive <span id="kpi-positive">{positivePct}%</span>
-              </div>
-              <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
-                <img src="/logos/google.svg" alt="" className="h-4" />
-                <img src="/logos/tripadvisor.svg" alt="" className="h-4" />
-                <img src="/logos/booking.svg" alt="" className="h-4" />
-              </div>
-            </div>
-
-            <div
-              id="float-box-b"
-              role="status"
-              aria-label={`Top insight: ${insight} (${badge})`}
-              className="hidden lg:block pointer-events-none absolute -bottom-8 left-[-120px] z-10 w-[280px] h-[140px] rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20"
-            >
-              <div className="text-xs text-muted-foreground">Top insight</div>
-              <div className="mt-1 flex items-start gap-2">
-                <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
-                <div className="text-sm" id="insight-title">{insight}</div>
-              </div>
-              <div className="mt-2 text-xs text-muted-foreground">Based on recurring themes</div>
-              <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
-            </div>
 
             <Input
               id="business-name-input"
@@ -275,6 +261,7 @@ export default function Index() {
               disabled={loading}
               aria-label="Preview"
               className="absolute right-1 top-1 h-10 rounded-full px-6"
+              variant="hero"
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
@@ -325,8 +312,41 @@ export default function Index() {
 
           <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-muted-foreground">We’ll instantly pull your last 5 Google reviews — no signup needed.</p>
 
-
-          {/* Preview results */}
+          <div className="mx-auto mt-8 grid w-full max-w-[600px] grid-cols-1 gap-4 sm:grid-cols-2">
+            <div
+              id="float-box-a"
+              className="rounded-xl border bg-white/70 backdrop-blur-md p-6 shadow-lg animate-float-slow"
+              role="status"
+              aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
+            >
+              <div className="text-xs text-muted-foreground">Last 90 days</div>
+              <div className="mt-1 text-2xl font-semibold inline-flex items-center gap-2">
+                Avg <span aria-hidden>★</span> <span id="kpi-avg"><CountUp value={Number(avgDisplay)} decimals={1} /></span>
+              </div>
+              <div className="mt-1 text-sm">
+                Reviews <span id="kpi-total"><CountUp value={Number(totalDisplay)} /></span> ·
+                Positive <span id="kpi-positive"><CountUp value={Number(positivePct)} /></span>%
+              </div>
+              <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
+                <img src="/logos/google.svg" alt="Google reviews" className="h-4" />
+                <img src="/logos/tripadvisor.svg" alt="Tripadvisor reviews" className="h-4" />
+                <img src="/logos/booking.svg" alt="Booking.com reviews" className="h-4" />
+              </div>
+            </div>
+            <div
+              id="float-box-b"
+              className="rounded-xl border bg-white/70 backdrop-blur-md p-6 shadow-lg animate-float-slow"
+              role="status"
+              aria-label={`Top insight: ${insight} (${badge})`}
+            >
+              <div className="text-xs text-muted-foreground">Top insight</div>
+              <div className="mt-1 flex items-start gap-2">
+                <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
+                <div className="text-sm" id="insight-title">{insight}</div>
+              </div>
+              <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
+            </div>
+          </div>
           <div id="preview-results" aria-live="polite" className="mx-auto mt-[72px] w-full max-w-[760px] text-left">
             {error && (
               <p role="alert" className="text-sm text-destructive">{error}</p>

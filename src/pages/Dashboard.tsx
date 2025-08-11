@@ -8,7 +8,7 @@ import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tool
 import { filterReviews, calcAvgRating, calcTotals, calcTopTopic, calcTrendSeries, calcTopicCounts } from "@/lib/metrics";
 import { generateInsights, type Insight } from "@/lib/insights";
 import { Lightbulb } from "lucide-react";
-
+import PerformanceEvolution from "@/components/analytics/PerformanceEvolution";
 // Helper to compute daily average series for the first chart
 function buildDailyAvgData(revs: Array<{ date: string; rating: number }>) {
   const byDay: Record<string, { day: string; sum: number; count: number; avg_norm_rating: number }> = {};
@@ -133,6 +133,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <PerformanceEvolution totalReviews={totalReviews} delta={2.45} positive={pctPositive >= 60} />
 
       {/* Insights */}
       <Card id="insights-panel">
