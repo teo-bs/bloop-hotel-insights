@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,7 +6,6 @@ import { Star, Lightbulb } from "lucide-react";
 import { onSavePreviewGuard } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
 import { getPlacesPreview, getPlaceSuggestions } from "@/lib/api/googlePlaces";
-import { openAuthModal } from "@/lib/auth";
 import { openIntegrationsModal } from "@/lib/actions";
 export default function Index() {
   const [query, setQuery] = useState("");
@@ -192,45 +190,47 @@ export default function Index() {
           <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Understand your guests with Padu.</h1>
           <p className="mt-3 text-base text-muted-foreground">AI review consolidation & insights — one clear picture.</p>
 
-          {/* Floating mini-cards */}
-          <div
-            id="float-box-a"
-            role="status"
-            aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
-            className="absolute z-10 mx-auto mb-3 w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
-          >
-            <div className="text-xs text-muted-foreground">Last 90 days</div>
-            <div className="mt-1 text-xl font-semibold">
-              Avg <span aria-hidden>★</span> <span id="kpi-avg">{avgDisplay}</span>
-            </div>
-            <div className="mt-1 text-sm">
-              Reviews <span id="kpi-total">{(Number(totalDisplay) as any)?.toLocaleString?.() || totalDisplay}</span> ·
-              Positive <span id="kpi-positive">{positivePct}%</span>
-            </div>
-            <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
-              <img src="/logos/google.svg" alt="" className="h-4" />
-              <img src="/logos/tripadvisor.svg" alt="" className="h-4" />
-              <img src="/logos/booking.svg" alt="" className="h-4" />
-            </div>
-          </div>
-
-          <div
-            id="float-box-b"
-            role="status"
-            aria-label={`Top insight: ${insight} (${badge})`}
-            className="absolute z-10 mx-auto w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
-          >
-            <div className="text-xs text-muted-foreground">Top insight</div>
-            <div className="mt-1 flex items-start gap-2">
-              <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
-              <div className="text-sm" id="insight-title">{insight}</div>
-            </div>
-            <div className="mt-2 text-xs text-muted-foreground">Based on recurring themes</div>
-            <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
-          </div>
+{/* Floating mini-cards rendered relative to search area below */}
 
           {/* Search capsule */}
           <div className="relative mx-auto mt-6 w-full max-w-[720px]">
+            {/* Floating mini-cards positioned around the search */}
+            <div
+              id="float-box-a"
+              role="status"
+              aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
+              className="hidden lg:block pointer-events-none absolute -top-8 right-[-120px] z-10 w-[280px] h-[140px] rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20"
+            >
+              <div className="text-xs text-muted-foreground">Last 90 days</div>
+              <div className="mt-1 text-xl font-semibold">
+                Avg <span aria-hidden>★</span> <span id="kpi-avg">{avgDisplay}</span>
+              </div>
+              <div className="mt-1 text-sm">
+                Reviews <span id="kpi-total">{(Number(totalDisplay) as any)?.toLocaleString?.() || totalDisplay}</span> ·
+                Positive <span id="kpi-positive">{positivePct}%</span>
+              </div>
+              <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
+                <img src="/logos/google.svg" alt="" className="h-4" />
+                <img src="/logos/tripadvisor.svg" alt="" className="h-4" />
+                <img src="/logos/booking.svg" alt="" className="h-4" />
+              </div>
+            </div>
+
+            <div
+              id="float-box-b"
+              role="status"
+              aria-label={`Top insight: ${insight} (${badge})`}
+              className="hidden lg:block pointer-events-none absolute -bottom-8 left-[-120px] z-10 w-[280px] h-[140px] rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20"
+            >
+              <div className="text-xs text-muted-foreground">Top insight</div>
+              <div className="mt-1 flex items-start gap-2">
+                <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
+                <div className="text-sm" id="insight-title">{insight}</div>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">Based on recurring themes</div>
+              <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
+            </div>
+
             <Input
               id="business-name-input"
               aria-label="Business name"
@@ -259,7 +259,7 @@ export default function Index() {
                   setShowSuggestions(false);
                 }
               }}
-              className="h-12 rounded-full px-5 pr-36 text-base shadow-inner focus-ring"
+              className="relative z-0 h-12 rounded-full px-5 pr-36 text-base shadow-inner focus-ring"
             />
 
             {loadingSuggest && (

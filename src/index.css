@@ -234,8 +234,8 @@ All colors MUST be HSL.
 @keyframes floaty { from { transform: translateY(0) } to { transform: translateY(-6px) } }
 @media (min-width: 1024px){
   #float-box-a, #float-box-b { position:absolute; width:280px; height:140px; }
-  #float-box-a { left:-140px; top:-20px; animation: floaty 6s ease-in-out infinite alternate; }
-  #float-box-b { right:-140px; top:-20px; animation: floaty 6s ease-in-out infinite alternate; animation-delay: 3s; }
+  #float-box-a { animation: floaty 6s ease-in-out infinite alternate; }
+  #float-box-b { animation: floaty 6s ease-in-out infinite alternate; animation-delay: 3s; }
 }
 @media (max-width: 1023px){
   #float-box-a, #float-box-b { display:none; }

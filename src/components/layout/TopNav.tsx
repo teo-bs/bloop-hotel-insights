@@ -21,8 +21,11 @@ export default function TopNav() {
         <nav className="hidden md:flex items-center gap-1">
           <NavLink to="/#pricing" className={linkCls}>Pricing</NavLink>
           <NavLink to="/#docs" className={linkCls}>Docs</NavLink>
-          <Button asChild variant="ghost">
-            <Link to="/auth?mode=signin">Sign in</Link>
+          <Button 
+            variant="ghost"
+            onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}
+          >
+            Sign in
           </Button>
           <Button
             variant="hero"
@@ -45,9 +48,7 @@ export default function TopNav() {
               <div className="mt-8 flex flex-col gap-2">
                 <NavLink to="/#pricing" className={linkCls}>Pricing</NavLink>
                 <NavLink to="/#docs" className={linkCls}>Docs</NavLink>
-                <Button asChild variant="ghost" className="justify-start">
-                  <Link to="/auth?mode=signin">Sign in</Link>
-                </Button>
+                <Button variant="ghost" className="justify-start" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}>Sign in</Button>
                 <Button variant="hero" onClick={() => navigate("/auth?mode=signup")}>Get Started</Button>
               </div>
             </SheetContent>
