@@ -150,11 +150,16 @@ export default function Index() {
       <div className="pointer-events-none absolute inset-0 noise-overlay" aria-hidden="true" />
 
       {/* Top-right persistent Login */}
-      <div className="fixed right-6 top-6 z-30">
-        <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => openAuthModal({ reason: "signin" })}>
-          Login
-        </Button>
-      </div>
+        <div className="fixed right-6 top-6 z-30">
+          <Button
+            id="btn-top-login"
+            variant="ghost"
+            className="rounded-full"
+            onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}
+          >
+            Login
+          </Button>
+        </div>
 
       {/* Glassmorphic centered nav */}
       <nav id="nav-glass" aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
@@ -188,42 +193,40 @@ export default function Index() {
           <p className="mt-3 text-base text-muted-foreground">AI review consolidation & insights — one clear picture.</p>
 
           {/* Floating mini-cards */}
-          <div className="relative mt-4">
-            <div
-              id="float-box-a"
-              role="status"
-              aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
-              className="mx-auto mb-3 w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
-            >
-              <div className="text-xs text-muted-foreground">Last 90 days</div>
-              <div className="mt-1 text-xl font-semibold">
-                Avg <span aria-hidden>★</span> <span id="kpi-avg">{avgDisplay}</span>
-              </div>
-              <div className="mt-1 text-sm">
-                Reviews <span id="kpi-total">{(Number(totalDisplay) as any)?.toLocaleString?.() || totalDisplay}</span> ·
-                Positive <span id="kpi-positive">{positivePct}%</span>
-              </div>
-              <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
-                <img src="/logos/google.svg" alt="" className="h-4" />
-                <img src="/logos/tripadvisor.svg" alt="" className="h-4" />
-                <img src="/logos/booking.svg" alt="" className="h-4" />
-              </div>
+          <div
+            id="float-box-a"
+            role="status"
+            aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
+            className="absolute z-10 mx-auto mb-3 w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
+          >
+            <div className="text-xs text-muted-foreground">Last 90 days</div>
+            <div className="mt-1 text-xl font-semibold">
+              Avg <span aria-hidden>★</span> <span id="kpi-avg">{avgDisplay}</span>
             </div>
+            <div className="mt-1 text-sm">
+              Reviews <span id="kpi-total">{(Number(totalDisplay) as any)?.toLocaleString?.() || totalDisplay}</span> ·
+              Positive <span id="kpi-positive">{positivePct}%</span>
+            </div>
+            <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
+              <img src="/logos/google.svg" alt="" className="h-4" />
+              <img src="/logos/tripadvisor.svg" alt="" className="h-4" />
+              <img src="/logos/booking.svg" alt="" className="h-4" />
+            </div>
+          </div>
 
-            <div
-              id="float-box-b"
-              role="status"
-              aria-label={`Top insight: ${insight} (${badge})`}
-              className="mx-auto w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
-            >
-              <div className="text-xs text-muted-foreground">Top insight</div>
-              <div className="mt-1 flex items-start gap-2">
-                <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
-                <div className="text-sm" id="insight-title">{insight}</div>
-              </div>
-              <div className="mt-2 text-xs text-muted-foreground">Based on recurring themes</div>
-              <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
+          <div
+            id="float-box-b"
+            role="status"
+            aria-label={`Top insight: ${insight} (${badge})`}
+            className="absolute z-10 mx-auto w-full max-w-xs rounded-2xl border bg-background/70 p-4 backdrop-blur-md shadow-lg ring-1 ring-accent/20 transition-transform hover:-translate-y-0.5"
+          >
+            <div className="text-xs text-muted-foreground">Top insight</div>
+            <div className="mt-1 flex items-start gap-2">
+              <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
+              <div className="text-sm" id="insight-title">{insight}</div>
             </div>
+            <div className="mt-2 text-xs text-muted-foreground">Based on recurring themes</div>
+            <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
           </div>
 
           {/* Search capsule */}

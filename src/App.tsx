@@ -15,6 +15,7 @@ import GlobalActions from "./components/GlobalActions";
 import IntegrationsModal from "@/components/integrations/IntegrationsModal";
 import CSVUploadModal from "@/components/upload/CSVUploadModal";
 import ReviewsPage from "./pages/Reviews";
+import AuthModal from "@/components/auth/AuthModal";
 
 const queryClient = new QueryClient();
 
@@ -25,10 +26,16 @@ const App = () => (
       <Sonner />
       <GlobalActions />
       <BrowserRouter>
+        {/* Global modals */}
+        <AuthModal />
         <IntegrationsModal />
         <CSVUploadModal />
+        {/* Auth modal available globally */}
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/sign-in" element={<AuthPage />} />
+          <Route path="/auth/sign-up" element={<AuthPage />} />
+          <Route path="/auth/reset" element={<AuthPage />} />
           <Route path="/" element={<Index />} />
           <Route
             path="/dashboard"
