@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthRedirectUrl } from "@/lib/auth-config";
 
 export async function isSignedIn() {
   const { data } = await supabase.auth.getSession();

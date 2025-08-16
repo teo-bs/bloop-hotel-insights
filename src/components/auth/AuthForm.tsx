@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthRedirectUrl } from "@/lib/auth-config";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,11 +55,10 @@ export default function AuthForm({ mode, onModeChange, onSuccess, compactHeader 
         document.dispatchEvent(new CustomEvent("auth:success"));
         onSuccess?.();
       } else if (mode === "signup") {
-        const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: fullName ? { full_name: fullName } : undefined, emailRedirectTo: redirectUrl },
+          options: { data: fullName ? { full_name: fullName } : undefined, emailRedirectTo: getAuthRedirectUrl() },
         });
         if (error) throw error;
         toast({ title: "Account created", description: "Check your email if verification is required." });
@@ -83,8 +83,7 @@ export default function AuthForm({ mode, onModeChange, onSuccess, compactHeader 
     setLoading(true);
     setErrorTop(null);
     try {
-      const redirectTo = `${window.location.origin}/`;
-      const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+      const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: getAuthRedirectUrl() } });
       if (error) throw error;
     } catch (err: any) {
       const msg = err?.message || "Google auth failed";

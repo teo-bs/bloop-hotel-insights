@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
+import { getAuthRedirectUrl } from "@/lib/auth-config";
 
 export default function UnifiedAuthModal() {
   const [open, setOpen] = useState(false);
@@ -52,7 +53,7 @@ export default function UnifiedAuthModal() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/auth/callback` }
+        options: { redirectTo: getAuthRedirectUrl() }
       });
       if (error) throw error;
     } catch (err: any) {
@@ -71,7 +72,7 @@ export default function UnifiedAuthModal() {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+        options: { emailRedirectTo: getAuthRedirectUrl() }
       });
       if (error) throw error;
       setEmailSent(true);
