@@ -29,49 +29,45 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
     <Sidebar
       id="app-sidebar"
       collapsible="icon"
-      className="rounded-r-2xl transition-[width] duration-200 ease-out"
+      className="bg-white/90 backdrop-blur-md border-r border-white/40 transition-[width] duration-200 ease-out"
       style={{
         ["--sidebar-width" as any]: "15rem",
         ["--sidebar-width-icon" as any]: "4.5rem",
-        ["--sidebar-background" as any]: "214 82% 50%",
-        ["--sidebar-foreground" as any]: "0 0% 100%",
       }}
     >
       <SidebarContent className="p-4">
-        <div className="relative h-full flex flex-col text-sidebar-foreground">
-          <div className="absolute inset-0 bg-gradient-to-b from-sidebar-foreground/10 to-transparent pointer-events-none rounded-r-2xl" aria-hidden="true" />
-
+        <div className="relative h-full flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 font-bold">
-              <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <span className="inline-block h-2 w-2 rounded-full bg-yellow-400" />
               {state !== "collapsed" && <span>Padu</span>}
             </div>
             <button
               id="btn-sidebar-toggle"
               onClick={toggleSidebar}
-              className="p-2 rounded-md hover:bg-sidebar-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="p-2 rounded-md hover:bg-slate-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Toggle sidebar"
               aria-controls="app-sidebar"
               aria-expanded={state !== "collapsed"}
             >
               {state === "collapsed" ? (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 text-slate-600" />
               ) : (
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 text-slate-600" />
               )}
             </button>
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 space-y-1">
+          <nav className="flex-1 space-y-2">
             {items.map(({ id, route, label, Icon }) => {
               const active = currentRoute === route;
               const baseCls =
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ";
+                "flex items-center gap-3 rounded-full px-4 py-3 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ";
               const stateCls = active
-                ? "font-bold text-sidebar-foreground bg-sidebar-foreground/10 pl-3"
-                : "text-sidebar-foreground/90 hover:bg-sidebar-foreground/10 pl-3";
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "text-slate-700 hover:bg-slate-100/70";
 
               const linkEl = (
                 <a
@@ -85,16 +81,9 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
                     e.preventDefault();
                     onRouteChange(route);
                   }}
-                  className={baseCls + stateCls + " relative"}
+                  className={baseCls + stateCls}
                 >
-                  <span
-                    aria-hidden
-                    className={
-                      "absolute left-0 top-0 h-full w-1 rounded-r bg-accent origin-top transform transition-transform duration-200 " +
-                      (active ? "scale-y-100" : "scale-y-0")
-                    }
-                  />
-                  <Icon className={`h-4 w-4 text-sidebar-foreground/80 transition-transform duration-200 ${state === "collapsed" ? "translate-x-0" : "translate-x-0.5"}`} />
+                  <Icon className="h-4 w-4" />
                   <span className={state === "collapsed" ? "hidden" : "block"}>{label}</span>
                 </a>
               );
@@ -111,25 +100,25 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
           </nav>
 
           {/* Footer user + logout */}
-          <div className="mt-4 border-t border-sidebar-foreground/10 pt-3">
+          <div className="mt-4 border-t border-slate-200/60 pt-4">
             {state === "collapsed" ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div id="sidebar-user" className="h-8 w-8 rounded-full bg-sidebar-foreground/20 grid place-items-center text-xs font-bold select-none">
+                  <div id="sidebar-user" className="h-8 w-8 rounded-full bg-slate-200 grid place-items-center text-xs font-bold select-none text-slate-700">
                     {String(name).charAt(0).toUpperCase()}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">{name}</TooltipContent>
               </Tooltip>
             ) : (
-              <div id="sidebar-user" className="flex items-center gap-3 rounded-md px-3 py-2">
-                <div className="h-8 w-8 rounded-full bg-sidebar-foreground/20 grid place-items-center text-xs font-bold select-none">
+              <div id="sidebar-user" className="flex items-center gap-3 rounded-full px-4 py-3 bg-slate-50">
+                <div className="h-8 w-8 rounded-full bg-slate-200 grid place-items-center text-xs font-bold select-none text-slate-700">
                   {String(name).charAt(0).toUpperCase()}
                 </div>
-                <div className="text-sm font-medium truncate">{name}</div>
+                <div className="text-sm font-medium truncate text-slate-900">{name}</div>
               </div>
             )}
-            <Button variant="ghost" className="justify-start w-full mt-2 text-sidebar-foreground hover:bg-sidebar-foreground/10" onClick={async () => { await supabase.auth.signOut(); navigate("/", { replace: true }); }}>
+            <Button variant="ghost" className="justify-start w-full mt-2 text-slate-600 hover:bg-slate-100/70 rounded-full" onClick={async () => { await supabase.auth.signOut(); navigate("/", { replace: true }); }}>
               <LogOut className="h-4 w-4 mr-2" />
               {state === "collapsed" ? <span className="hidden">Log out</span> : "Log out"}
             </Button>

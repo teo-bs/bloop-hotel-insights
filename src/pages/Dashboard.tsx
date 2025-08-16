@@ -7,8 +7,9 @@ import { useGlobalDateFilter } from "@/stores/filters";
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
 import { filterReviews, calcAvgRating, calcTotals, calcTopTopic, calcTrendSeries, calcTopicCounts } from "@/lib/metrics";
 import { generateInsights, type Insight } from "@/lib/insights";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Calendar, TrendingUp, Users, Star, Hash } from "lucide-react";
 import PerformanceEvolution from "@/components/analytics/PerformanceEvolution";
+
 // Helper to compute daily average series for the first chart
 function buildDailyAvgData(revs: Array<{ date: string; rating: number }>) {
   const byDay: Record<string, { day: string; sum: number; count: number; avg_norm_rating: number }> = {};
@@ -41,7 +42,6 @@ export default function Dashboard() {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [smallData, setSmallData] = useState(false);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
-
 
   const recompute = () => {
     const window = { from: start, to: end };
@@ -97,89 +97,133 @@ export default function Dashboard() {
     }
   }, []);
 
+  // Mock data for new sections
+  const sourcesHealth = [
+    { platform: "Google Business Profile", status: "Connected", lastSync: "2 hours ago", logo: "/logos/google.svg" },
+    { platform: "TripAdvisor", status: "Needs reconnect", lastSync: "3 days ago", logo: "/logos/tripadvisor.svg" },
+    { platform: "Booking.com", status: "Connected", lastSync: "1 hour ago", logo: "/logos/booking.svg" },
+  ];
+
   return (
-    <div className="p-6 md:p-8 xl:p-10 space-y-6 md:space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Hotel Reviews Dashboard</h1>
-        <div className="flex gap-2">
-          <Button id="btn-refresh-metrics" variant="secondary" onClick={handleRefreshMetrics}>Refresh metrics</Button>
+    <div className="max-w-[1100px] mx-auto px-6 pb-24 animate-fade-in">
+      {/* Header */}
+      <div className="py-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900">Hotel Reviews Dashboard</h1>
+          <div className="flex items-center gap-2 mt-2 text-slate-600">
+            <Calendar className="h-4 w-4" />
+            <span>Last 90 days</span>
+          </div>
         </div>
+        <Button id="btn-refresh-metrics" variant="secondary" className="rounded-full" onClick={handleRefreshMetrics}>
+          Refresh metrics
+        </Button>
       </div>
 
-      {/* KPI cards */}
-      <div id="metrics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader><CardTitle>Avg Rating</CardTitle></CardHeader>
-          <CardContent>
-            {isRecomputing ? <Skeleton className="h-8 w-24" /> : <div className="text-3xl font-semibold">{avgRating.toFixed(1)}</div>}
+      {/* Row 1: KPI Cards */}
+      <div id="metrics" className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)] hover:-translate-y-0.5 transition-transform duration-200">
+          <CardHeader className="p-6 md:p-8 pb-2">
+            <CardTitle className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+              <Star className="h-4 w-4" />
+              Avg Rating
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 md:p-8 pt-0">
+            {isRecomputing ? (
+              <Skeleton className="h-12 w-20" />
+            ) : (
+              <div className="text-5xl font-bold tracking-tight text-slate-900">{avgRating.toFixed(1)}</div>
+            )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader><CardTitle>Total Reviews</CardTitle></CardHeader>
-          <CardContent>
-            {isRecomputing ? <Skeleton className="h-8 w-28" /> : <div className="text-3xl font-semibold">{totalReviews}</div>}
+
+        <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)] hover:-translate-y-0.5 transition-transform duration-200">
+          <CardHeader className="p-6 md:p-8 pb-2">
+            <CardTitle className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+              <Users className="h-4 w-4" />
+              Total Reviews
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 md:p-8 pt-0">
+            {isRecomputing ? (
+              <Skeleton className="h-12 w-24" />
+            ) : (
+              <div className="text-5xl font-bold tracking-tight text-slate-900">{totalReviews}</div>
+            )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader><CardTitle>% Positive</CardTitle></CardHeader>
-          <CardContent>
-            {isRecomputing ? <Skeleton className="h-8 w-20" /> : <div className="text-3xl font-semibold">{pctPositive.toFixed(0)}%</div>}
+
+        <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)] hover:-translate-y-0.5 transition-transform duration-200">
+          <CardHeader className="p-6 md:p-8 pb-2">
+            <CardTitle className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+              <TrendingUp className="h-4 w-4" />
+              % Positive
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 md:p-8 pt-0">
+            {isRecomputing ? (
+              <Skeleton className="h-12 w-20" />
+            ) : (
+              <div className="text-5xl font-bold tracking-tight text-slate-900">{pctPositive.toFixed(0)}%</div>
+            )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader><CardTitle>Top Topic</CardTitle></CardHeader>
-          <CardContent>
-            {isRecomputing ? <Skeleton className="h-8 w-32" /> : <div className="text-3xl font-semibold capitalize">{topTopic}</div>}
+
+        <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)] hover:-translate-y-0.5 transition-transform duration-200">
+          <CardHeader className="p-6 md:p-8 pb-2">
+            <CardTitle className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+              <Hash className="h-4 w-4" />
+              Top Topic
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 md:p-8 pt-0">
+            {isRecomputing ? (
+              <Skeleton className="h-12 w-32" />
+            ) : (
+              <div className="text-5xl font-bold tracking-tight text-slate-900 capitalize">{topTopic}</div>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      <PerformanceEvolution totalReviews={totalReviews} delta={2.45} positive={pctPositive >= 60} />
+      {/* Row 2: Performance Evolution */}
+      <div className="mb-8">
+        <PerformanceEvolution totalReviews={totalReviews} delta={2.45} positive={pctPositive >= 60} />
+      </div>
 
-      {/* Insights */}
-      <Card id="insights-panel">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-yellow-500" /> Insights</CardTitle>
+      {/* Row 3: Insights */}
+      <Card id="insights-panel" className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)] mb-8">
+        <CardHeader className="p-6 md:p-8">
+          <CardTitle className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
+            <Lightbulb className="h-5 w-5 text-yellow-500" />
+            Insights
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="p-6 md:p-8 pt-0">
           {smallData && (
-            <div className="text-xs text-muted-foreground">Limited data (&lt;30 reviews). Insights may be less reliable.</div>
+            <div className="text-xs text-muted-foreground mb-4">Limited data (&lt;30 reviews). Insights may be less reliable.</div>
           )}
           {isRecomputing ? (
-            <>
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </>
+            <div className="grid gap-6 md:grid-cols-3">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
           ) : insights.length ? (
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3">
               {insights.map((ins, i) => (
-                <div id={`insight-card-${i + 1}`} key={ins.id} className="rounded-lg border p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="font-semibold">{ins.title}</div>
-                      <div className="text-sm text-muted-foreground">{ins.recommendation}</div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setExpanded((prev) => ({ ...prev, [i]: !prev[i] }))}
-                      aria-expanded={!!expanded[i]}
-                      aria-controls={`insight-details-${i}`}
-                    >
-                      {expanded[i] ? "Hide details" : "View details"}
-                    </Button>
-                  </div>
-                  {expanded[i] && (
-                    <div id={`insight-details-${i}`} className="mt-2 text-sm">
-                      <div className="text-muted-foreground mb-1">Mentions: {ins.evidence.mentions}</div>
-                      <ul className="list-disc pl-5 space-y-1">
-                        {ins.evidence.recentExamples.map((ex, idx) => (
-                          <li key={idx}>{ex}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                <div key={ins.id} className="rounded-xl border border-slate-200/60 p-4 bg-white/50">
+                  <div className="font-semibold text-slate-900 mb-1">{ins.title}</div>
+                  <div className="text-sm text-slate-600 mb-3">{ins.recommendation}</div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-600 hover:text-blue-700"
+                    onClick={() => setExpanded((prev) => ({ ...prev, [i]: !prev[i] }))}
+                  >
+                    View details
+                  </Button>
                 </div>
               ))}
             </div>
@@ -189,76 +233,68 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Average Rating (Normalized to 5)</CardTitle>
+      {/* Row 4: Two Columns */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-6 space-y-6 lg:space-y-0 mb-8">
+        {/* Sentiment by Topic */}
+        <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
+          <CardHeader className="p-6 md:p-8">
+            <CardTitle className="text-2xl font-semibold text-slate-900">Sentiment by Topic</CardTitle>
           </CardHeader>
-          <CardContent className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyAvgData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis domain={[0, 5]} />
-                <Tooltip />
-                <Line type="monotone" dataKey="avg_norm_rating" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Review Volume by Sentiment (Weekly)</CardTitle>
-          </CardHeader>
-          <CardContent className="h-72">
+          <CardContent className="p-6 md:p-8 pt-0 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="weekStartISO" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(2,6,23,0.06)" />
+                <XAxis dataKey="weekStartISO" tick={{ fill: '#94A3B8' }} />
+                <YAxis tick={{ fill: '#94A3B8' }} />
+                <Tooltip
+                  contentStyle={{ borderRadius: 12, border: '1px solid rgba(15,23,42,.08)', backgroundColor: 'white' }}
+                />
                 <Legend />
-                <Bar dataKey="positive" stackId="a" fill="hsl(var(--chart-1))" name="Positive" />
-                <Bar dataKey="neutral" stackId="a" fill="hsl(var(--chart-2))" name="Neutral" />
-                <Bar dataKey="negative" stackId="a" fill="hsl(var(--chart-3))" name="Negative" />
+                <Bar dataKey="positive" stackId="a" fill="#10B981" name="Positive" radius={[0, 0, 4, 4]} />
+                <Bar dataKey="neutral" stackId="a" fill="#6B7280" name="Neutral" />
+                <Bar dataKey="negative" stackId="a" fill="#EF4444" name="Negative" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Topic bars */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Topics</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {isRecomputing ? (
-            <>
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-5 w-11/12" />
-              <Skeleton className="h-5 w-9/12" />
-            </>
-          ) : (
-            <div className="space-y-2">
-              {topicBars.slice(0, 8).map((t) => (
-                <div key={t.topic} className="flex items-center gap-3">
-                  <div className="w-28 text-sm capitalize">{t.topic}</div>
-                  <div className="flex-1 h-2 rounded bg-muted">
-                    <div
-                      className="h-2 rounded bg-primary"
-                      style={{ width: `${Math.min(100, (t.count / (topicBars[0]?.count || 1)) * 100)}%` }}
-                      aria-label={`${t.topic} count`}
-                    />
+        {/* Source Health */}
+        <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
+          <CardHeader className="p-6 md:p-8">
+            <CardTitle className="text-2xl font-semibold text-slate-900">Source Health</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 md:p-8 pt-0">
+            <div className="space-y-4">
+              {sourcesHealth.map((source) => (
+                <div key={source.platform} className="flex items-center justify-between p-4 rounded-xl bg-white/50 border border-slate-200/60">
+                  <div className="flex items-center gap-3">
+                    <img src={source.logo} alt={source.platform} className="h-6 w-6" />
+                    <div>
+                      <div className="font-medium text-slate-900">{source.platform}</div>
+                      <div className="text-sm text-slate-500">Last sync: {source.lastSync}</div>
+                    </div>
                   </div>
-                  <div className="w-8 text-right text-sm tabular-nums">{t.count}</div>
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    source.status === "Connected" 
+                      ? "bg-green-50 text-green-700" 
+                      : "bg-red-50 text-red-700"
+                  }`}>
+                    {source.status}
+                  </div>
                 </div>
               ))}
-              {topicBars.length === 0 && <div className="text-sm text-muted-foreground">No topics yet</div>}
             </div>
-          )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 5: Recent Reviews (placeholder for now) */}
+      <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
+        <CardHeader className="p-6 md:p-8">
+          <CardTitle className="text-2xl font-semibold text-slate-900">Recent Reviews</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 md:p-8 pt-0">
+          <div className="text-sm text-muted-foreground">Recent reviews feed will be implemented here with filters and pagination.</div>
         </CardContent>
       </Card>
     </div>

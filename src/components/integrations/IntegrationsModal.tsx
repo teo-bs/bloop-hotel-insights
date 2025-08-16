@@ -274,7 +274,7 @@ export default function IntegrationsModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent id="integrations-modal" className="max-w-4xl">
+      <DialogContent id="integrations-modal" className="max-w-4xl bg-white/90 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
         <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <div>

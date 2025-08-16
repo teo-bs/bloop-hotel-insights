@@ -190,7 +190,7 @@ export default function CSVUploadModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent id="csv-modal" className="max-w-3xl">
+      <DialogContent id="csv-modal" className="max-w-3xl bg-white/90 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
         <DialogHeader>
           <DialogTitle>Upload reviews via CSV</DialogTitle>
           <DialogDescription>
