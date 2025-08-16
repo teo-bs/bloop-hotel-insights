@@ -11,6 +11,16 @@ export default function AuthCallback() {
   useEffect(() => {
     async function handleAuthCallback() {
       try {
+        // Handle auth callback from URL params/hash
+        const { data, error: authError } = await supabase.auth.getUser();
+        
+        if (authError) {
+          console.error("Auth callback error:", authError);
+          toast({ title: "Authentication failed", description: authError.message, variant: "destructive" });
+          navigate("/", { replace: true });
+          return;
+        }
+
         // Check if we have a session
         const { data: { session }, error } = await supabase.auth.getSession();
         

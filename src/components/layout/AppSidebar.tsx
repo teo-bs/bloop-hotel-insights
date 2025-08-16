@@ -129,7 +129,7 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
                 <div className="text-sm font-medium truncate">{name}</div>
               </div>
             )}
-            <Button variant="ghost" className="justify-start w-full mt-2 text-sidebar-foreground hover:bg-sidebar-foreground/10" onClick={async () => { await supabase.auth.signOut(); navigate("/auth?mode=signin", { replace: true }); }}>
+            <Button variant="ghost" className="justify-start w-full mt-2 text-sidebar-foreground hover:bg-sidebar-foreground/10" onClick={async () => { await supabase.auth.signOut(); navigate("/", { replace: true }); }}>
               <LogOut className="h-4 w-4 mr-2" />
               {state === "collapsed" ? <span className="hidden">Log out</span> : "Log out"}
             </Button>
