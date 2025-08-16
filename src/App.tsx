@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import UploadPage from "./pages/Upload";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -15,7 +16,7 @@ import GlobalActions from "./components/GlobalActions";
 import IntegrationsModal from "@/components/integrations/IntegrationsModal";
 import CSVUploadModal from "@/components/upload/CSVUploadModal";
 import ReviewsPage from "./pages/Reviews";
-import AuthModal from "@/components/auth/AuthModal";
+import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
 
 const queryClient = new QueryClient();
 
@@ -27,12 +28,13 @@ const App = () => (
       <GlobalActions />
       <BrowserRouter>
         {/* Global modals */}
-        <AuthModal />
+        <UnifiedAuthModal />
         <IntegrationsModal />
         <CSVUploadModal />
         {/* Auth modal available globally */}
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/auth/sign-in" element={<AuthPage />} />
           <Route path="/auth/sign-up" element={<AuthPage />} />
           <Route path="/auth/reset" element={<AuthPage />} />
