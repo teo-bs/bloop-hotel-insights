@@ -179,6 +179,7 @@ export default function UploadPage() {
         description: `Imported ${success} reviews, ${errors} skipped.`,
       });
 
+      // Already on app subdomain, just navigate to dashboard
       navigate("/dashboard");
     } catch (e: any) {
       console.error("[Upload] fatal error", e);

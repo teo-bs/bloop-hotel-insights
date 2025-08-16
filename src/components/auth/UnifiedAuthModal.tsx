@@ -99,9 +99,15 @@ export default function UnifiedAuthModal() {
       setOpen(false);
       try {
         const did = await resumePendingAfterAuth();
-        if (!did) window.location.href = "/dashboard";
+        if (!did) {
+          // Redirect to app subdomain
+          const { redirectToApp } = await import("@/utils/domain");
+          redirectToApp('/dashboard');
+        }
       } catch {
-        window.location.href = "/dashboard";
+        // Redirect to app subdomain on error
+        const { redirectToApp } = await import("@/utils/domain");
+        redirectToApp('/dashboard');
       }
     } catch (err: any) {
       const msg = err?.message || "Sign in failed";

@@ -23,11 +23,17 @@ export default function AuthPage() {
 
   useEffect(() => {
     // Redirect to dashboard if already signed in or upon sign-in
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate("/dashboard", { replace: true });
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session) {
+        const { redirectToApp } = await import("@/utils/domain");
+        redirectToApp('/dashboard');
+      }
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") navigate("/dashboard", { replace: true });
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === "SIGNED_IN") {
+        const { redirectToApp } = await import("@/utils/domain");
+        redirectToApp('/dashboard');
+      }
     });
     return () => {
       sub.subscription?.unsubscribe();
@@ -37,9 +43,13 @@ export default function AuthPage() {
   async function handleSuccess() {
     try {
       const did = await resumePendingAfterAuth();
-      if (!did) navigate("/dashboard", { replace: true });
+      if (!did) {
+        const { redirectToApp } = await import("@/utils/domain");
+        redirectToApp('/dashboard');
+      }
     } catch {
-      navigate("/dashboard", { replace: true });
+      const { redirectToApp } = await import("@/utils/domain");
+      redirectToApp('/dashboard');
     }
   }
 

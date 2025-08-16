@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
+import { isAppSubdomain, redirectToApp, redirectToRoot } from "@/utils/domain";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -20,13 +21,23 @@ export default function AuthCallback() {
         if (error) {
           console.error("Auth callback error:", error);
           toast({ title: "Authentication failed", description: error.message, variant: "destructive" });
-          navigate("/", { replace: true });
+          // Redirect to root domain on error
+          if (isAppSubdomain()) {
+            redirectToRoot('/');
+          } else {
+            navigate("/", { replace: true });
+          }
           return;
         }
 
         if (!session) {
           console.log("No session found, redirecting to home");
-          navigate("/", { replace: true });
+          // Redirect to root domain if no session
+          if (isAppSubdomain()) {
+            redirectToRoot('/');
+          } else {
+            navigate("/", { replace: true });
+          }
           return;
         }
 
@@ -55,12 +66,22 @@ export default function AuthCallback() {
           localStorage.removeItem("padu.pending");
         }
 
-        // Default redirect to dashboard
-        navigate("/dashboard", { replace: true });
+        // Default redirect to dashboard on app subdomain
+        if (isAppSubdomain()) {
+          navigate("/dashboard", { replace: true });
+        } else {
+          // If on root domain, redirect to app subdomain
+          redirectToApp('/dashboard');
+        }
       } catch (error) {
         console.error("Auth callback error:", error);
         toast({ title: "Authentication error", description: "Please try signing in again.", variant: "destructive" });
-        navigate("/", { replace: true });
+        // Redirect to root domain on error
+        if (isAppSubdomain()) {
+          redirectToRoot('/');
+        } else {
+          navigate("/", { replace: true });
+        }
       }
     }
 

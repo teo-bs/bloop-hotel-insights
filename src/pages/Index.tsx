@@ -7,6 +7,8 @@ import { onSavePreviewGuard } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
 import { getPlacesPreview, getPlaceSuggestions } from "@/lib/api/googlePlaces";
 import { openIntegrationsModal } from "@/lib/actions";
+import { redirectToApp } from "@/utils/domain";
+import { useAuth } from "@/hooks/useAuth";
 export default function Index() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,6 +16,7 @@ export default function Index() {
   const [result, setResult] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Autocomplete state
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -168,16 +171,27 @@ export default function Index() {
       {/* subtle noise overlay */}
       <div className="pointer-events-none absolute inset-0 noise-overlay" aria-hidden="true" />
 
-      {/* Top-right persistent Login */}
+      {/* Top-right persistent Login/Dashboard */}
         <div className="fixed right-6 top-6 z-30">
-          <Button
-            id="btn-top-login"
-            variant="ghost"
-            className="rounded-full"
-            onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}
-          >
-            Login
-          </Button>
+          {user ? (
+            <Button
+              id="btn-top-dashboard"
+              variant="ghost"
+              className="rounded-full"
+              onClick={() => redirectToApp('/dashboard')}
+            >
+              Go to Dashboard
+            </Button>
+          ) : (
+            <Button
+              id="btn-top-login"
+              variant="ghost"
+              className="rounded-full"
+              onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}
+            >
+              Login
+            </Button>
+          )}
         </div>
 
       {/* Glassmorphic centered nav */}

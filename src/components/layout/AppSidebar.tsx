@@ -10,6 +10,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { redirectToRoot } from "@/utils/domain";
 
 export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "dashboard" | "reviews" | "insights" | "reports" | "settings"; onRouteChange: (r: "dashboard" | "reviews" | "insights" | "reports" | "settings") => void; }) {
   const navigate = useNavigate();
@@ -118,7 +119,10 @@ export function AppSidebar({ currentRoute, onRouteChange }: { currentRoute: "das
                 <div className="text-sm font-medium truncate text-slate-900">{name}</div>
               </div>
             )}
-            <Button variant="ghost" className="justify-start w-full mt-2 text-slate-600 hover:bg-slate-100/70 rounded-full" onClick={async () => { await supabase.auth.signOut(); navigate("/", { replace: true }); }}>
+            <Button variant="ghost" className="justify-start w-full mt-2 text-slate-600 hover:bg-slate-100/70 rounded-full" onClick={async () => { 
+              await supabase.auth.signOut(); 
+              redirectToRoot('/');
+            }}>
               <LogOut className="h-4 w-4 mr-2" />
               {state === "collapsed" ? <span className="hidden">Log out</span> : "Log out"}
             </Button>

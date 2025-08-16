@@ -284,7 +284,9 @@ export default function CSVUploadModal() {
             <Button
               onClick={() => {
                 setOpen(false);
-                navigate("/dashboard#metrics");
+                // Use hash for in-app navigation since we're already on app subdomain
+                window.location.hash = "dashboard";
+                window.location.href = "#metrics";
               }}
               aria-label="View in Dashboard"
             >
