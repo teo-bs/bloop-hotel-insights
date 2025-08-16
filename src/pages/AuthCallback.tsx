@@ -11,17 +11,10 @@ export default function AuthCallback() {
   useEffect(() => {
     async function handleAuthCallback() {
       try {
-        // Handle auth callback from URL params/hash
-        const { data, error: authError } = await supabase.auth.getUser();
+        // Wait a bit for Supabase to process the URL hash
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        if (authError) {
-          console.error("Auth callback error:", authError);
-          toast({ title: "Authentication failed", description: authError.message, variant: "destructive" });
-          navigate("/", { replace: true });
-          return;
-        }
-
-        // Check if we have a session
+        // Let Supabase handle the session from URL automatically
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -35,6 +28,11 @@ export default function AuthCallback() {
           console.log("No session found, redirecting to home");
           navigate("/", { replace: true });
           return;
+        }
+
+        // Clean up URL by removing the auth hash/query params
+        if (window.location.hash || window.location.search.includes('access_token')) {
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         // Dispatch success event
