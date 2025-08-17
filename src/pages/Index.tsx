@@ -330,40 +330,110 @@ export default function Index() {
 
           <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-muted-foreground">We’ll instantly pull your last 5 Google reviews — no signup needed.</p>
 
-          <div className="mx-auto mt-8 grid w-full max-w-[600px] grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Hero Cards - 3 cinematic cards */}
+          <div className="mx-auto mt-12 grid w-full max-w-[900px] grid-cols-1 gap-6 md:grid-cols-3">
+            {/* Card 1: Average Guest Rating */}
             <div
-              id="float-box-a"
-              className="rounded-xl border bg-white/70 backdrop-blur-md p-6 shadow-lg animate-float-slow"
+              className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl p-6 shadow-2xl transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] animate-[fade-in_0.8s_ease-out_0.2s_both]"
               role="status"
-              aria-label={`Average rating ${avgDisplay}, total reviews ${totalDisplay}, positive ${positivePct}%`}
+              aria-label={result ? `Average rating ${avgDisplay}, total reviews ${totalDisplay}` : "Average guest rating preview"}
             >
-              <div className="text-xs text-muted-foreground">Last 90 days</div>
-              <div className="mt-1 text-2xl font-semibold inline-flex items-center gap-2">
-                Avg <span aria-hidden>★</span> <span id="kpi-avg"><CountUp value={Number(avgDisplay)} decimals={1} /></span>
-              </div>
-              <div className="mt-1 text-sm">
-                Reviews <span id="kpi-total"><CountUp value={Number(totalDisplay)} /></span> ·
-                Positive <span id="kpi-positive"><CountUp value={Number(positivePct)} /></span>%
-              </div>
-              <div className="mt-2 flex items-center gap-3 opacity-70 grayscale" aria-hidden="true">
-                <img src="/logos/google.svg" alt="Google reviews" className="h-4" />
-                <img src="/logos/tripadvisor.svg" alt="Tripadvisor reviews" className="h-4" />
-                <img src="/logos/booking.svg" alt="Booking.com reviews" className="h-4" />
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star, idx) => (
+                      <Star 
+                        key={star}
+                        className={`h-4 w-4 transition-all duration-300 ${
+                          result 
+                            ? (star <= Math.floor(Number(avgDisplay)) ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/30")
+                            : "text-yellow-400 fill-yellow-400"
+                        }`}
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-2xl font-bold">
+                    {result ? <CountUp value={Number(avgDisplay)} decimals={1} /> : "4.3"}
+                  </span>
+                </div>
+                <div className="text-sm font-medium text-foreground">
+                  {result ? "Your actual rating" : "Your reputation at a glance"}
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {result 
+                    ? `${totalDisplay} total reviews` 
+                    : "Last 90 days across Google, Tripadvisor & Booking.com"
+                  }
+                </div>
               </div>
             </div>
+
+            {/* Card 2: Impact on Bookings */}
             <div
-              id="float-box-b"
-              className="rounded-xl border bg-white/70 backdrop-blur-md p-6 shadow-lg animate-float-slow"
+              className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl p-6 shadow-2xl transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] animate-[fade-in_0.8s_ease-out_0.4s_both]"
               role="status"
-              aria-label={`Top insight: ${insight} (${badge})`}
+              aria-label={result ? `${positivePct}% positive reviews` : "Impact on bookings preview"}
             >
-              <div className="text-xs text-muted-foreground">Top insight</div>
-              <div className="mt-1 flex items-start gap-2">
-                <Lightbulb className="mt-0.5 h-4 w-4 text-accent" aria-hidden="true" />
-                <div className="text-sm" id="insight-title">{insight}</div>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-2xl">📈</span>
+                  <span className="text-2xl font-bold text-green-400">
+                    {result ? <CountUp value={positivePct} /> : "72"}%
+                  </span>
+                </div>
+                <div className="text-sm font-medium text-foreground">
+                  {result 
+                    ? "Positive review rate" 
+                    : "of guests cite service quality as the deciding factor"
+                  }
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {result 
+                    ? "Reviews rating 4+ stars" 
+                    : "Positive reviews directly drive bookings"
+                  }
+                </div>
               </div>
-              <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
             </div>
+
+            {/* Card 3: Top Guest Insight */}
+            <div
+              className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl p-6 shadow-2xl transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] animate-[fade-in_0.8s_ease-out_0.6s_both]"
+              role="status"
+              aria-label={result ? `Top insight: ${insight}` : "Top guest insight preview"}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="mb-3 flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-yellow-400 animate-pulse" />
+                  <span className="text-sm font-semibold text-accent">
+                    {result ? badge : "Medium impact"}
+                  </span>
+                </div>
+                <div className="text-sm font-medium text-foreground">
+                  {result ? insight : "Standardize breakfast quality"}
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {result 
+                    ? "AI-identified from recent reviews" 
+                    : "A recurring theme with medium impact"
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Trust element */}
+          <div className="mx-auto mt-8 text-center">
+            <p className="text-xs text-muted-foreground/80 flex items-center justify-center gap-3">
+              <span>Data pulled directly from</span>
+              <img src="/logos/google.svg" alt="Google" className="h-3 opacity-60" />
+              <img src="/logos/tripadvisor.svg" alt="Tripadvisor" className="h-3 opacity-60" />
+              <img src="/logos/booking.svg" alt="Booking.com" className="h-3 opacity-60" />
+            </p>
           </div>
         </div>
       </section>
@@ -417,7 +487,7 @@ export default function Index() {
 
                 {/* Reviews Section */}
                 <div className="space-y-4">
-                  {(result.reviews || []).slice(0, 3).map((r: any, i: number) => (
+                  {(result.reviews || []).slice(0, 5).map((r: any, i: number) => (
                     <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
                       <Avatar className="h-10 w-10 flex-shrink-0">
                         {r.profile_photo_url ? (
@@ -443,7 +513,7 @@ export default function Index() {
                     </div>
                   ))}
                   
-                  {(result.reviews || []).length > 3 && (
+                  {(result.reviews || []).length > 5 && (
                     <div className="text-center pt-2">
                       <button className="text-sm text-primary hover:text-primary/80 transition-colors">
                         See more reviews →
