@@ -7,9 +7,15 @@
 import { getAppDomain } from "@/utils/domain";
 
 export function getAuthRedirectUrl(): string {
-  // Always use the app subdomain for auth callbacks
-  const appDomain = getAppDomain();
-  return `${appDomain}/auth/callback`;
+  const hostname = window.location.hostname;
+  
+  // In development, use localhost
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `${window.location.protocol}//${hostname}${window.location.port ? `:${window.location.port}` : ''}/auth/callback`;
+  }
+  
+  // Always redirect to app.getpadu.com for production auth callbacks
+  return 'https://app.getpadu.com/auth/callback';
 }
 
 /**

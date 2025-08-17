@@ -3,7 +3,7 @@
  */
 
 /**
- * Checks if we're on the app subdomain (e.g., app.padu.com, app.localhost:3000)
+ * Checks if we're on the app subdomain (e.g., app.getpadu.com, app.localhost:3000)
  */
 export function isAppSubdomain(): boolean {
   const hostname = window.location.hostname;
@@ -23,12 +23,17 @@ export function getAppDomain(): string {
     return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
   }
   
-  // In production, use app subdomain
+  // In production, use app.getpadu.com
   if (hostname.startsWith('app.')) {
     return `${protocol}//${hostname}`;
   }
   
-  // Convert root domain to app subdomain
+  // Convert getpadu.com to app.getpadu.com
+  if (hostname === 'getpadu.com' || hostname.endsWith('.getpadu.com')) {
+    return `${protocol}//app.getpadu.com`;
+  }
+  
+  // Fallback: add app subdomain
   return `${protocol}//app.${hostname}`;
 }
 
@@ -43,6 +48,11 @@ export function getRootDomain(): string {
   // In development, use localhost
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  }
+  
+  // For app.getpadu.com, return getpadu.com
+  if (hostname === 'app.getpadu.com') {
+    return `${protocol}//getpadu.com`;
   }
   
   // Remove app subdomain if present
