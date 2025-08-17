@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Lightbulb } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Star, Lightbulb, Menu } from "lucide-react";
 import { onSavePreviewGuard } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
 import { getPlacesPreview, getPlaceSuggestions } from "@/lib/api/googlePlaces";
 import { openIntegrationsModal } from "@/lib/actions";
 import { redirectToApp } from "@/utils/domain";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 export default function Index() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,6 +25,7 @@ export default function Index() {
     session,
     loading: authLoading
   } = useAuth();
+  const isMobile = useIsMobile();
 
   // Autocomplete state
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -223,34 +226,90 @@ export default function Index() {
       {/* subtle noise overlay */}
       <div className="pointer-events-none absolute inset-0 noise-overlay" aria-hidden="true" />
 
-      {/* Top-right persistent Login/Dashboard */}
-        <div className="fixed right-6 top-6 z-30">
-          {authLoading ? <Button variant="ghost" className="rounded-full" disabled>
-              <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            </Button> : session ? <Button id="btn-top-dashboard" variant="ghost" className="rounded-full" onClick={() => redirectToApp('/dashboard')}>
-              Go to Dashboard
-            </Button> : <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", {
-        detail: {
-          mode: "signup"
-        }
-      }))}>
-              Get Started
-            </Button>}
+      {/* Navigation - Mobile vs Desktop */}
+      {isMobile ? (
+        /* Mobile: Hamburger menu in top-right */
+        <div className="fixed right-4 top-4 z-30">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80 bg-card/95 backdrop-blur-xl border-l border-white/20">
+              <div className="flex flex-col gap-6 pt-8">
+                <div className="space-y-4">
+                  <a href="/#docs" className="block rounded-lg px-4 py-3 text-sm font-medium hover:bg-muted transition-colors">
+                    Docs
+                  </a>
+                  <a href="/#pricing" className="block rounded-lg px-4 py-3 text-sm font-medium hover:bg-muted transition-colors">
+                    Pricing
+                  </a>
+                </div>
+                <div className="border-t border-white/10 pt-6 space-y-3">
+                  {authLoading ? (
+                    <Button variant="ghost" className="w-full justify-start" disabled>
+                      <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                      Loading...
+                    </Button>
+                  ) : session ? (
+                    <Button variant="default" className="w-full" onClick={() => redirectToApp('/dashboard')}>
+                      Go to Dashboard
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signin" } }))}>
+                        Sign In
+                      </Button>
+                      <Button variant="default" className="w-full" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}>
+                        Get Started
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-
-      {/* Glassmorphic centered nav with proper spacing */}
-      <nav id="nav-glass" aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
-        <div className="flex items-center gap-4 md:gap-8 rounded-full border border-input bg-card/70 px-4 md:px-8 py-3 backdrop-blur-md shadow-lg max-w-[calc(100vw-200px)]">
-          <div className="h-3 w-3 rounded-full bg-foreground/50 flex-shrink-0" aria-hidden="true" />
-          <div className="flex items-center gap-3 md:gap-6 text-sm text-muted-foreground">
-            <a href="/#docs" className="rounded-full px-2 md:px-3 py-2 hover:text-foreground focus-ring transition-colors whitespace-nowrap">Docs</a>
-            <a href="/#pricing" className="rounded-full px-2 md:px-3 py-2 hover:text-foreground focus-ring transition-colors whitespace-nowrap">Pricing</a>
+      ) : (
+        <>
+          {/* Desktop: Top-right auth buttons */}
+          <div className="fixed right-6 top-6 z-30">
+            {authLoading ? (
+              <Button variant="ghost" className="rounded-full" disabled>
+                <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              </Button>
+            ) : session ? (
+              <Button id="btn-top-dashboard" variant="ghost" className="rounded-full" onClick={() => redirectToApp('/dashboard')}>
+                Go to Dashboard
+              </Button>
+            ) : (
+              <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}>
+                Get Started
+              </Button>
+            )}
           </div>
-        </div>
-      </nav>
 
-      {/* Centered Hero */}
-      <section className="relative z-10 flex items-center justify-center min-h-screen">
+          {/* Desktop: Glassmorphic centered nav - sleeker design */}
+          <nav id="nav-glass" aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
+            <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 backdrop-blur-xl px-5 py-2.5 shadow-lg hover:bg-white/15 transition-all duration-300">
+              <div className="h-2 w-2 rounded-full bg-white/40 flex-shrink-0" aria-hidden="true" />
+              <div className="flex items-center gap-5 text-sm text-white/80">
+                <a href="/#docs" className="rounded-full px-3 py-1.5 hover:text-white hover:bg-white/10 focus-ring transition-all duration-200 whitespace-nowrap">
+                  Docs
+                </a>
+                <a href="/#pricing" className="rounded-full px-3 py-1.5 hover:text-white hover:bg-white/10 focus-ring transition-all duration-200 whitespace-nowrap">
+                  Pricing
+                </a>
+              </div>
+            </div>
+          </nav>
+        </>
+      )}
+
+      {/* Centered Hero - Added top padding to push content below floating nav */}
+      <section className="relative z-10 flex items-center justify-center min-h-screen pt-24">
         <div className="w-full max-w-[860px] px-6 flex flex-col justify-center items-center gap-6 text-center relative">
           {/* Padu logo */}
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg animate-[float-y_4s_ease-in-out_infinite_alternate]">
