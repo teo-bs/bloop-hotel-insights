@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TopNav from "@/components/layout/TopNav";
-import AuthForm, { AuthMode } from "@/components/auth/AuthForm";
+import AuthForm from "@/components/auth/AuthForm";
+
+type AuthMode = "signin" | "signup" | "reset";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
 import { supabase } from "@/integrations/supabase/client";
 

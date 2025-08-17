@@ -4,6 +4,7 @@ import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
 import AuthPage from "@/pages/Auth";
 import AuthCallback from "@/pages/AuthCallback";
+import UpdatePasswordPage from "@/pages/UpdatePassword";
 import Dashboard from "@/pages/Dashboard";
 import UploadPage from "@/pages/Upload";
 import ReviewsPage from "@/pages/Reviews";
@@ -29,6 +30,7 @@ export default function DomainRouter() {
         <Route path="/auth/sign-in" element={<AuthPage />} />
         <Route path="/auth/sign-up" element={<AuthPage />} />
         <Route path="/auth/reset" element={<AuthPage />} />
+        <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
         
         {/* Redirect bare app subdomain to dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

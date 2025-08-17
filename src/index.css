@@ -42,20 +42,25 @@ All colors MUST be HSL.
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    /* Padu Brand Colors */
-    --padu-blue: 213 89% 51%;
+    /* Padu Brand Colors - Royal Blue #1A73E8 */
+    --primary: 213 89% 51%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Brand Colors */
     --padu-ink: 222 84% 5%;
     --padu-muted: 215 16% 47%;
-    --padu-surface: rgba(255,255,255,0.9);
-    --padu-border: rgba(15,23,42,0.06);
     --padu-green: 162 73% 46%;
     --padu-red: 0 84% 60%;
     --padu-gold: 51 100% 50%;
     
     /* Glass Effects */
-    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-bg: rgba(255, 255, 255, 0.9);
     --glass-border: rgba(255, 255, 255, 0.4);
     --glass-shadow: 0 12px 40px rgba(2, 6, 23, 0.08);
+    
+    /* Text Colors */
+    --foreground: 222 84% 5%; /* #0F172A */
+    --muted-foreground: 215 16% 47%; /* #475569 */
   }
 
   .dark {
@@ -115,6 +120,13 @@ All colors MUST be HSL.
     background: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  
+  /* Modal overlay - blurred translucent, not black */
+  .modal-overlay {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   h1, h2, h3, h4, h5, h6 {

@@ -5,29 +5,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
 import { getAuthRedirectUrl } from "@/lib/auth-config";
 
-export default function UnifiedAuthModal() {
+type AuthMode = "signin" | "signup" | "reset";
+
+export default function NewUnifiedAuthModal() {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPasswordFields, setShowPasswordFields] = useState(false);
-  const [showPw, setShowPw] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [canResend, setCanResend] = useState(false);
-  const [errorTop, setErrorTop] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [capsLock, setCapsLock] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     function handleOpen() {
       setOpen(true);
-      setEmailSent(false);
-      setShowPasswordFields(false);
-      setErrorTop(null);
+      setMode("signin");
+      setErrorMessage(null);
+      setResetSent(false);
+      setEmail("");
+      setPassword("");
+      setFullName("");
     }
     function handleSuccess() {
       setOpen(false);
@@ -40,16 +46,11 @@ export default function UnifiedAuthModal() {
     };
   }, []);
 
-  useEffect(() => {
-    if (emailSent) {
-      const timer = setTimeout(() => setCanResend(true), 30000); // 30s
-      return () => clearTimeout(timer);
-    }
-  }, [emailSent]);
+  const passwordStrength = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
 
-  async function continueWithGoogle() {
+  async function handleGoogleAuth() {
     setLoading(true);
-    setErrorTop(null);
+    setErrorMessage(null);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -58,103 +59,110 @@ export default function UnifiedAuthModal() {
       if (error) throw error;
     } catch (err: any) {
       const msg = err?.message || "Google auth failed";
-      setErrorTop(msg);
+      setErrorMessage(msg);
       toast({ title: "Google auth failed", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   }
 
-  async function continueWithEmail() {
-    if (!email) return;
-    setLoading(true);
-    setErrorTop(null);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: getAuthRedirectUrl() }
-      });
-      if (error) throw error;
-      setEmailSent(true);
-      setCanResend(false);
-      toast({ title: "Check your email", description: "We sent you a sign-in link" });
-    } catch (err: any) {
-      const msg = err?.message || "Failed to send email";
-      setErrorTop(msg);
-      toast({ title: "Error", description: msg, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function signInWithPassword(e: React.FormEvent) {
+  async function handleEmailPasswordAuth(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setErrorTop(null);
+    setErrorMessage(null);
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      toast({ title: "Signed in!", description: "Welcome back." });
-      document.dispatchEvent(new CustomEvent("auth:success"));
-      setOpen(false);
-      try {
-        const did = await resumePendingAfterAuth();
-        if (!did) {
-          // Redirect to app subdomain
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            throw new Error("Incorrect email or password.");
+          }
+          throw error;
+        }
+        toast({ title: "Welcome back 👋", description: "You're signed in." });
+        document.dispatchEvent(new CustomEvent("auth:success"));
+        setOpen(false);
+        
+        try {
+          const did = await resumePendingAfterAuth();
+          if (!did) {
+            const { redirectToApp } = await import("@/utils/domain");
+            redirectToApp('/dashboard');
+          }
+        } catch {
           const { redirectToApp } = await import("@/utils/domain");
           redirectToApp('/dashboard');
         }
-      } catch {
-        // Redirect to app subdomain on error
-        const { redirectToApp } = await import("@/utils/domain");
-        redirectToApp('/dashboard');
+      } else if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { 
+            data: fullName ? { full_name: fullName } : undefined,
+            emailRedirectTo: getAuthRedirectUrl()
+          },
+        });
+        if (error) {
+          if (error.message.includes("already registered")) {
+            throw new Error("Account exists via Google—use Continue with Google or reset your password.");
+          }
+          throw error;
+        }
+        toast({ title: "Account created. You're all set.", description: "Welcome to Padu!" });
+        document.dispatchEvent(new CustomEvent("auth:success"));
+        setOpen(false);
+        
+        try {
+          const did = await resumePendingAfterAuth();
+          if (!did) {
+            const { redirectToApp } = await import("@/utils/domain");
+            redirectToApp('/dashboard');
+          }
+        } catch {
+          const { redirectToApp } = await import("@/utils/domain");
+          redirectToApp('/dashboard');
+        }
+      } else if (mode === "reset") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/update-password`
+        });
+        if (error) throw error;
+        setResetSent(true);
+        toast({ title: "Check your email for a reset link.", description: "We sent password reset instructions." });
       }
     } catch (err: any) {
-      const msg = err?.message || "Sign in failed";
-      setErrorTop(msg);
+      const msg = err?.message || "Authentication failed";
+      setErrorMessage(msg);
       toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   }
 
-  if (emailSent) {
+  if (mode === "reset" && resetSent) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="p-0 bg-transparent border-0 shadow-none">
-          <div id="auth-modal" className="max-w-[440px] w-[88vw] mx-auto">
-            <Card className="w-full rounded-2xl border border-white/40 bg-card/70 backdrop-blur-md shadow-[0_8px_24px_hsl(var(--foreground)/0.06)]">
+        <DialogContent className="p-0 bg-white/15 backdrop-blur-md border-0 shadow-none modal-overlay">
+          <div className="max-w-[440px] w-[88vw] mx-auto">
+            <Card className="w-full rounded-2xl border border-white/40 bg-white/90 backdrop-blur-md shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
               <CardHeader className="pb-4 text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-background/70">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/70">
                   <img src="/lovable-uploads/10e2e94b-0e70-490d-bc29-2f836e6ddf32.png" alt="Padu logo" className="h-8 w-8 rounded-lg" />
                 </div>
                 <CardTitle className="text-2xl font-bold">Check your email</CardTitle>
-                <CardDescription>We sent a sign-in link to {email}</CardDescription>
+                <CardDescription>We sent password reset instructions to {email}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center text-sm text-muted-foreground">
-                  Didn't receive it? 
-                  {canResend ? (
-                    <button 
-                      type="button" 
-                      className="ml-1 underline text-primary" 
-                      onClick={() => {
-                        setEmailSent(false);
-                        continueWithEmail();
-                      }}
-                    >
-                      Resend link
-                    </button>
-                  ) : (
-                    <span className="ml-1">Check your spam folder or wait 30s to resend</span>
-                  )}
-                </div>
                 <Button 
-                  variant="outline" 
-                  className="w-full rounded-full" 
-                  onClick={() => setEmailSent(false)}
+                  variant="glass" 
+                  className="w-full" 
+                  onClick={() => {
+                    setResetSent(false);
+                    setMode("signin");
+                  }}
                 >
-                  Try a different email
+                  Back to sign in
                 </Button>
               </CardContent>
             </Card>
@@ -166,33 +174,40 @@ export default function UnifiedAuthModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-0 bg-transparent border-0 shadow-none">
-        <div id="auth-modal" className="max-w-[440px] w-[88vw] mx-auto">
-          <Card className="w-full rounded-2xl border border-white/40 bg-card/70 backdrop-blur-md shadow-[0_8px_24px_hsl(var(--foreground)/0.06)]">
+      <DialogContent className="p-0 bg-white/15 backdrop-blur-md border-0 shadow-none modal-overlay">
+        <div className="max-w-[440px] w-[88vw] mx-auto">
+          <Card className="w-full rounded-2xl border border-white/40 bg-white/90 backdrop-blur-md shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
             <CardHeader className="pb-4">
-              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-background/70">
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-white/70">
                 <img src="/lovable-uploads/10e2e94b-0e70-490d-bc29-2f836e6ddf32.png" alt="Padu logo" className="h-8 w-8 rounded-lg" />
               </div>
-              <CardTitle className="text-2xl font-bold text-center">Continue to Padu</CardTitle>
-              <CardDescription className="text-center">No credit card required.</CardDescription>
+              <CardTitle className="text-2xl font-bold text-center">
+                {mode === "signin" && "Continue to Padu"}
+                {mode === "signup" && "Create your free Padu account"}
+                {mode === "reset" && "Reset your password"}
+              </CardTitle>
+              <CardDescription className="text-center">
+                {mode === "signin" && "No credit card required."}
+                {mode === "signup" && "No credit card required."}
+                {mode === "reset" && "Enter your email to receive reset instructions."}
+              </CardDescription>
               <div className="mt-1 flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 <span>We use industry-standard encryption.</span>
               </div>
-              {errorTop && (
-                <div role="alert" className="mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {errorTop}
+              {errorMessage && (
+                <div role="alert" className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {errorMessage}
                 </div>
               )}
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Google Button */}
               <Button
-                id="btn-google-auth"
                 type="button"
                 variant="hero"
-                className="w-full rounded-full"
-                onClick={continueWithGoogle}
+                className="w-full"
+                onClick={handleGoogleAuth}
                 disabled={loading}
               >
                 {loading ? (
@@ -201,123 +216,152 @@ export default function UnifiedAuthModal() {
                     Connecting...
                   </span>
                 ) : (
-                  "Continue with Google"
+                  <>
+                    <img src="/logos/google.svg" alt="Google" className="h-4 w-4" />
+                    Continue with Google
+                  </>
                 )}
               </Button>
 
               {/* Divider */}
               <div className="relative py-1 text-center text-xs text-muted-foreground">
-                <span className="bg-background px-2">or</span>
-                <div className="absolute inset-x-0 top-1/2 -z-10 h-px -translate-y-1/2 bg-border" />
+                <span className="bg-white px-2">or</span>
+                <div className="absolute inset-x-0 top-1/2 -z-10 h-px -translate-y-1/2 bg-gray-200" />
               </div>
 
-              {/* Email Magic Link */}
-              {!showPasswordFields ? (
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <Label htmlFor="email-input" className="sr-only">Email</Label>
-                      <div className="relative">
-                        <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          id="email-input"
-                          type="email"
-                          placeholder="your@email.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-9 rounded-full shadow-inner"
-                          onKeyDown={(e) => e.key === 'Enter' && continueWithEmail()}
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      id="btn-email-link"
-                      onClick={continueWithEmail}
-                      disabled={!email || loading}
-                      className="rounded-full px-6"
-                    >
-                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
-                    </Button>
-                  </div>
-                  
-                  <div className="text-center">
-                    <button 
-                      type="button"
-                      className="text-sm text-muted-foreground underline"
-                      onClick={() => setShowPasswordFields(true)}
-                    >
-                      Have a password? Click here
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Password Fields */
-                <form onSubmit={signInWithPassword} className="space-y-3">
+              {/* Email + Password Form */}
+              <form onSubmit={handleEmailPasswordAuth} className="space-y-3">
+                {mode === "signup" && (
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="fullName" className="text-sm font-medium">Full name (optional)</Label>
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        id="signin-email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="pl-9 rounded-full shadow-inner"
+                        id="fullName"
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="pl-9 rounded-full shadow-inner focus-ring"
                       />
                     </div>
                   </div>
+                )}
 
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      aria-invalid={!!errorMessage}
+                      className="pl-9 rounded-full shadow-inner focus-ring"
+                    />
+                  </div>
+                </div>
+
+                {mode !== "reset" && (
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                    <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                     <div className="relative">
                       <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        id="signin-password"
-                        type={showPw ? "text" : "password"}
+                        id="password"
+                        type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onKeyUp={(e: any) => setCapsLock(!!e.getModifierState?.("CapsLock"))}
                         required
-                        className="pl-9 pr-10 rounded-full shadow-inner"
+                        aria-invalid={!!errorMessage}
+                        className="pl-9 pr-10 rounded-full shadow-inner focus-ring"
                       />
                       <button
                         type="button"
-                        aria-label={showPw ? "Hide password" : "Show password"}
-                        onClick={() => setShowPw(!showPw)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full rounded-full"
-                    variant="hero"
-                  >
-                    {loading ? (
-                      <span className="inline-flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Signing in...
-                      </span>
-                    ) : (
-                      "Sign in"
+                    {capsLock && <div className="text-xs text-amber-600">Caps Lock is on</div>}
+                    {mode === "signup" && password && (
+                      <div className="text-xs">
+                        <span className={passwordStrength ? "text-green-600" : "text-amber-600"}>
+                          {passwordStrength ? "Strong" : "Needs letter, number, and 8+ characters"}
+                        </span>
+                      </div>
                     )}
-                  </Button>
+                  </div>
+                )}
 
-                  <div className="text-center">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full"
+                  variant="hero"
+                >
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {mode === "signin" ? "Signing in..." : mode === "signup" ? "Creating account..." : "Sending link..."}
+                    </span>
+                  ) : (
+                    mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"
+                  )}
+                </Button>
+              </form>
+
+              {/* Mode Switching Links */}
+              <div className="text-center text-sm text-muted-foreground space-y-2">
+                {mode === "signin" && (
+                  <>
+                    <div>
+                      <button 
+                        type="button"
+                        className="text-primary hover:underline"
+                        onClick={() => setMode("reset")}
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div>
+                      <button 
+                        type="button"
+                        className="text-primary hover:underline"
+                        onClick={() => setMode("signup")}
+                      >
+                        Create account
+                      </button>
+                    </div>
+                  </>
+                )}
+                {mode === "signup" && (
+                  <div>
                     <button 
                       type="button"
-                      className="text-sm text-muted-foreground underline"
-                      onClick={() => setShowPasswordFields(false)}
+                      className="text-primary hover:underline"
+                      onClick={() => setMode("signin")}
                     >
-                      Back to magic link
+                      Already have an account? Sign in
                     </button>
                   </div>
-                </form>
-              )}
+                )}
+                {mode === "reset" && (
+                  <div>
+                    <button 
+                      type="button"
+                      className="text-primary hover:underline"
+                      onClick={() => setMode("signin")}
+                    >
+                      Back to sign in
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <div className="text-center text-xs text-muted-foreground">
                 We never share your email.
