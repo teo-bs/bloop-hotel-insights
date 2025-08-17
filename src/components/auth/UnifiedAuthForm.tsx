@@ -64,6 +64,12 @@ export default function UnifiedAuthForm({ mode, onModeChange, onSuccess }: Unifi
     } catch (err: any) {
       const msg = err?.message || "Authentication failed";
       setErrorMessage(msg);
+      
+      // Handle specific error cases for better UX
+      if (mode === "signup" && msg.includes("already registered")) {
+        // Show helpful message for existing users
+        setErrorMessage("This email already has an account.");
+      }
     } finally {
       setLoading(false);
     }
@@ -118,6 +124,28 @@ export default function UnifiedAuthForm({ mode, onModeChange, onSuccess }: Unifi
         {errorMessage && (
           <div role="alert" className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {errorMessage}
+            {/* Show helpful actions for duplicate email */}
+            {mode === "signup" && errorMessage.includes("already has an account") && (
+              <div className="mt-2 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={() => onModeChange?.("signin")}
+                >
+                  Sign in instead
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={handleGoogleAuth}
+                  disabled={loading}
+                >
+                  Continue with Google
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardHeader>

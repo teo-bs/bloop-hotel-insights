@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import UnifiedAuthForm from "./UnifiedAuthForm";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
+import { redirectToApp } from "@/utils/domain";
 
 type AuthMode = "signin" | "signup" | "reset";
 
@@ -11,7 +12,8 @@ export default function AuthModal() {
 
   useEffect(() => {
     function handleOpen(e: any) {
-      setMode("signin");
+      const detail = e.detail || {};
+      setMode(detail.mode || "signup"); // Default to signup for new users
       setOpen(true);
     }
     function handleSuccess() {
@@ -27,21 +29,32 @@ export default function AuthModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-0 bg-white/15 backdrop-blur-md border-0 shadow-none modal-overlay">
-        <div id="auth-modal" className="max-w-[440px] w-[88vw] mx-auto">
+      <DialogContent className="p-0 bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl max-w-[440px] w-[90vw]">
+        <div id="auth-modal" className="p-1">
           <UnifiedAuthForm
             mode={mode}
             onModeChange={setMode}
             onSuccess={async () => {
               setOpen(false);
+              // Handle post-auth routing
               try {
-                const did = await resumePendingAfterAuth();
-                if (!did) {
-                  const { redirectToApp } = await import("@/utils/domain");
+                const pending = localStorage.getItem("padu.pending");
+                if (pending) {
+                  const intent = JSON.parse(pending);
+                  if (intent?.type === "savePreview") {
+                    await resumePendingAfterAuth();
+                    return;
+                  }
+                }
+                // Check for next parameter
+                const params = new URLSearchParams(window.location.search);
+                const next = params.get('next');
+                if (next && next.startsWith('/')) {
+                  redirectToApp(next);
+                } else {
                   redirectToApp('/dashboard');
                 }
               } catch {
-                const { redirectToApp } = await import("@/utils/domain");
                 redirectToApp('/dashboard');
               }
             }}

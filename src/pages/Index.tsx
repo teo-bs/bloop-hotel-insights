@@ -187,7 +187,7 @@ export default function Index() {
               id="btn-top-login"
               variant="ghost"
               className="rounded-full"
-              onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}
+              onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signin" } }))}
             >
               Login
             </Button>
@@ -411,23 +411,23 @@ export default function Index() {
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-xs text-muted-foreground">Data from Google. <span className="hidden sm:inline">No credit card required.</span></div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      id="btn-save-preview"
-                      onClick={handleSave}
-                      disabled={saving}
-                      aria-label="Save to dashboard (free)"
-                      className="rounded-full"
-                      variant="hero"
-                    >
-                      {saving ? (
-                        <span className="inline-flex items-center gap-2">
-                          <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
-                          Saving…
-                        </span>
-                      ) : (
-                        "Save to dashboard (free)"
-                      )}
-                    </Button>
+                     <Button
+                       id="btn-save-preview"
+                       onClick={handleSave}
+                       disabled={saving}
+                       aria-label="Save to dashboard (free)"
+                       className="rounded-full"
+                       variant="hero"
+                     >
+                       {saving ? (
+                         <span className="inline-flex items-center gap-2">
+                           <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
+                           Saving…
+                         </span>
+                       ) : (
+                         user ? "Save to dashboard" : "Save to dashboard (free)"
+                       )}
+                     </Button>
                     <Button
                       id="btn-upgrade-gbp"
                       variant="ghost"

@@ -20,8 +20,25 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
 
   // Check both user and session for better reliability
   if (!user || !session) {
+    // Store next path and open auth modal instead of navigating
     const next = location.pathname + location.search;
-    return <Navigate to={`/auth?next=${encodeURIComponent(next)}`} replace />;
+    localStorage.setItem("padu.pending", JSON.stringify({ type: "redirect", path: next }));
+    
+    // Open auth modal
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent("auth:open", { 
+        detail: { mode: "signup", intent: { type: "redirect", path: next } }
+      }));
+    }, 100);
+    
+    return (
+      <div className="min-h-screen grid place-items-center bg-gpt5-gradient animate-gpt5-pan">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Please sign in to continue</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

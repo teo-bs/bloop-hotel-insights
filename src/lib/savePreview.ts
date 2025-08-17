@@ -22,12 +22,12 @@ export async function onSavePreviewGuard(currentInputUrl: string, lastPreview: a
   const pid = lastPreview?.place?.id || lastPreview?.place?.place_id || null;
   const pending: PendingSave = { type: "savePreview", placeId: pid || null, url: pid ? null : currentInputUrl };
 
-  const { isSignedIn, openAuthModal } = await import("./auth");
+  const { isSignedIn, openSignupModal } = await import("./auth");
   if (!(await isSignedIn())) {
     try {
       localStorage.setItem("padu.pending", JSON.stringify(pending));
     } catch {}
-    openAuthModal({ reason: "savePreview" });
+    openSignupModal({ reason: "savePreview" });
     return;
   }
   await actuallySavePreview(pending);

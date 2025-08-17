@@ -23,18 +23,12 @@ export default function AuthPage() {
     else setMode("signin");
   }, [location.pathname, location.search]);
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages immediately
   useEffect(() => {
     if (!loading && user && location.pathname !== '/auth/callback') {
-      const params = new URLSearchParams(location.search);
-      const next = params.get('next');
-      if (next && next.startsWith('/')) {
-        navigate(next, { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
+      navigate('/dashboard', { replace: true });
     }
-  }, [user, loading, location.pathname, location.search, navigate]);
+  }, [user, loading, location.pathname, navigate]);
 
   if (loading) {
     return (
@@ -51,7 +45,22 @@ export default function AuthPage() {
     <>
       <TopNav />
       <div className="min-h-[calc(100vh-56px)] flex items-center justify-center p-6 md:p-10 bg-gpt5-gradient animate-gpt5-pan">
-        <UnifiedAuthForm mode={mode} onModeChange={setMode} />
+        <div className="w-full max-w-[440px] mx-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-1">
+          <UnifiedAuthForm 
+            mode={mode} 
+            onModeChange={setMode}
+            onSuccess={() => {
+              // Handle redirect after auth success
+              const params = new URLSearchParams(location.search);
+              const next = params.get('next');
+              if (next && next.startsWith('/')) {
+                navigate(next, { replace: true });
+              } else {
+                navigate('/dashboard', { replace: true });
+              }
+            }}
+          />
+        </div>
       </div>
     </>
   );
