@@ -34,29 +34,9 @@ export default function AuthModal() {
           <UnifiedAuthForm
             mode={mode}
             onModeChange={setMode}
-            onSuccess={async () => {
+            onSuccess={() => {
               setOpen(false);
-              // Handle post-auth routing
-              try {
-                const pending = localStorage.getItem("padu.pending");
-                if (pending) {
-                  const intent = JSON.parse(pending);
-                  if (intent?.type === "savePreview") {
-                    await resumePendingAfterAuth();
-                    return;
-                  }
-                }
-                // Check for next parameter
-                const params = new URLSearchParams(window.location.search);
-                const next = params.get('next');
-                if (next && next.startsWith('/')) {
-                  redirectToApp(next);
-                } else {
-                  redirectToApp('/dashboard');
-                }
-              } catch {
-                redirectToApp('/dashboard');
-              }
+              // Auth state change will handle redirects and pending actions automatically
             }}
           />
         </div>

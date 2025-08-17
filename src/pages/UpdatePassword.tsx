@@ -34,7 +34,9 @@ export default function UpdatePasswordPage() {
         description: "Please request a new password reset link.",
         variant: "destructive"
       });
-      navigate('/auth?mode=reset');
+      // Open auth modal instead of navigating to /auth
+      document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "reset" } }));
+      navigate('/dashboard', { replace: true });
     }
   }, [searchParams, navigate, toast]);
 

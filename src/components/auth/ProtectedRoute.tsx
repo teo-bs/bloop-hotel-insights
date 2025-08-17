@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     const next = location.pathname + location.search;
     localStorage.setItem("padu.pending", JSON.stringify({ type: "redirect", path: next }));
     
-    // Open auth modal
+    // Open auth modal with signup mode for protected routes
     setTimeout(() => {
       document.dispatchEvent(new CustomEvent("auth:open", { 
         detail: { mode: "signup", intent: { type: "redirect", path: next } }

@@ -32,13 +32,17 @@ export default function AuthCallback() {
         if (error) {
           console.error("Auth callback error:", error);
           toast({ title: "Authentication failed", description: error.message, variant: "destructive" });
-          navigate('/auth', { replace: true });
+          // Open auth modal instead of navigating to /auth
+          document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signin" } }));
+          navigate('/dashboard', { replace: true });
           return;
         }
 
         if (!session) {
-          console.log("No session found after retries, redirecting to auth");
-          navigate('/auth', { replace: true });
+          console.log("No session found after retries, opening auth modal");
+          // Open auth modal instead of navigating to /auth
+          document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signin" } }));
+          navigate('/dashboard', { replace: true });
           return;
         }
 
@@ -82,7 +86,9 @@ export default function AuthCallback() {
       } catch (error) {
         console.error("Auth callback error:", error);
         toast({ title: "Authentication error", description: "Please try signing in again.", variant: "destructive" });
-        navigate('/auth', { replace: true });
+        // Open auth modal instead of navigating to /auth
+        document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signin" } }));
+        navigate('/dashboard', { replace: true });
       }
     }
 

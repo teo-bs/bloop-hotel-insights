@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { isAppSubdomain, redirectToApp, redirectToRoot } from "@/utils/domain";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
-import AuthPage from "@/pages/Auth";
+import AuthGuard from "@/components/auth/AuthGuard";
 import AuthCallback from "@/pages/AuthCallback";
 import UpdatePasswordPage from "@/pages/UpdatePassword";
 import Dashboard from "@/pages/Dashboard";
@@ -25,11 +25,8 @@ export default function DomainRouter() {
     return (
       <Routes>
         {/* Auth routes available on app subdomain */}
-        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth" element={<AuthGuard />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/auth/sign-in" element={<AuthPage />} />
-        <Route path="/auth/sign-up" element={<AuthPage />} />
-        <Route path="/auth/reset" element={<AuthPage />} />
         <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
         
         {/* Redirect bare app subdomain to dashboard */}

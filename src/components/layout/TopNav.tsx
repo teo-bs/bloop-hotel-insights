@@ -29,7 +29,7 @@ export default function TopNav() {
           </Button>
           <Button
             variant="hero"
-            onClick={() => navigate("/auth?mode=signup")}
+            onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}
             className="ml-1"
           >
             Get Started
@@ -49,7 +49,7 @@ export default function TopNav() {
                 <NavLink to="/#pricing" className={linkCls}>Pricing</NavLink>
                 <NavLink to="/#docs" className={linkCls}>Docs</NavLink>
                 <Button variant="ghost" className="justify-start" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}>Sign in</Button>
-                <Button variant="hero" onClick={() => navigate("/auth?mode=signup")}>Get Started</Button>
+                <Button variant="hero" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}>Get Started</Button>
               </div>
             </SheetContent>
           </Sheet>

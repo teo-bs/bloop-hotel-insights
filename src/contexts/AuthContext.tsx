@@ -15,6 +15,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  handleAuthSuccess: (next?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -40,8 +41,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { toast } = useToast();
 
   // Handle auth success and redirects
-  const handleAuthSuccess = async () => {
+  const handleAuthSuccess = async (next?: string) => {
     try {
+      // Clear URL parameters
+      if (window.location.search || window.location.hash) {
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        window.history.replaceState({}, '', url.toString());
+      }
+
+      // Check for explicit next parameter first
+      if (next && next.startsWith('/')) {
+        navigate(next, { replace: true });
+        return;
+      }
+
       // Check for pending actions
       const pending = localStorage.getItem("padu.pending");
       if (pending) {
@@ -52,6 +67,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
             localStorage.removeItem("padu.pending");
             return;
           }
+          if (pendingData?.type === "redirect" && pendingData?.path) {
+            localStorage.removeItem("padu.pending");
+            navigate(pendingData.path, { replace: true });
+            return;
+          }
         } catch (e) {
           console.error("Error processing pending action:", e);
         }
@@ -60,10 +80,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Check for next parameter in URL
       const params = new URLSearchParams(location.search);
-      const next = params.get('next');
+      const nextParam = params.get('next');
       
-      if (next && next.startsWith('/')) {
-        navigate(next, { replace: true });
+      if (nextParam && nextParam.startsWith('/')) {
+        navigate(nextParam, { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
@@ -228,6 +248,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signInWithGoogle,
     signOut,
     resetPassword,
+    handleAuthSuccess,
   };
 
   return (

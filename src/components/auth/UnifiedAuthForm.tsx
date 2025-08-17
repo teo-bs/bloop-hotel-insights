@@ -24,7 +24,7 @@ export default function UnifiedAuthForm({ mode, onModeChange, onSuccess }: Unifi
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [capsLock, setCapsLock] = useState(false);
   
-  const { signInWithPassword, signUp, signInWithGoogle, resetPassword } = useAuth();
+  const { signInWithPassword, signUp, signInWithGoogle, resetPassword, handleAuthSuccess } = useAuth();
 
   const passwordStrength = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
 
