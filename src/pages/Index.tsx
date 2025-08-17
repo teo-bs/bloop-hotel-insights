@@ -294,12 +294,12 @@ export default function Index() {
           {/* Desktop: Glassmorphic centered nav - sleeker design */}
           <nav id="nav-glass" aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
             <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 backdrop-blur-xl px-5 py-2.5 shadow-lg hover:bg-white/15 transition-all duration-300">
-              <div className="h-2 w-2 rounded-full bg-white/40 flex-shrink-0" aria-hidden="true" />
-              <div className="flex items-center gap-5 text-sm text-white/80">
-                <a href="/#docs" className="rounded-full px-3 py-1.5 hover:text-white hover:bg-white/10 focus-ring transition-all duration-200 whitespace-nowrap">
+              <div className="h-2 w-2 rounded-full bg-black/60 flex-shrink-0" aria-hidden="true" />
+              <div className="flex items-center gap-5 text-sm text-black/80">
+                <a href="/#docs" className="rounded-full px-3 py-1.5 hover:text-black hover:bg-white/10 focus-ring transition-all duration-200 whitespace-nowrap">
                   Docs
                 </a>
-                <a href="/#pricing" className="rounded-full px-3 py-1.5 hover:text-white hover:bg-white/10 focus-ring transition-all duration-200 whitespace-nowrap">
+                <a href="/#pricing" className="rounded-full px-3 py-1.5 hover:text-black hover:bg-white/10 focus-ring transition-all duration-200 whitespace-nowrap">
                   Pricing
                 </a>
               </div>
