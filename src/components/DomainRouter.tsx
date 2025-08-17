@@ -33,7 +33,14 @@ export default function DomainRouter() {
         <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
         
         {/* Redirect bare app subdomain to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          } 
+        />
         
         {/* Protected app routes */}
         <Route

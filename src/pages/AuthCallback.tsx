@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +7,7 @@ import { isAppSubdomain, redirectToApp, redirectToRoot } from "@/utils/domain";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -57,7 +58,6 @@ export default function AuthCallback() {
             if (pending?.type === "savePreview") {
               await resumePendingAfterAuth();
               localStorage.removeItem("padu.pending");
-              // resumePendingAfterAuth will handle the redirect to reviews
               return;
             }
           } catch (e) {
@@ -66,12 +66,21 @@ export default function AuthCallback() {
           localStorage.removeItem("padu.pending");
         }
 
-        // Default redirect to dashboard on app subdomain
+        // Check for next parameter in URL
+        const params = new URLSearchParams(location.search);
+        const next = params.get('next');
+        
+        // Default redirect logic
         if (isAppSubdomain()) {
-          navigate("/dashboard", { replace: true });
+          if (next && next.startsWith('/')) {
+            navigate(next, { replace: true });
+          } else {
+            navigate("/dashboard", { replace: true });
+          }
         } else {
           // If on root domain, redirect to app subdomain
-          redirectToApp('/dashboard');
+          const targetPath = (next && next.startsWith('/')) ? next : '/dashboard';
+          redirectToApp(targetPath);
         }
       } catch (error) {
         console.error("Auth callback error:", error);

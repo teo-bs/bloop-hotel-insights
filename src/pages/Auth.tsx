@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TopNav from "@/components/layout/TopNav";
-import AuthForm from "@/components/auth/AuthForm";
+import UnifiedAuthForm from "@/components/auth/UnifiedAuthForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 type AuthMode = "signin" | "signup" | "reset";
-import { resumePendingAfterAuth } from "@/lib/savePreview";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function AuthPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>("signin");
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const path = location.pathname;
@@ -23,43 +23,35 @@ export default function AuthPage() {
     else setMode("signin");
   }, [location.pathname, location.search]);
 
+  // Redirect authenticated users away from auth pages
   useEffect(() => {
-    // Redirect to dashboard if already signed in or upon sign-in
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (data.session) {
-        const { redirectToApp } = await import("@/utils/domain");
-        redirectToApp('/dashboard');
+    if (!loading && user && location.pathname !== '/auth/callback') {
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next');
+      if (next && next.startsWith('/')) {
+        navigate(next, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
       }
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange(async (event) => {
-      if (event === "SIGNED_IN") {
-        const { redirectToApp } = await import("@/utils/domain");
-        redirectToApp('/dashboard');
-      }
-    });
-    return () => {
-      sub.subscription?.unsubscribe();
-    };
-  }, [navigate]);
-
-  async function handleSuccess() {
-    try {
-      const did = await resumePendingAfterAuth();
-      if (!did) {
-        const { redirectToApp } = await import("@/utils/domain");
-        redirectToApp('/dashboard');
-      }
-    } catch {
-      const { redirectToApp } = await import("@/utils/domain");
-      redirectToApp('/dashboard');
     }
+  }, [user, loading, location.pathname, location.search, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gpt5-gradient animate-gpt5-pan">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <>
       <TopNav />
       <div className="min-h-[calc(100vh-56px)] flex items-center justify-center p-6 md:p-10 bg-gpt5-gradient animate-gpt5-pan">
-        <AuthForm mode={mode} onModeChange={setMode} onSuccess={handleSuccess} />
+        <UnifiedAuthForm mode={mode} onModeChange={setMode} />
       </div>
     </>
   );

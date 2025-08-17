@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getPlacesPreview, getPlaceSuggestions } from "@/lib/api/googlePlaces";
 import { openIntegrationsModal } from "@/lib/actions";
 import { redirectToApp } from "@/utils/domain";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 export default function Index() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);

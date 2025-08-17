@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import AuthForm from "./AuthForm";
+import UnifiedAuthForm from "./UnifiedAuthForm";
 import { resumePendingAfterAuth } from "@/lib/savePreview";
 
 type AuthMode = "signin" | "signup" | "reset";
@@ -29,7 +29,7 @@ export default function AuthModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="p-0 bg-white/15 backdrop-blur-md border-0 shadow-none modal-overlay">
         <div id="auth-modal" className="max-w-[440px] w-[88vw] mx-auto">
-          <AuthForm
+          <UnifiedAuthForm
             mode={mode}
             onModeChange={setMode}
             onSuccess={async () => {

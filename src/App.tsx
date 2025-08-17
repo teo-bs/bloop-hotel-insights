@@ -7,8 +7,9 @@ import { BrowserRouter } from "react-router-dom";
 import GlobalActions from "./components/GlobalActions";
 import IntegrationsModal from "@/components/integrations/IntegrationsModal";
 import CSVUploadModal from "@/components/upload/CSVUploadModal";
-import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
+import AuthModal from "@/components/auth/AuthModal";
 import DomainRouter from "@/components/DomainRouter";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -19,12 +20,14 @@ const App = () => (
       <Sonner />
       <GlobalActions />
       <BrowserRouter>
-        {/* Global modals */}
-        <UnifiedAuthModal />
-        <IntegrationsModal />
-        <CSVUploadModal />
-        {/* Domain-aware routing */}
-        <DomainRouter />
+        <AuthProvider>
+          {/* Global modals */}
+          <AuthModal />
+          <IntegrationsModal />
+          <CSVUploadModal />
+          {/* Domain-aware routing */}
+          <DomainRouter />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

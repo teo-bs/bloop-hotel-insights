@@ -3,20 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck, User } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { getAuthRedirectUrl } from "@/lib/auth-config";
+import { useAuth } from "@/contexts/AuthContext";
 
 type AuthMode = "signin" | "signup" | "reset";
 
-interface NewAuthFormProps {
+interface UnifiedAuthFormProps {
   mode: AuthMode;
   onModeChange?: (mode: AuthMode) => void;
   onSuccess?: () => void;
 }
 
-export default function NewAuthForm({ mode, onModeChange, onSuccess }: NewAuthFormProps) {
+export default function UnifiedAuthForm({ mode, onModeChange, onSuccess }: UnifiedAuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -25,7 +23,8 @@ export default function NewAuthForm({ mode, onModeChange, onSuccess }: NewAuthFo
   const [resetSent, setResetSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [capsLock, setCapsLock] = useState(false);
-  const { toast } = useToast();
+  
+  const { signInWithPassword, signUp, signInWithGoogle, resetPassword } = useAuth();
 
   const passwordStrength = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
 
@@ -33,15 +32,11 @@ export default function NewAuthForm({ mode, onModeChange, onSuccess }: NewAuthFo
     setLoading(true);
     setErrorMessage(null);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: getAuthRedirectUrl() }
-      });
+      const { error } = await signInWithGoogle();
       if (error) throw error;
     } catch (err: any) {
       const msg = err?.message || "Google auth failed";
       setErrorMessage(msg);
-      toast({ title: "Google auth failed", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -54,44 +49,21 @@ export default function NewAuthForm({ mode, onModeChange, onSuccess }: NewAuthFo
     
     try {
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            throw new Error("Incorrect email or password.");
-          }
-          throw error;
-        }
-        toast({ title: "Welcome back 👋", description: "You're signed in." });
+        const { error } = await signInWithPassword(email, password);
+        if (error) throw error;
         onSuccess?.();
       } else if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { 
-            data: fullName ? { full_name: fullName } : undefined,
-            emailRedirectTo: getAuthRedirectUrl()
-          },
-        });
-        if (error) {
-          if (error.message.includes("already registered")) {
-            throw new Error("Account exists via Google—use Continue with Google or reset your password.");
-          }
-          throw error;
-        }
-        toast({ title: "Account created. You're all set.", description: "Welcome to Padu!" });
+        const { error } = await signUp(email, password, fullName);
+        if (error) throw error;
         onSuccess?.();
       } else if (mode === "reset") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/update-password`
-        });
+        const { error } = await resetPassword(email);
         if (error) throw error;
         setResetSent(true);
-        toast({ title: "Check your email for a reset link.", description: "We sent password reset instructions." });
       }
     } catch (err: any) {
       const msg = err?.message || "Authentication failed";
       setErrorMessage(msg);
-      toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }

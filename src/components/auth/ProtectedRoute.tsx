@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -16,7 +16,8 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace state={{ from: location }} />;
+    const next = location.pathname + location.search;
+    return <Navigate to={`/auth?next=${encodeURIComponent(next)}`} replace />;
   }
 
   return <>{children}</>;
