@@ -13,38 +13,41 @@ export default function AuthCallback() {
   useEffect(() => {
     async function handleAuthCallback() {
       try {
-        // Wait a bit for Supabase to process the URL hash
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Let Supabase handle the session from URL automatically
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Handle OAuth callback with retries for session detection
+        const maxRetries = 3;
+        let session = null;
+        let error = null;
+
+        // Give Supabase time to process OAuth callback and retry if needed
+        for (let i = 0; i < maxRetries; i++) {
+          await new Promise(resolve => setTimeout(resolve, i === 0 ? 100 : 500));
+          const result = await supabase.auth.getSession();
+          session = result.data.session;
+          error = result.error;
+          
+          if (session || error) break;
+          console.log(`Session retry ${i + 1}/${maxRetries}`);
+        }
         
         if (error) {
           console.error("Auth callback error:", error);
           toast({ title: "Authentication failed", description: error.message, variant: "destructive" });
-          // Redirect to root domain on error
-          if (isAppSubdomain()) {
-            redirectToRoot('/');
-          } else {
-            navigate("/", { replace: true });
-          }
+          navigate('/auth', { replace: true });
           return;
         }
 
         if (!session) {
-          console.log("No session found, redirecting to home");
-          // Redirect to root domain if no session
-          if (isAppSubdomain()) {
-            redirectToRoot('/');
-          } else {
-            navigate("/", { replace: true });
-          }
+          console.log("No session found after retries, redirecting to auth");
+          navigate('/auth', { replace: true });
           return;
         }
 
+        console.log("Session established successfully:", session.user.id);
+
         // Clean up URL by removing the auth hash/query params
-        if (window.location.hash || window.location.search.includes('access_token')) {
-          window.history.replaceState({}, document.title, window.location.pathname);
+        if (window.location.hash || window.location.search.includes('code=') || window.location.search.includes('access_token')) {
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
         }
 
         // Dispatch success event
@@ -70,32 +73,21 @@ export default function AuthCallback() {
         const params = new URLSearchParams(location.search);
         const next = params.get('next');
         
-        // Default redirect logic
-        if (isAppSubdomain()) {
-          if (next && next.startsWith('/')) {
-            navigate(next, { replace: true });
-          } else {
-            navigate("/dashboard", { replace: true });
-          }
+        // Always redirect to dashboard on app subdomain
+        if (next && next.startsWith('/')) {
+          navigate(next, { replace: true });
         } else {
-          // If on root domain, redirect to app subdomain
-          const targetPath = (next && next.startsWith('/')) ? next : '/dashboard';
-          redirectToApp(targetPath);
+          navigate('/dashboard', { replace: true });
         }
       } catch (error) {
         console.error("Auth callback error:", error);
         toast({ title: "Authentication error", description: "Please try signing in again.", variant: "destructive" });
-        // Redirect to root domain on error
-        if (isAppSubdomain()) {
-          redirectToRoot('/');
-        } else {
-          navigate("/", { replace: true });
-        }
+        navigate('/auth', { replace: true });
       }
     }
 
     handleAuthCallback();
-  }, [navigate, toast]);
+  }, [navigate, toast, location.search]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gpt5-gradient animate-gpt5-pan">

@@ -76,18 +76,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Get initial session with retry logic
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
+        if (error) {
+          console.error("Error getting session:", error);
+        }
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      } catch (error) {
+        console.error("Session initialization error:", error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    getInitialSession();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
+        
+        console.log("Auth state change:", event, session?.user?.id);
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -101,6 +118,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (location.pathname.startsWith('/auth') && location.pathname !== '/auth/callback') {
             await handleAuthSuccess();
           }
+        } else if (event === 'SIGNED_OUT') {
+          // Clear any cached data
+          setSession(null);
+          setUser(null);
         }
       }
     );
@@ -118,6 +139,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (error.message.includes("Invalid login credentials")) {
           return { error: new Error("Incorrect email or password.") };
         }
+        if (error.message.includes("Email not confirmed")) {
+          return { error: new Error("Please check your email and click the confirmation link before signing in.") };
+        }
         return { error };
       }
       toast({ title: "Welcome back 👋", description: "You're signed in." });
@@ -129,7 +153,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { 
@@ -137,13 +161,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
           emailRedirectTo: getAuthRedirectUrl()
         },
       });
+      
       if (error) {
         if (error.message.includes("already registered")) {
           return { error: new Error("Account exists via Google—use Continue with Google or reset your password.") };
         }
         return { error };
       }
-      toast({ title: "Account created. You're all set.", description: "Welcome to Padu!" });
+      
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        toast({ 
+          title: "Check your email", 
+          description: "We sent you a confirmation link to complete your signup." 
+        });
+      } else {
+        toast({ title: "Account created. You're all set.", description: "Welcome to Padu!" });
+      }
+      
       return { error: null };
     } catch (err: any) {
       return { error: err };
