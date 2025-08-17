@@ -16,7 +16,7 @@ export default function Index() {
   const [result, setResult] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
 
   // Autocomplete state
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -173,7 +173,11 @@ export default function Index() {
 
       {/* Top-right persistent Login/Dashboard */}
         <div className="fixed right-6 top-6 z-30">
-          {user ? (
+          {authLoading ? (
+            <Button variant="ghost" className="rounded-full" disabled>
+              <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            </Button>
+          ) : session ? (
             <Button
               id="btn-top-dashboard"
               variant="ghost"
@@ -187,9 +191,9 @@ export default function Index() {
               id="btn-top-login"
               variant="ghost"
               className="rounded-full"
-              onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signin" } }))}
+              onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}
             >
-              Login
+              Get Started
             </Button>
           )}
         </div>

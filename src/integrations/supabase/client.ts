@@ -8,9 +8,41 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Custom cookie storage for cross-domain support
+class CookieStorage {
+  getItem(key: string): string | null {
+    if (typeof document === 'undefined') return null;
+    const name = key + '=';
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) === 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return null;
+  }
+
+  setItem(key: string, value: string): void {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${key}=${value}; path=/; domain=.getpadu.com; SameSite=Lax; Secure`;
+  }
+
+  removeItem(key: string): void {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.getpadu.com;`;
+  }
+}
+
+const cookieStorage = new CookieStorage();
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: cookieStorage,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
