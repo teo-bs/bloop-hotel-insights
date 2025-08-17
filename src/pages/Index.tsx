@@ -461,7 +461,7 @@ export default function Index() {
                     {result ? badge : "Medium impact"}
                   </span>
                 </div>
-                <div className="text-sm font-medium text-white">
+                <div className="text-sm font-medium text-black">
                   {result ? insight : "Standardize breakfast quality"}
                 </div>
                 <div className="mt-2 text-xs text-muted-foreground">
