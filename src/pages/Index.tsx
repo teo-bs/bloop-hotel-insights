@@ -131,19 +131,67 @@ export default function Index() {
     }
   }
 
-  // Derived KPIs and simple insight from preview
+  // Derived KPIs and sophisticated insight from preview
   const revs = (result?.reviews as any[]) || [];
   const avgVal = revs.length ? revs.reduce((s: number, r: any) => s + (Number(r.rating) || 0), 0) / revs.length : 4.3;
   const avgDisplay = avgVal.toFixed(1);
   const totalDisplay = (result?.place?.totalReviews as number) ?? (revs.length || 12482);
   const positivePct = revs.length ? Math.round((revs.filter((r: any) => Number(r.rating) >= 4).length / revs.length) * 100) : 72;
-  const textBlob = revs.map((r: any) => String(r.text || "")).join(" ").toLowerCase();
-  const hasLow = revs.some((r: any) => Number(r.rating) <= 3);
+  
+  // Enhanced insight generation from actual review content
   let insight = "Standardize breakfast quality";
   let badge = "Medium impact";
-  if (/(check-?in|reception|queue)/.test(textBlob) && hasLow) { insight = "Improve check‑in speed"; badge = "High impact"; }
-  else if (/(wifi|wi-?fi|internet)/.test(textBlob) && hasLow) { insight = "Upgrade Wi‑Fi reliability"; badge = "High impact"; }
-  else if (/(clean|dirty|smell|mold)/.test(textBlob)) { insight = "Deepen housekeeping checks"; badge = "Medium impact"; }
+  
+  if (revs.length > 0) {
+    const textBlob = revs.map((r: any) => String(r.text || "")).join(" ").toLowerCase();
+    const negativeRevs = revs.filter((r: any) => Number(r.rating) <= 3);
+    const lowRatingCount = negativeRevs.length;
+    
+    // Check-in issues analysis
+    const checkinKeywords = ['check-in', 'check in', 'checkin', 'reception', 'front desk', 'lobby', 'waiting', 'queue'];
+    const checkinMentions = checkinKeywords.filter(keyword => textBlob.includes(keyword)).length;
+    const checkinNegative = negativeRevs.some(r => checkinKeywords.some(kw => (r.text || "").toLowerCase().includes(kw)));
+    
+    // Wi-Fi issues analysis  
+    const wifiKeywords = ['wifi', 'wi-fi', 'wi fi', 'internet', 'connection', 'network'];
+    const wifiMentions = wifiKeywords.filter(keyword => textBlob.includes(keyword)).length;
+    const wifiNegative = negativeRevs.some(r => wifiKeywords.some(kw => (r.text || "").toLowerCase().includes(kw)));
+    
+    // Cleanliness issues analysis
+    const cleanKeywords = ['clean', 'dirty', 'dust', 'stain', 'smell', 'mold', 'bathroom', 'housekeeping'];
+    const cleanMentions = cleanKeywords.filter(keyword => textBlob.includes(keyword)).length;
+    const cleanNegative = negativeRevs.some(r => cleanKeywords.some(kw => (r.text || "").toLowerCase().includes(kw)));
+    
+    // Service issues analysis
+    const serviceKeywords = ['service', 'staff', 'rude', 'helpful', 'friendly', 'attitude'];
+    const serviceMentions = serviceKeywords.filter(keyword => textBlob.includes(keyword)).length;
+    const serviceNegative = negativeRevs.some(r => serviceKeywords.some(kw => (r.text || "").toLowerCase().includes(kw)));
+    
+    // Prioritize insights based on frequency and negative sentiment
+    if (checkinMentions >= 2 && checkinNegative) {
+      insight = "Improve check‑in speed";
+      badge = "High impact";
+    } else if (wifiMentions >= 2 && wifiNegative) {
+      insight = "Upgrade Wi‑Fi reliability";
+      badge = "High impact";
+    } else if (cleanMentions >= 2 && cleanNegative) {
+      insight = "Deepen housekeeping checks";
+      badge = "Medium impact";
+    } else if (serviceMentions >= 2 && serviceNegative) {
+      insight = "Enhance staff training";
+      badge = "High impact";
+    } else if (textBlob.includes('breakfast') || textBlob.includes('food')) {
+      const foodNegative = negativeRevs.some(r => ['breakfast', 'food', 'buffet', 'dining'].some(kw => (r.text || "").toLowerCase().includes(kw)));
+      if (foodNegative) {
+        insight = "Improve breakfast quality";
+        badge = "Medium impact";
+      }
+    } else if (lowRatingCount > 0) {
+      // Fallback to most common complaint theme
+      insight = "Address guest satisfaction";
+      badge = lowRatingCount >= 2 ? "High impact" : "Medium impact";
+    }
+  }
 
   // Simple count-up on reveal
   function CountUp({ value, duration = 800, decimals = 0 }: { value: number; duration?: number; decimals?: number }) {
@@ -200,11 +248,11 @@ export default function Index() {
 
       {/* Glassmorphic centered nav with proper spacing */}
       <nav id="nav-glass" aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
-        <div className="flex items-center gap-8 rounded-full border border-input bg-card/70 px-8 py-3 backdrop-blur-md shadow-lg">
-          <div className="h-3 w-3 rounded-full bg-foreground/50" aria-hidden="true" />
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="/#docs" className="rounded-full px-3 py-2 hover:text-foreground focus-ring transition-colors">Docs</a>
-            <a href="/#pricing" className="rounded-full px-3 py-2 hover:text-foreground focus-ring transition-colors">Pricing</a>
+        <div className="flex items-center gap-4 md:gap-8 rounded-full border border-input bg-card/70 px-4 md:px-8 py-3 backdrop-blur-md shadow-lg max-w-[calc(100vw-200px)]">
+          <div className="h-3 w-3 rounded-full bg-foreground/50 flex-shrink-0" aria-hidden="true" />
+          <div className="flex items-center gap-3 md:gap-6 text-sm text-muted-foreground">
+            <a href="/#docs" className="rounded-full px-2 md:px-3 py-2 hover:text-foreground focus-ring transition-colors whitespace-nowrap">Docs</a>
+            <a href="/#pricing" className="rounded-full px-2 md:px-3 py-2 hover:text-foreground focus-ring transition-colors whitespace-nowrap">Pricing</a>
           </div>
         </div>
       </nav>
@@ -413,7 +461,7 @@ export default function Index() {
                     {result ? badge : "Medium impact"}
                   </span>
                 </div>
-                <div className="text-sm font-medium text-foreground">
+                <div className="text-sm font-medium text-white">
                   {result ? insight : "Standardize breakfast quality"}
                 </div>
                 <div className="mt-2 text-xs text-muted-foreground">
