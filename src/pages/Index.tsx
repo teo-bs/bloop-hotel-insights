@@ -198,20 +198,20 @@ export default function Index() {
           )}
         </div>
 
-      {/* Glassmorphic centered nav */}
+      {/* Glassmorphic centered nav with proper spacing */}
       <nav id="nav-glass" aria-label="Primary" className="pointer-events-auto fixed left-1/2 top-6 z-20 -translate-x-1/2">
-        <div className="flex items-center gap-6 rounded-full border border-input bg-card/70 px-5 py-2 backdrop-blur-md shadow-lg">
+        <div className="flex items-center gap-8 rounded-full border border-input bg-card/70 px-8 py-3 backdrop-blur-md shadow-lg">
           <div className="h-3 w-3 rounded-full bg-foreground/50" aria-hidden="true" />
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <a href="/#docs" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Docs</a>
-            <a href="/#pricing" className="rounded-full px-2 py-1 hover:text-foreground focus-ring">Pricing</a>
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="/#docs" className="rounded-full px-3 py-2 hover:text-foreground focus-ring transition-colors">Docs</a>
+            <a href="/#pricing" className="rounded-full px-3 py-2 hover:text-foreground focus-ring transition-colors">Pricing</a>
           </div>
         </div>
       </nav>
 
       {/* Centered Hero */}
-      <section className="relative z-10 flex items-center justify-center">
-        <div className="w-full max-w-[860px] px-6 min-h-[calc(100vh-80px)] flex flex-col justify-center items-center gap-6 text-center relative">
+      <section className="relative z-10 flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-[860px] px-6 flex flex-col justify-center items-center gap-6 text-center relative">
           {/* Padu logo */}
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-background/70 backdrop-blur-md shadow-lg animate-[float-y_4s_ease-in-out_infinite_alternate]">
             <img
@@ -365,41 +365,73 @@ export default function Index() {
               <div className="mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs" id="insight-badge">{badge}</div>
             </div>
           </div>
-          <div id="preview-results" aria-live="polite" className="mx-auto mt-[72px] w-full max-w-[760px] text-left">
+        </div>
+      </section>
+
+      {/* Review Results Section */}
+      <section className="relative z-10 pb-20">
+        <div id="preview-results" aria-live="polite" className="mx-auto w-full max-w-[760px] px-6">
             {error && (
               <p role="alert" className="text-sm text-destructive">{error}</p>
             )}
 
             {result && (
-              <div className="rounded-2xl border bg-background/80 p-5 backdrop-blur-md shadow-xl">
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="text-lg font-semibold">{result.place?.name ?? "Unnamed place"}</div>
-                    <div className="text-sm text-muted-foreground">{result.place?.address ?? ""}</div>
+              <div className="animate-fade-in rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-[0_24px_80px_rgba(0,0,0,0.12)] p-6">
+                {/* Hotel Header with Logo */}
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-white/80 flex items-center justify-center">
+                    {result.place?.icon || result.place?.photo ? (
+                      <img 
+                        src={result.place?.icon || result.place?.photo} 
+                        alt={`${result.place?.name} logo`}
+                        className="w-12 h-12 object-contain"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                        {(result.place?.name || "H").charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                  <div className="mt-2 inline-flex items-center gap-2 text-sm sm:mt-0">
-                    <Star className="h-4 w-4 text-accent" />
-                    <span className="font-medium">{result.place?.rating ?? "-"}</span>
-                    <span className="text-muted-foreground">•</span>
-                    <span className="text-muted-foreground">{result.place?.totalReviews ?? 0} total reviews</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-bold text-foreground mb-1">{result.place?.name ?? "Unnamed place"}</h3>
+                    <p className="text-sm text-muted-foreground">{result.place?.address ?? ""}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star} 
+                            className={`h-4 w-4 ${
+                              star <= Math.floor(result.place?.rating || 0) 
+                                ? "text-yellow-400 fill-yellow-400" 
+                                : "text-muted-foreground/30"
+                            }`} 
+                          />
+                        ))}
+                      </div>
+                      <span className="font-semibold text-foreground">{result.place?.rating ?? "-"}</span>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="text-muted-foreground font-medium">{result.place?.totalReviews ?? 0} reviews</span>
+                    </div>
                   </div>
                 </div>
-                <div className="my-4 border-t" />
 
-                <ul className="space-y-4">
-                  {(result.reviews || []).slice(0, 5).map((r: any, i: number) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8">
+                {/* Reviews Section */}
+                <div className="space-y-4">
+                  {(result.reviews || []).slice(0, 3).map((r: any, i: number) => (
+                    <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                      <Avatar className="h-10 w-10 flex-shrink-0">
                         {r.profile_photo_url ? (
                           <AvatarImage src={r.profile_photo_url} alt={`${r.author_name || "Reviewer"} avatar`} />
                         ) : (
-                          <AvatarFallback>{(r.author_name || "").slice(0, 2).toUpperCase() || "G"}</AvatarFallback>
+                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                            {(r.author_name || "").slice(0, 2).toUpperCase() || "G"}
+                          </AvatarFallback>
                         )}
                       </Avatar>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <div className="truncate text-sm font-medium max-w-[200px]">{r.author_name || "Anonymous"}</div>
-                          <div className="inline-flex items-center gap-1 text-accent">
+                          <div className="inline-flex items-center gap-1 text-yellow-400">
                             {Array.from({ length: Number(r.rating || 0) }).map((_, j) => (
                               <Star key={j} className="h-3.5 w-3.5 fill-current" />
                             ))}
@@ -408,13 +440,21 @@ export default function Index() {
                         </div>
                         <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{r.text || ""}</p>
                       </div>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                  
+                  {(result.reviews || []).length > 3 && (
+                    <div className="text-center pt-2">
+                      <button className="text-sm text-primary hover:text-primary/80 transition-colors">
+                        See more reviews →
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-6 border-t border-white/10 pt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-xs text-muted-foreground">Data from Google. <span className="hidden sm:inline">No credit card required.</span></div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                      <Button
                        id="btn-save-preview"
                        onClick={handleSave}
@@ -434,17 +474,16 @@ export default function Index() {
                      </Button>
                     <Button
                       id="btn-upgrade-gbp"
-                      variant="ghost"
+                      variant="glass"
                       className="rounded-full"
                       onClick={() => openIntegrationsModal()}
                     >
-                      Connect Business Profile for full history
+                      Connect Business Profile
                     </Button>
                   </div>
                 </div>
               </div>
             )}
-          </div>
         </div>
       </section>
     </main>
