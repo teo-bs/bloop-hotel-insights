@@ -8,41 +8,139 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-// Custom cookie storage for cross-domain support
-class CookieStorage {
+// Environment-aware storage for cross-domain and development support
+class EnvironmentAwareStorage {
+  private isProduction(): boolean {
+    return window.location.hostname.includes('getpadu.com');
+  }
+
+  private isDevelopment(): boolean {
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  }
+
+  private shouldUseCookies(): boolean {
+    return this.isProduction();
+  }
+
   getItem(key: string): string | null {
     if (typeof document === 'undefined') return null;
-    const name = key + '=';
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) === ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) === 0) {
-        return c.substring(name.length, c.length);
+    
+    if (!this.shouldUseCookies()) {
+      // Use localStorage for development and preview environments
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        console.warn('Failed to get from localStorage:', error);
+        return null;
       }
     }
-    return null;
+
+    // Use cookies for production
+    try {
+      const name = key + '=';
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const ca = decodedCookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+          const value = c.substring(name.length, c.length);
+          console.debug(`Retrieved session from cookie: ${key}`);
+          return value;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.warn('Failed to get from cookie:', error);
+      return null;
+    }
   }
 
   setItem(key: string, value: string): void {
     if (typeof document === 'undefined') return;
-    document.cookie = `${key}=${value}; path=/; domain=.getpadu.com; SameSite=Lax; Secure`;
+    
+    if (!this.shouldUseCookies()) {
+      // Use localStorage for development and preview environments
+      try {
+        localStorage.setItem(key, value);
+        console.debug(`Stored session in localStorage: ${key}`);
+        return;
+      } catch (error) {
+        console.warn('Failed to set in localStorage:', error);
+        return;
+      }
+    }
+
+    // Use cookies for production with cross-domain support
+    try {
+      const cookieOptions = [
+        `${key}=${value}`,
+        'path=/',
+        'domain=.getpadu.com',
+        'SameSite=Lax',
+        'Secure'
+      ].join('; ');
+      
+      document.cookie = cookieOptions;
+      console.debug(`Stored session in cookie: ${key}`);
+    } catch (error) {
+      console.warn('Failed to set cookie:', error);
+      // Fallback to localStorage if cookie fails
+      try {
+        localStorage.setItem(key, value);
+        console.debug(`Fallback: stored session in localStorage: ${key}`);
+      } catch (fallbackError) {
+        console.error('Failed to set both cookie and localStorage:', fallbackError);
+      }
+    }
   }
 
   removeItem(key: string): void {
     if (typeof document === 'undefined') return;
-    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.getpadu.com;`;
+    
+    if (!this.shouldUseCookies()) {
+      // Remove from localStorage for development and preview environments
+      try {
+        localStorage.removeItem(key);
+        console.debug(`Removed session from localStorage: ${key}`);
+        return;
+      } catch (error) {
+        console.warn('Failed to remove from localStorage:', error);
+        return;
+      }
+    }
+
+    // Remove from cookies for production
+    try {
+      const cookieOptions = [
+        `${key}=`,
+        'expires=Thu, 01 Jan 1970 00:00:00 UTC',
+        'path=/',
+        'domain=.getpadu.com'
+      ].join('; ');
+      
+      document.cookie = cookieOptions;
+      console.debug(`Removed session from cookie: ${key}`);
+    } catch (error) {
+      console.warn('Failed to remove cookie:', error);
+      // Also try to remove from localStorage as fallback
+      try {
+        localStorage.removeItem(key);
+        console.debug(`Fallback: removed session from localStorage: ${key}`);
+      } catch (fallbackError) {
+        console.error('Failed to remove from both cookie and localStorage:', fallbackError);
+      }
+    }
   }
 }
 
-const cookieStorage = new CookieStorage();
+const authStorage = new EnvironmentAwareStorage();
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: cookieStorage,
+    storage: authStorage,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
