@@ -5,7 +5,7 @@ import NotFound from "@/pages/NotFound";
 import AuthGuard from "@/components/auth/AuthGuard";
 import AuthCallback from "@/pages/AuthCallback";
 import UpdatePasswordPage from "@/pages/UpdatePassword";
-import Dashboard from "@/pages/Dashboard";
+import NewDashboard from "@/pages/NewDashboard";
 import UploadPage from "@/pages/Upload";
 import ReviewsPage from "@/pages/Reviews";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -45,7 +45,7 @@ export default function DomainRouter() {
           element={
             <ProtectedRoute>
               <AppLayout>
-                <Dashboard />
+                <NewDashboard />
               </AppLayout>
             </ProtectedRoute>
           }
