@@ -41,7 +41,7 @@ export default function DashboardLayout({
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20">
+    <div className="min-h-screen bg-gpt5-gradient animate-gpt5-pan">
       {/* Top Navbar */}
       <header 
         className={`sticky top-0 z-50 w-full transition-all duration-300 ${

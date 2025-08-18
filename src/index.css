@@ -242,6 +242,47 @@ All colors MUST be HSL.
   .hover\:shadow-glow:hover {
     box-shadow: 0 12px 46px hsl(var(--primary) / 0.35), 0 0 0 1px hsl(var(--primary) / 0.28);
   }
+
+  /* React Flow Dashboard Styles */
+  .react-flow-dashboard .react-flow__viewport {
+    transition: transform 0.2s ease;
+  }
+
+  .react-flow-dashboard .react-flow__node {
+    cursor: grab;
+  }
+
+  .react-flow-dashboard .react-flow__node.dragging {
+    cursor: grabbing;
+  }
+
+  .react-flow-dashboard .react-flow__controls {
+    bottom: 20px;
+    left: 20px;
+  }
+
+  .controls-minimal .react-flow__controls-button {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(16px);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    transition: all 0.2s ease;
+  }
+
+  .controls-minimal .react-flow__controls-button:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .controls-minimal .react-flow__controls-button svg {
+    width: 16px;
+    height: 16px;
+    color: #64748b;
+  }
 }
 
 /* Floating mini-cards positioning and motion */
