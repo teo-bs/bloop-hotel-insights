@@ -7,6 +7,10 @@
  */
 export function isAppSubdomain(): boolean {
   const hostname = window.location.hostname;
+  // Handle Lovable preview URLs
+  if (hostname.includes('lovableproject.com')) {
+    return true; // Treat all Lovable URLs as app subdomain
+  }
   return hostname.startsWith('app.') || hostname === 'localhost' || hostname === '127.0.0.1';
 }
 
@@ -17,6 +21,11 @@ export function getAppDomain(): string {
   const hostname = window.location.hostname;
   const protocol = window.location.protocol;
   const port = window.location.port;
+  
+  // Handle Lovable preview URLs - stay on same domain
+  if (hostname.includes('lovableproject.com')) {
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  }
   
   // In development, use localhost
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
