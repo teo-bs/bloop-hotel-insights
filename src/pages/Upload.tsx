@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 type CsvRow = {
   review_date?: string;
@@ -190,23 +191,25 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="p-6 md:p-10 animate-fade-in">
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Upload Reviews (CSV)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              Expected headers: review_date,rating,rating_scale,title,text,author,language,source,external_id,url,hotel_name
-            </p>
-          </div>
-          <Input type="file" accept=".csv,text/csv" onChange={onFileChange} />
-          <Button onClick={handleUpload} variant="hero" disabled={!file || processing}>
-            {processing ? "Processing..." : "Start upload"}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+    <DashboardLayout activeTab="home">
+      <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8">
+        <Card className="max-w-2xl mx-auto bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
+          <CardHeader className="p-6">
+            <CardTitle className="text-2xl font-bold text-slate-900">Upload Reviews (CSV)</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 pt-0 space-y-4">
+            <div>
+              <p className="text-sm text-slate-600">
+                Expected headers: review_date,rating,rating_scale,title,text,author,language,source,external_id,url,hotel_name
+              </p>
+            </div>
+            <Input type="file" accept=".csv,text/csv" onChange={onFileChange} />
+            <Button onClick={handleUpload} className="w-full" disabled={!file || processing}>
+              {processing ? "Processing..." : "Start upload"}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }

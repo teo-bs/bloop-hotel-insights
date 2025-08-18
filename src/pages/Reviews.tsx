@@ -16,6 +16,7 @@ import { useReviewFilters, setReviewFilters, resetReviewFilters, type DatePreset
 import { filterReviews } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Filter, X } from "lucide-react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 function toStr(d: Date) { return d.toISOString().slice(0,10); }
 
@@ -128,176 +129,182 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 xl:p-10 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Reviews</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={resetReviewFilters} aria-label="Clear filters"><X className="h-4 w-4" /> Clear</Button>
+    <DashboardLayout activeTab="home">
+      <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-slate-900">Reviews</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={resetReviewFilters} aria-label="Clear filters">
+              <X className="h-4 w-4 mr-2" /> Clear
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Filter bar */}
-      <Card id="reviews-filterbar">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2"><Filter className="h-4 w-4" /> Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 items-end">
-            {/* Date preset */}
-            <div className="space-y-1">
-              <Label htmlFor="date-preset">Date range</Label>
-              <div className="flex items-center gap-2">
-                <Select value={filters.datePreset} onValueChange={onPresetChange}>
-                  <SelectTrigger id="date-preset" className="w-40"><SelectValue placeholder="Preset" /></SelectTrigger>
-                  <SelectContent className="z-50 bg-popover">
-                    <SelectItem value="last_7">Last 7 days</SelectItem>
-                    <SelectItem value="last_30">Last 30 days</SelectItem>
-                    <SelectItem value="last_90">Last 90 days</SelectItem>
-                    <SelectItem value="custom">Custom</SelectItem>
-                  </SelectContent>
-                </Select>
+        {/* Filter bar */}
+        <Card id="reviews-filterbar" className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
+          <CardHeader className="pb-2 p-6">
+            <CardTitle className="text-base flex items-center gap-2 text-slate-900">
+              <Filter className="h-4 w-4" /> Filters
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 pt-0 space-y-4">
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 items-end">
+              {/* Date preset */}
+              <div className="space-y-1">
+                <Label htmlFor="date-preset">Date range</Label>
+                <div className="flex items-center gap-2">
+                  <Select value={filters.datePreset} onValueChange={onPresetChange}>
+                    <SelectTrigger id="date-preset" className="w-40"><SelectValue placeholder="Preset" /></SelectTrigger>
+                    <SelectContent className="z-50 bg-popover">
+                      <SelectItem value="last_7">Last 7 days</SelectItem>
+                      <SelectItem value="last_30">Last 30 days</SelectItem>
+                      <SelectItem value="last_90">Last 90 days</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="icon" aria-label="Open calendar"><CalendarIcon className="h-4 w-4" /></Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
+                      <div className="p-3 pointer-events-auto">
+                        <Calendar
+                          mode="range"
+                          selected={{ from: new Date(filters.start), to: new Date(filters.end) } as any}
+                          onSelect={(r: any) => {
+                            const start = r?.from ? toStr(r.from) : filters.start;
+                            const end = r?.to ? toStr(r.to) : start;
+                            setReviewFilters({ datePreset: "custom", start, end });
+                            setGlobalDateFilter({ start, end });
+                          }}
+                          initialFocus
+                          className={cn("p-0 pointer-events-auto")}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {/* Platforms */}
+              <div className="space-y-1">
+                <Label>Platform</Label>
+                <ToggleGroup type="multiple" value={filters.platforms} onValueChange={onPlatformToggle} className="flex flex-wrap gap-2">
+                  {Object.keys(PLATFORM_LABELS).map((p) => (
+                    <ToggleGroupItem key={p} value={p} aria-label={PLATFORM_LABELS[p as ReviewPlatform]}>
+                      {PLATFORM_LABELS[p as ReviewPlatform]}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </div>
+
+              {/* Sentiment */}
+              <div className="space-y-1">
+                <Label>Sentiment</Label>
+                <ToggleGroup type="single" value={filters.sentiment} onValueChange={onSentimentToggle} className="flex gap-2">
+                  {SENTIMENT_OPTIONS.map((s) => (
+                    <ToggleGroupItem key={s.val} value={s.val} aria-label={`Sentiment ${s.label}`}>
+                      {s.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </div>
+
+              {/* Topics */}
+              <div className="space-y-1">
+                <Label>Topic</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="icon" aria-label="Open calendar"><CalendarIcon className="h-4 w-4" /></Button>
+                    <Button variant="outline" className="justify-between w-full">
+                      {filters.topics.length ? `${filters.topics.length} selected` : "All topics"}
+                    </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
-                    <div className="p-3 pointer-events-auto">
-                      <Calendar
-                        mode="range"
-                        selected={{ from: new Date(filters.start), to: new Date(filters.end) } as any}
-                        onSelect={(r: any) => {
-                          const start = r?.from ? toStr(r.from) : filters.start;
-                          const end = r?.to ? toStr(r.to) : start;
-                          setReviewFilters({ datePreset: "custom", start, end });
-                          setGlobalDateFilter({ start, end });
-                        }}
-                        initialFocus
-                        className={cn("p-0 pointer-events-auto")}
-                      />
+                  <PopoverContent className="z-50 bg-popover w-64" align="start">
+                    <div className="max-h-64 overflow-auto pr-1">
+                      {allTopics.map((t) => (
+                        <label key={t} className="flex items-center gap-2 py-1 cursor-pointer">
+                          <Checkbox checked={filters.topics.includes(t)} onCheckedChange={(c) => onTopicToggle(t, Boolean(c))} aria-label={`Topic ${t}`} />
+                          <span className="capitalize text-sm">{t}</span>
+                        </label>
+                      ))}
                     </div>
                   </PopoverContent>
                 </Popover>
               </div>
-            </div>
 
-            {/* Platforms */}
-            <div className="space-y-1">
-              <Label>Platform</Label>
-              <ToggleGroup type="multiple" value={filters.platforms} onValueChange={onPlatformToggle} className="flex flex-wrap gap-2">
-                {Object.keys(PLATFORM_LABELS).map((p) => (
-                  <ToggleGroupItem key={p} value={p} aria-label={PLATFORM_LABELS[p as ReviewPlatform]}>
-                    {PLATFORM_LABELS[p as ReviewPlatform]}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+              {/* Search */}
+              <div className="space-y-1 col-span-1 xl:col-span-1">
+                <Label htmlFor="reviews-search">Search</Label>
+                <Input id="reviews-search" placeholder="Search text or title" value={search} onChange={(e) => setSearch(e.target.value)} />
+              </div>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Sentiment */}
-            <div className="space-y-1">
-              <Label>Sentiment</Label>
-              <ToggleGroup type="single" value={filters.sentiment} onValueChange={onSentimentToggle} className="flex gap-2">
-                {SENTIMENT_OPTIONS.map((s) => (
-                  <ToggleGroupItem key={s.val} value={s.val} aria-label={`Sentiment ${s.label}`}>
-                    {s.label}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-
-            {/* Topics */}
-            <div className="space-y-1">
-              <Label>Topic</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-between w-full">
-                    {filters.topics.length ? `${filters.topics.length} selected` : "All topics"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-50 bg-popover w-64" align="start">
-                  <div className="max-h-64 overflow-auto pr-1">
-                    {allTopics.map((t) => (
-                      <label key={t} className="flex items-center gap-2 py-1 cursor-pointer">
-                        <Checkbox checked={filters.topics.includes(t)} onCheckedChange={(c) => onTopicToggle(t, Boolean(c))} aria-label={`Topic ${t}`} />
-                        <span className="capitalize text-sm">{t}</span>
-                      </label>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Search */}
-            <div className="space-y-1 col-span-1 xl:col-span-1">
-              <Label htmlFor="reviews-search">Search</Label>
-              <Input id="reviews-search" placeholder="Search text or title" value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
+        {/* Results meta */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-slate-600">
+            Showing <span className="font-medium">{filtered.length}</span> result{filtered.length === 1 ? "" : "s"}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Results meta */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Showing <span className="font-medium">{filtered.length}</span> result{filtered.length === 1 ? "" : "s"}
         </div>
-      </div>
 
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {filtered.length === 0 ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">No reviews match your filters. Try clearing some filters.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table id="reviews-table" ref={tableRef as any} tabIndex={-1}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[110px]">Date</TableHead>
-                    <TableHead className="min-w-[120px]">Platform</TableHead>
-                    <TableHead className="min-w-[80px]">Rating</TableHead>
-                    <TableHead className="min-w-[100px]">Sentiment</TableHead>
-                    <TableHead className="min-w-[200px]">Title</TableHead>
-                    <TableHead>Text</TableHead>
-                    <TableHead className="min-w-[180px]">Topics</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((r) => {
-                    const s = (r as any).sentiment as Sentiment | undefined;
-                    const derived: Sentiment = s || (r.rating >= 4 ? "positive" : r.rating === 3 ? "neutral" : "negative");
-                    const topics = ((r as any).topics as string[] | undefined) || [];
-                    return (
-                      <TableRow key={r.id}>
-                        <TableCell className="whitespace-nowrap">{r.date}</TableCell>
-                        <TableCell className="capitalize">{r.platform}</TableCell>
-                        <TableCell>{r.rating.toFixed(1)}</TableCell>
-                        <TableCell>
-                          <span
-                            className={cn(
-                              "px-2 py-0.5 rounded text-xs",
-                              derived === "positive" && "bg-green-500/15 text-green-600 dark:text-green-400",
-                              derived === "neutral" && "bg-foreground/10 text-foreground/70",
-                              derived === "negative" && "bg-red-500/15 text-red-600 dark:text-red-400"
-                            )}
-                            aria-label={`Sentiment ${derived}`}
-                          >
-                            {derived}
-                          </span>
-                        </TableCell>
-                        <TableCell className="truncate max-w-[260px]">{r.title || "—"}</TableCell>
-                        <TableCell className="truncate max-w-[520px]">{r.text}</TableCell>
-                        <TableCell className="truncate max-w-[260px]">
-                          {topics.length ? topics.join(", ") : "—"}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+        {/* Table */}
+        <Card className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
+          <CardContent className="p-0">
+            {filtered.length === 0 ? (
+              <div className="p-8 text-center text-sm text-slate-600">No reviews match your filters. Try clearing some filters.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table id="reviews-table" ref={tableRef as any} tabIndex={-1}>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[110px]">Date</TableHead>
+                      <TableHead className="min-w-[120px]">Platform</TableHead>
+                      <TableHead className="min-w-[80px]">Rating</TableHead>
+                      <TableHead className="min-w-[100px]">Sentiment</TableHead>
+                      <TableHead className="min-w-[200px]">Title</TableHead>
+                      <TableHead>Text</TableHead>
+                      <TableHead className="min-w-[180px]">Topics</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((r) => {
+                      const s = (r as any).sentiment as Sentiment | undefined;
+                      const derived: Sentiment = s || (r.rating >= 4 ? "positive" : r.rating === 3 ? "neutral" : "negative");
+                      const topics = ((r as any).topics as string[] | undefined) || [];
+                      return (
+                        <TableRow key={r.id}>
+                          <TableCell className="whitespace-nowrap">{r.date}</TableCell>
+                          <TableCell className="capitalize">{r.platform}</TableCell>
+                          <TableCell>{r.rating.toFixed(1)}</TableCell>
+                          <TableCell>
+                            <span
+                              className={cn(
+                                "px-2 py-0.5 rounded text-xs",
+                                derived === "positive" && "bg-green-500/15 text-green-600 dark:text-green-400",
+                                derived === "neutral" && "bg-foreground/10 text-foreground/70",
+                                derived === "negative" && "bg-red-500/15 text-red-600 dark:text-red-400"
+                              )}
+                              aria-label={`Sentiment ${derived}`}
+                            >
+                              {derived}
+                            </span>
+                          </TableCell>
+                          <TableCell className="truncate max-w-[260px]">{r.title || "—"}</TableCell>
+                          <TableCell className="truncate max-w-[520px]">{r.text}</TableCell>
+                          <TableCell className="truncate max-w-[260px]">
+                            {topics.length ? topics.join(", ") : "—"}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }

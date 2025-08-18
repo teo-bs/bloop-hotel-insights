@@ -9,8 +9,8 @@ import Dashboard from "@/pages/Dashboard";
 import UploadPage from "@/pages/Upload";
 import ReviewsPage from "@/pages/Reviews";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import AppLayout from "@/components/layout/AppLayout";
 import LandingLayout from "@/components/layout/LandingLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 /**
  * Router that handles domain-based routing
@@ -44,9 +44,7 @@ export default function DomainRouter() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <Dashboard />
-              </AppLayout>
+              <Dashboard />
             </ProtectedRoute>
           }
         />
@@ -54,9 +52,7 @@ export default function DomainRouter() {
           path="/upload"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <UploadPage />
-              </AppLayout>
+              <UploadPage />
             </ProtectedRoute>
           }
         />
@@ -64,9 +60,7 @@ export default function DomainRouter() {
           path="/reviews"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <ReviewsPage />
-              </AppLayout>
+              <ReviewsPage />
             </ProtectedRoute>
           }
         />
@@ -74,9 +68,12 @@ export default function DomainRouter() {
           path="/insights"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <div className="p-8 text-center text-muted-foreground">Insights page coming soon...</div>
-              </AppLayout>
+              <DashboardLayout activeTab="insights">
+                <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 text-center text-slate-600">
+                  <h1 className="text-3xl font-bold text-slate-900 mb-4">Insights</h1>
+                  <p>Coming soon...</p>
+                </div>
+              </DashboardLayout>
             </ProtectedRoute>
           }
         />
@@ -84,9 +81,12 @@ export default function DomainRouter() {
           path="/reports"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <div className="p-8 text-center text-muted-foreground">Reports page coming soon...</div>
-              </AppLayout>
+              <DashboardLayout activeTab="home">
+                <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 text-center text-slate-600">
+                  <h1 className="text-3xl font-bold text-slate-900 mb-4">Reports</h1>
+                  <p>Coming soon...</p>
+                </div>
+              </DashboardLayout>
             </ProtectedRoute>
           }
         />
@@ -94,9 +94,12 @@ export default function DomainRouter() {
           path="/settings"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <div className="p-8 text-center text-muted-foreground">Settings page coming soon...</div>
-              </AppLayout>
+              <DashboardLayout activeTab="home">
+                <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 text-center text-slate-600">
+                  <h1 className="text-3xl font-bold text-slate-900 mb-4">Settings</h1>
+                  <p>Coming soon...</p>
+                </div>
+              </DashboardLayout>
             </ProtectedRoute>
           }
         />
