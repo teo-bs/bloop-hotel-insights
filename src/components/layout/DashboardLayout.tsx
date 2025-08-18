@@ -55,8 +55,12 @@ export default function DashboardLayout({
           <div className="flex items-center gap-6">
             {/* Logo */}
             <div className="flex items-center gap-2 font-bold text-xl">
+              <img 
+                src="/lovable-uploads/048c2a9e-abc8-4951-8a52-70b7d76192f3.png" 
+                alt="Padu" 
+                className="w-8 h-8 rounded-lg"
+              />
               <span className="text-slate-900">Padu</span>
-              <span className="inline-block h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
             </div>
 
             {/* Divider */}
@@ -118,9 +122,9 @@ export default function DashboardLayout({
           <div className="flex items-center gap-3">
             {/* Search */}
             <div className={`relative transition-all duration-200 ${searchExpanded ? 'w-64' : 'w-10'}`}>
-              <Search 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" 
-              />
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
               <Input
                 placeholder="Search reviews, insights, sources…"
                 className={`pl-10 pr-4 py-2 border-slate-200/60 bg-white/70 backdrop-blur-sm transition-all duration-200 ${
@@ -134,7 +138,7 @@ export default function DashboardLayout({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-10 h-10 rounded-full hover:bg-slate-100/80"
+                  className="absolute inset-0 w-10 h-10 rounded-full hover:bg-slate-100/80"
                   onClick={() => setSearchExpanded(true)}
                 >
                   <Search className="h-4 w-4" />

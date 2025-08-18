@@ -13,8 +13,12 @@ export default function TopNav() {
       <div className="container mx-auto px-4 md:px-6 xl:px-10 h-14 flex items-center justify-between">
         {/* Brand */}
         <Link to="/" className="inline-flex items-center gap-2 font-bold text-lg">
+          <img 
+            src="/lovable-uploads/048c2a9e-abc8-4951-8a52-70b7d76192f3.png" 
+            alt="Padu" 
+            className="w-8 h-8 rounded-lg"
+          />
           <span>Padu</span>
-          <span className="inline-block h-2 w-2 rounded-full bg-accent" aria-hidden="true" />
         </Link>
 
         {/* Desktop actions */}
