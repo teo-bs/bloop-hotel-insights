@@ -54,6 +54,11 @@ export function getRootDomain(): string {
   const protocol = window.location.protocol;
   const port = window.location.port;
   
+  // Handle Lovable preview URLs - stay on same domain
+  if (hostname.includes('lovableproject.com')) {
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  }
+  
   // In development, use localhost
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
@@ -73,6 +78,14 @@ export function getRootDomain(): string {
  * Redirects to the app subdomain with the given path
  */
 export function redirectToApp(path: string = '/dashboard'): void {
+  const hostname = window.location.hostname;
+  
+  // In Lovable environment, don't redirect - just navigate
+  if (hostname.includes('lovableproject.com')) {
+    window.location.href = path;
+    return;
+  }
+  
   const appDomain = getAppDomain();
   window.location.href = `${appDomain}${path}`;
 }
@@ -81,6 +94,14 @@ export function redirectToApp(path: string = '/dashboard'): void {
  * Redirects to the root domain with the given path
  */
 export function redirectToRoot(path: string = '/'): void {
+  const hostname = window.location.hostname;
+  
+  // In Lovable environment, don't redirect - just navigate
+  if (hostname.includes('lovableproject.com')) {
+    window.location.href = path;
+    return;
+  }
+  
   const rootDomain = getRootDomain();
   window.location.href = `${rootDomain}${path}`;
 }

@@ -166,8 +166,15 @@ export default function DomainRouter() {
  * Component that redirects to the app subdomain
  */
 function RedirectToApp({ path }: { path: string }) {
-  // Perform the redirect
-  redirectToApp(path);
+  const hostname = window.location.hostname;
+  
+  // In Lovable environment, just navigate without redirect
+  if (hostname.includes('lovableproject.com')) {
+    window.location.href = path;
+  } else {
+    // Perform the redirect for non-Lovable environments
+    redirectToApp(path);
+  }
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gpt5-gradient animate-gpt5-pan">
