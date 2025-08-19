@@ -259,11 +259,8 @@ export default function Index() {
                     </Button>
                   ) : (
                     <>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signin" } }))}>
-                        Sign In
-                      </Button>
-                      <Button variant="default" className="w-full" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}>
-                        Get Started
+                      <Button variant="default" className="w-full" onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))}>
+                        Join Waitlist
                       </Button>
                     </>
                   )}
@@ -285,8 +282,8 @@ export default function Index() {
                 Go to Dashboard
               </Button>
             ) : (
-              <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}>
-                Get Started
+              <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))}>
+                Join Waitlist
               </Button>
             )}
           </div>

@@ -25,18 +25,12 @@ export default function TopNav() {
         <nav className="hidden md:flex items-center gap-1">
           <NavLink to="/#pricing" className={linkCls}>Pricing</NavLink>
           <NavLink to="/#docs" className={linkCls}>Docs</NavLink>
-          <Button 
-            variant="ghost"
-            onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}
-          >
-            Sign in
-          </Button>
           <Button
             variant="hero"
-            onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}
+            onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))}
             className="ml-1"
           >
-            Get Started
+            Join Waitlist
           </Button>
         </nav>
 
@@ -52,8 +46,7 @@ export default function TopNav() {
               <div className="mt-8 flex flex-col gap-2">
                 <NavLink to="/#pricing" className={linkCls}>Pricing</NavLink>
                 <NavLink to="/#docs" className={linkCls}>Docs</NavLink>
-                <Button variant="ghost" className="justify-start" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { reason: "generic" } }))}>Sign in</Button>
-                <Button variant="hero" onClick={() => document.dispatchEvent(new CustomEvent("auth:open", { detail: { mode: "signup" } }))}>Get Started</Button>
+                <Button variant="hero" onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))}>Join Waitlist</Button>
               </div>
             </SheetContent>
           </Sheet>

@@ -9,6 +9,8 @@ import Dashboard from "@/pages/Dashboard";
 import UploadPage from "@/pages/Upload";
 import ReviewsPage from "@/pages/Reviews";
 import Settings from "@/pages/Settings";
+import WaitlistPreview from "@/pages/WaitlistPreview";
+import AdminWaitlist from "@/pages/AdminWaitlist";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import LandingLayout from "@/components/layout/LandingLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -30,70 +32,20 @@ export default function DomainRouter() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
         
-        {/* Redirect bare app subdomain to dashboard */}
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute>
-              <Navigate to="/dashboard" replace />
-            </ProtectedRoute>
-          } 
-        />
+        {/* Waitlist mode - preview page */}
+        <Route path="/waitlist-preview" element={<WaitlistPreview />} />
+        <Route path="/admin/waitlist" element={<ProtectedRoute><AdminWaitlist /></ProtectedRoute>} />
         
-        {/* Protected app routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/upload"
-          element={
-            <ProtectedRoute>
-              <UploadPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reviews"
-          element={
-            <ProtectedRoute>
-              <ReviewsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/insights"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout activeTab="insights">
-                <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 text-center text-slate-600">
-                  <h1 className="text-3xl font-bold text-slate-900 mb-4">Insights</h1>
-                  <p>Coming soon...</p>
-                </div>
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reports"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout activeTab="home">
-                <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 text-center text-slate-600">
-                  <h1 className="text-3xl font-bold text-slate-900 mb-4">Reports</h1>
-                  <p>Coming soon...</p>
-                </div>
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/settings/:section/:subsection" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        {/* Redirect all app routes to waitlist preview */}
+        <Route path="/" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/upload" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/reviews" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/insights" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/reports" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/settings" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/settings/:section" element={<Navigate to="/waitlist-preview" replace />} />
+        <Route path="/settings/:section/:subsection" element={<Navigate to="/waitlist-preview" replace />} />
         
         {/* Catch all */}
         <Route path="*" element={<NotFound />} />
