@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { Handle, Position } from '@xyflow/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,8 +66,6 @@ function TasksWidget({ data }: TasksWidgetProps) {
 
   return (
     <div className="w-full h-full">
-      <Handle type="target" position={Position.Top} className="opacity-0" />
-      
       <Card className="w-full h-full bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
@@ -144,8 +141,6 @@ function TasksWidget({ data }: TasksWidgetProps) {
           )}
         </CardContent>
       </Card>
-      
-      <Handle type="source" position={Position.Bottom} className="opacity-0" />
     </div>
   );
 }

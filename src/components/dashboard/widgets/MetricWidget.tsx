@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { Handle, Position } from '@xyflow/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Users, TrendingUp, Lightbulb, TrendingDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -30,8 +29,6 @@ function MetricWidget({ data }: MetricWidgetProps) {
   
   return (
     <div className="w-full h-full">
-      <Handle type="target" position={Position.Top} className="opacity-0" />
-      
       <Card className="w-full h-full bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
         <CardContent className="p-6 h-full flex flex-col justify-between">
           {/* Header */}
@@ -75,8 +72,6 @@ function MetricWidget({ data }: MetricWidgetProps) {
           </div>
         </CardContent>
       </Card>
-      
-      <Handle type="source" position={Position.Bottom} className="opacity-0" />
     </div>
   );
 }
