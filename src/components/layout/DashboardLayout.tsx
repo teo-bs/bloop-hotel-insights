@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, Settings, HelpCircle, Bell, ChevronDown, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ export default function DashboardLayout({
   onTabChange = () => {} 
 }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const userName = (user?.user_metadata as any)?.name || user?.email?.split('@')[0] || "User";
@@ -149,7 +151,12 @@ export default function DashboardLayout({
             {/* Settings */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-slate-100/80">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full hover:bg-slate-100/80"
+                  onClick={() => navigate('/settings')}
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>

@@ -8,6 +8,7 @@ import UpdatePasswordPage from "@/pages/UpdatePassword";
 import Dashboard from "@/pages/Dashboard";
 import UploadPage from "@/pages/Upload";
 import ReviewsPage from "@/pages/Reviews";
+import Settings from "@/pages/Settings";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import LandingLayout from "@/components/layout/LandingLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -90,19 +91,9 @@ export default function DomainRouter() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout activeTab="home">
-                <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 text-center text-slate-600">
-                  <h1 className="text-3xl font-bold text-slate-900 mb-4">Settings</h1>
-                  <p>Coming soon...</p>
-                </div>
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings/:section/:subsection" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         
         {/* Catch all */}
         <Route path="*" element={<NotFound />} />
