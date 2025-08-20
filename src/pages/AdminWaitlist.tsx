@@ -38,10 +38,18 @@ export default function AdminWaitlist() {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setWaitlistEntries(data || []);
+        if (error) {
+          console.error('Error fetching waitlist entries:', error);
+          // Handle unauthorized access gracefully
+          if (error.message?.includes('row-level security')) {
+            setWaitlistEntries([]);
+          }
+        } else {
+          setWaitlistEntries(data || []);
+        }
       } catch (error) {
         console.error('Error fetching waitlist entries:', error);
+        setWaitlistEntries([]);
       } finally {
         setIsLoading(false);
       }
