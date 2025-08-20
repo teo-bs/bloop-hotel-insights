@@ -16,9 +16,11 @@ interface WaitlistModalProps {
 
 export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     role: "",
+    otherRole: "",
     hotel_name: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,10 +30,19 @@ export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.role) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.role || !formData.hotel_name) {
       toast({
         title: "Required fields missing",
         description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (formData.role === "Other" && !formData.otherRole) {
+      toast({
+        title: "Role specification required",
+        description: "Please specify your role when selecting 'Other'.",
         variant: "destructive"
       });
       return;
@@ -43,10 +54,10 @@ export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps
       const { error } = await supabase
         .from('waitlist')
         .insert([{
-          name: formData.name,
+          name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
-          role: formData.role,
-          hotel_name: formData.hotel_name || null
+          role: formData.role === "Other" ? formData.otherRole : formData.role,
+          hotel_name: formData.hotel_name
         }]);
 
       if (error) {
@@ -73,7 +84,7 @@ export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps
       
       // Reset form after delay
       setTimeout(() => {
-        setFormData({ name: "", email: "", role: "", hotel_name: "" });
+        setFormData({ firstName: "", lastName: "", email: "", role: "", otherRole: "", hotel_name: "" });
         setSuccess(false);
         onOpenChange(false);
       }, 3000);
@@ -93,7 +104,7 @@ export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps
   const handleClose = () => {
     if (!isSubmitting && !success) {
       onOpenChange(false);
-      setFormData({ name: "", email: "", role: "", hotel_name: "" });
+      setFormData({ firstName: "", lastName: "", email: "", role: "", otherRole: "", hotel_name: "" });
     }
   };
 
@@ -115,17 +126,31 @@ export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name *</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Your full name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="bg-background/50 border-white/20"
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  placeholder="First name"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                  className="bg-background/50 border-white/20"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Last name"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                  className="bg-background/50 border-white/20"
+                  required
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -143,7 +168,7 @@ export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps
 
             <div className="space-y-2">
               <Label htmlFor="role">Role *</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
+              <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value, otherRole: value !== "Other" ? "" : prev.otherRole }))}>
                 <SelectTrigger className="bg-background/50 border-white/20">
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
@@ -157,15 +182,31 @@ export default function WaitlistModal({ open, onOpenChange }: WaitlistModalProps
               </Select>
             </div>
 
+            {formData.role === "Other" && (
+              <div className="space-y-2">
+                <Label htmlFor="otherRole">Please specify your role *</Label>
+                <Input
+                  id="otherRole"
+                  type="text"
+                  placeholder="Your role"
+                  value={formData.otherRole}
+                  onChange={(e) => setFormData(prev => ({ ...prev, otherRole: e.target.value }))}
+                  className="bg-background/50 border-white/20"
+                  required
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="hotel_name">Hotel Name</Label>
+              <Label htmlFor="hotel_name">Hotel Name *</Label>
               <Input
                 id="hotel_name"
                 type="text"
-                placeholder="Your hotel name (optional)"
+                placeholder="Your hotel name"
                 value={formData.hotel_name}
                 onChange={(e) => setFormData(prev => ({ ...prev, hotel_name: e.target.value }))}
                 className="bg-background/50 border-white/20"
+                required
               />
             </div>
 

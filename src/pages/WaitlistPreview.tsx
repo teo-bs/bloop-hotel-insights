@@ -64,8 +64,8 @@ export default function WaitlistPreview() {
                   alt="Padu" 
                   className="w-8 h-8 rounded-lg"
                 />
-                <span className="font-bold text-lg text-white">Padu</span>
-                <Badge variant="secondary" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                <span className="font-bold text-lg text-primary-foreground">Padu</span>
+                <Badge variant="secondary" className="bg-primary/20 text-primary-foreground border-primary/30">
                   Preview
                 </Badge>
               </div>
@@ -77,13 +77,13 @@ export default function WaitlistPreview() {
             <div className="max-w-6xl mx-auto">
               {/* Hero section */}
               <div className="text-center mb-12 space-y-4">
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
                   Get a sneak peek at your
-                  <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     Hotel Intelligence Dashboard
                   </span>
                 </h1>
-                <p className="text-xl text-white/80 max-w-2xl mx-auto">
+                <p className="text-xl text-primary-foreground/90 max-w-2xl mx-auto">
                   See how Padu transforms thousands of reviews into actionable insights that drive real business results.
                 </p>
               </div>
@@ -109,21 +109,21 @@ export default function WaitlistPreview() {
                       </div>
                       
                       <div className="flex-1">
-                        <h3 className="font-semibold text-white mb-1">
+                        <h3 className="font-semibold text-primary-foreground mb-1">
                           {card.title}
                         </h3>
-                        <p className="text-2xl font-bold text-white mb-1">
+                        <p className="text-2xl font-bold text-primary-foreground mb-1">
                           {card.value}
                         </p>
-                        <p className="text-sm text-white/70 mb-2">
+                        <p className="text-sm text-primary-foreground/80 mb-2">
                           {card.subtitle}
                         </p>
                         <Badge 
                           variant="secondary" 
                           className={`text-xs ${
                             card.locked 
-                              ? 'bg-muted/20 text-muted-foreground'
-                              : 'bg-green-500/20 text-green-300 border-green-400/30'
+                              ? 'bg-muted/20 text-muted-foreground border-muted/30'
+                              : 'bg-accent/20 text-accent-foreground border-accent/30'
                           }`}
                         >
                           {card.trend}
@@ -136,17 +136,17 @@ export default function WaitlistPreview() {
 
               {/* CTA section */}
               <div className="text-center">
-                <Card className="inline-block p-8 bg-white/10 backdrop-blur-xl border-white/20 rounded-2xl">
-                  <h2 className="text-2xl font-bold text-white mb-4">
+                <Card className="inline-block p-8 bg-card/20 backdrop-blur-xl border-border/30 rounded-2xl">
+                  <h2 className="text-2xl font-bold text-primary-foreground mb-4">
                     Ready to unlock your hotel's potential?
                   </h2>
-                  <p className="text-white/80 mb-6 max-w-md">
+                  <p className="text-primary-foreground/90 mb-6 max-w-md">
                     Be among the first to access Padu's full suite of AI-powered hotel intelligence tools.
                   </p>
                   <Button 
                     size="lg"
                     onClick={() => setShowWaitlistModal(true)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+                    className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
                   >
                     Be First to Access → Join Waitlist
                   </Button>
