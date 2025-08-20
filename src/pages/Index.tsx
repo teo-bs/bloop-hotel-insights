@@ -487,11 +487,8 @@ export default function Index() {
                 <div className="mt-6 border-t border-white/10 pt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                     <Button id="btn-save-preview" onClick={handleSave} disabled={saving} aria-label="Save to dashboard (free)" className="rounded-full" variant="hero">
-                       {saving ? <span className="inline-flex items-center gap-2">
-                           <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
-                           Saving…
-                         </span> : user ? "Save to dashboard" : "Save to dashboard (free)"}
+                     <Button id="btn-save-preview" onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))} aria-label="Save to dashboard" className="rounded-full" variant="hero">
+                       Save to dashboard
                      </Button>
                     
                   </div>
