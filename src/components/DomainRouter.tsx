@@ -13,6 +13,7 @@ import WaitlistPreview from "@/pages/WaitlistPreview";
 import AdminWaitlist from "@/pages/AdminWaitlist";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/components/auth/AdminRoute";
+import AdminDashboardRoute from "@/components/auth/AdminDashboardRoute";
 import LandingLayout from "@/components/layout/LandingLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
@@ -39,16 +40,16 @@ export default function DomainRouter() {
         {/* Admin-only routes */}
         <Route path="/admin/waitlist" element={<AdminRoute><AdminWaitlist /></AdminRoute>} />
         
-        {/* Admin can access dashboard, others get waitlist preview */}
-        <Route path="/" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><Navigate to="/dashboard" replace /></AdminRoute>} />
-        <Route path="/dashboard" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><ProtectedRoute><DashboardLayout><Dashboard /></DashboardLayout></ProtectedRoute></AdminRoute>} />
-        <Route path="/upload" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><ProtectedRoute><DashboardLayout><UploadPage /></DashboardLayout></ProtectedRoute></AdminRoute>} />
-        <Route path="/reviews" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><ProtectedRoute><DashboardLayout><ReviewsPage /></DashboardLayout></ProtectedRoute></AdminRoute>} />
-        <Route path="/insights" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><Navigate to="/waitlist-preview" replace /></AdminRoute>} />
-        <Route path="/reports" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><Navigate to="/waitlist-preview" replace /></AdminRoute>} />
-        <Route path="/settings" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><ProtectedRoute><Settings /></ProtectedRoute></AdminRoute>} />
-        <Route path="/settings/:section" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><ProtectedRoute><Settings /></ProtectedRoute></AdminRoute>} />
-        <Route path="/settings/:section/:subsection" element={<AdminRoute fallback={<Navigate to="/waitlist-preview" replace />}><ProtectedRoute><Settings /></ProtectedRoute></AdminRoute>} />
+        {/* Main app routes - protected and with admin redirect logic */}
+        <Route path="/" element={<AdminDashboardRoute><Navigate to="/dashboard" replace /></AdminDashboardRoute>} />
+        <Route path="/dashboard" element={<AdminDashboardRoute><DashboardLayout><Dashboard /></DashboardLayout></AdminDashboardRoute>} />
+        <Route path="/upload" element={<AdminDashboardRoute><DashboardLayout><UploadPage /></DashboardLayout></AdminDashboardRoute>} />
+        <Route path="/reviews" element={<AdminDashboardRoute><DashboardLayout><ReviewsPage /></DashboardLayout></AdminDashboardRoute>} />
+        <Route path="/insights" element={<AdminDashboardRoute><Navigate to="/waitlist-preview" replace /></AdminDashboardRoute>} />
+        <Route path="/reports" element={<AdminDashboardRoute><Navigate to="/waitlist-preview" replace /></AdminDashboardRoute>} />
+        <Route path="/settings" element={<AdminDashboardRoute><Settings /></AdminDashboardRoute>} />
+        <Route path="/settings/:section" element={<AdminDashboardRoute><Settings /></AdminDashboardRoute>} />
+        <Route path="/settings/:section/:subsection" element={<AdminDashboardRoute><Settings /></AdminDashboardRoute>} />
         
         {/* Catch all */}
         <Route path="*" element={<NotFound />} />
