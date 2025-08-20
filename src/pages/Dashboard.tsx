@@ -4,7 +4,8 @@ import { useReviews } from "@/stores/reviews";
 import { useGlobalDateFilter } from "@/stores/filters";
 import { filterReviews, calcAvgRating, calcTotals, calcTopTopic } from "@/lib/metrics";
 import { generateInsights } from "@/lib/insights";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import TopInsightsModal from "@/components/dashboard/modals/TopInsightsModal";
+import ForYouTodayModal from "@/components/dashboard/modals/ForYouTodayModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,7 +38,7 @@ export default function Dashboard() {
   const reviews = useReviews();
   const { start, end } = useGlobalDateFilter();
   
-  const [activeTab, setActiveTab] = useState<"home" | "insights" | "competition" | "ai-agents">("home");
+  
   const [isLoading, setIsLoading] = useState(false);
   const [metrics, setMetrics] = useState({
     avgRating: 0,
@@ -248,8 +249,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <DashboardLayout activeTab={activeTab} onTabChange={setActiveTab}>
-      <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 space-y-8">
+    <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 space-y-8">
         {/* Welcome Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
@@ -519,170 +519,34 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Two Column Layout - Fixed */}
+        {/* Two Column Layout - Consolidated */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Insights */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-              <CardHeader className="p-6">
-                <CardTitle className="flex items-center gap-3 text-2xl font-bold text-slate-900">
-                  <div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
-                    <Lightbulb className="h-5 w-5 text-yellow-700" />
-                  </div>
-                  Top Insights this period
-                </CardTitle>
-              </CardHeader>
-            </Card>
-
-            <div className="space-y-4">
-              {isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl">
-                    <CardContent className="p-6">
-                      <div className="space-y-3">
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-8 w-24" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : insights.length > 0 ? (
-                insights.map((insight, index) => (
-                  <Card 
-                    key={insight.id} 
-                    className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="flex items-start justify-between">
-                          <h3 className="font-semibold text-slate-900 text-lg leading-tight">{insight.title}</h3>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs px-3 py-1 font-medium ${getImpactColor(insight.impact)}`}
-                          >
-                            Impact: {insight.impact}
-                          </Badge>
-                        </div>
-                        
-                        <p className="text-sm text-slate-600 leading-relaxed">{insight.description}</p>
-                        
-                        <div className="flex items-center justify-between pt-2">
-                          <div className="text-xs text-slate-400">
-                            Based on recurring themes in recent reviews
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-primary hover:text-primary-foreground hover:bg-primary rounded-full transition-all duration-200"
-                          >
-                            View details
-                            <ArrowRight className="ml-2 h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl">
-                  <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                      <Lightbulb className="h-8 w-8 text-slate-400" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">No insights yet</h3>
-                    <p className="text-sm text-slate-600 max-w-md mx-auto">
-                      We'll surface your most important guest themes as soon as we analyze incoming reviews.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+          {/* Left Column - Top Insights Modal */}
+          <div className="lg:col-span-2">
+            <TopInsightsModal insights={insights} isLoading={isLoading} />
           </div>
           
-          {/* Right Column - Tasks */}
+          {/* Right Column - For You Today Modal and Padu AI */}
           <div className="space-y-6">
+            <ForYouTodayModal tasks={mockTasks} />
+            
+            {/* Padu AI Card */}
             <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-              <CardHeader className="p-6">
-                <CardTitle className="flex items-center gap-3 text-2xl font-bold text-slate-900">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-blue-700" />
+              <CardContent className="p-6 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                    <Lightbulb className="w-6 h-6 text-white" />
                   </div>
-                  For you today
-                </CardTitle>
-                <p className="text-sm text-slate-600 mt-1">
-                  Quick actions that keep your reputation sharp
-                </p>
-              </CardHeader>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">Padu AI</h3>
+                    <p className="text-sm text-slate-600">Your AI agents coming soon</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-xs px-3 py-1 bg-purple-50 text-purple-700 border-purple-200">
+                  Coming soon
+                </Badge>
+              </CardContent>
             </Card>
-
-            <div className="space-y-4">
-              {mockTasks.map((task, index) => {
-                const Icon = getTaskIcon(task.type);
-                
-                return (
-                  <Card 
-                    key={task.id} 
-                    className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          task.priority === "high" ? "bg-red-100" :
-                          task.priority === "medium" ? "bg-yellow-100" : "bg-blue-100"
-                        }`}>
-                          <Icon className={`h-5 w-5 ${
-                            task.priority === "high" ? "text-red-600" :
-                            task.priority === "medium" ? "text-yellow-600" : "text-blue-600"
-                          }`} />
-                        </div>
-                        
-                        <div className="flex-1 space-y-3">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <h3 className="font-semibold text-slate-900">{task.title}</h3>
-                              {task.count && (
-                                <Badge variant="outline" className="text-xs px-2 py-1">
-                                  {task.count} items
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-slate-600 mt-1">{task.description}</p>
-                            {task.lastAction && (
-                              <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
-                                <Clock className="w-3 h-3" />
-                                <span>{task.lastAction}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs px-3 py-1 font-medium ${getPriorityColor(task.priority)}`}
-                            >
-                              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority
-                            </Badge>
-                            
-                            <Button 
-                              size="sm" 
-                              onClick={task.ctaAction}
-                              className="rounded-full transition-all duration-200"
-                            >
-                              {task.ctaText}
-                              <ArrowRight className="ml-2 h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
           </div>
         </div>
 
@@ -840,6 +704,5 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
-  );
-}
+    );
+  }

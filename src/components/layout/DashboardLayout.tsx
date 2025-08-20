@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Settings, HelpCircle, Bell, ChevronDown, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,17 +11,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  activeTab?: "home" | "insights" | "competition" | "ai-agents";
-  onTabChange?: (tab: "home" | "insights" | "competition" | "ai-agents") => void;
 }
 
-export default function DashboardLayout({ 
-  children, 
-  activeTab = "home", 
-  onTabChange = () => {} 
-}: DashboardLayoutProps) {
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const userName = (user?.user_metadata as any)?.name || user?.email?.split('@')[0] || "User";
@@ -35,11 +30,21 @@ export default function DashboardLayout({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Auto-detect active tab from current route
+  const getActiveTab = (): "home" | "insights" | "competition" | "ai-agents" => {
+    const path = location.pathname;
+    if (path === "/dashboard") return "home";
+    if (path === "/reviews") return "insights";
+    return "home"; // default fallback
+  };
+
+  const activeTab = getActiveTab();
+
   const tabs = [
-    { id: "home", label: "Home", disabled: false },
-    { id: "insights", label: "Insights", disabled: false },
-    { id: "competition", label: "Competition", disabled: true, badge: "soon" },
-    { id: "ai-agents", label: "AI Agents", disabled: true, badge: "soon" },
+    { id: "home", label: "Home", disabled: false, path: "/dashboard" },
+    { id: "insights", label: "Insights", disabled: false, path: "/reviews" },
+    { id: "competition", label: "Competition", disabled: true, badge: "soon", path: "#" },
+    { id: "ai-agents", label: "AI Agents", disabled: true, badge: "soon", path: "#" },
   ] as const;
 
   return (
@@ -103,7 +108,7 @@ export default function DashboardLayout({
                   </Tooltip>
                 ) : (
                   <button
-                    onClick={() => onTabChange(tab.id)}
+                    onClick={() => navigate(tab.path)}
                     className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded-full ${
                       activeTab === tab.id
                         ? 'text-primary bg-primary/10 shadow-sm'

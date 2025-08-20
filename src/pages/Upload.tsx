@@ -191,7 +191,7 @@ export default function UploadPage() {
   };
 
   return (
-    <DashboardLayout activeTab="home">
+    <DashboardLayout>
       <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8">
         <Card className="max-w-2xl mx-auto bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_12px_40px_rgba(2,6,23,0.08)]">
           <CardHeader className="p-6">
