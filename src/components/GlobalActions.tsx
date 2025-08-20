@@ -37,5 +37,10 @@ export default function GlobalActions() {
     };
   }, []);
 
-  return null;
+  return (
+    <WaitlistModal 
+      open={waitlistModalOpen} 
+      onOpenChange={setWaitlistModalOpen} 
+    />
+  );
 }
