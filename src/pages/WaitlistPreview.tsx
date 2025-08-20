@@ -1,12 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Lock, Star, TrendingUp, Lightbulb, BarChart3 } from "lucide-react";
 import WaitlistModal from "@/components/waitlist/WaitlistModal";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, Link } from "react-router-dom";
+import { isAdmin } from "@/lib/admin";
 
 export default function WaitlistPreview() {
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Get current user
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      if (data.user) {
+        isAdmin().then(setIsAdminUser);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        isAdmin().then(setIsAdminUser);
+      } else {
+        setIsAdminUser(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const demoCards = [
     {
@@ -141,15 +171,42 @@ export default function WaitlistPreview() {
                     Ready to unlock your hotel's potential?
                   </h2>
                   <p className="text-primary-foreground/90 mb-6 max-w-md">
-                    Be among the first to access Padu's full suite of AI-powered hotel intelligence tools.
+                    {user && isAdminUser 
+                      ? "Welcome back, admin! You have full access to the dashboard." 
+                      : user 
+                        ? "Welcome back! Your access is being prepared." 
+                        : "Be among the first to access Padu's full suite of AI-powered hotel intelligence tools."
+                    }
                   </p>
-                  <Button 
-                    size="lg"
-                    onClick={() => setShowWaitlistModal(true)}
-                    className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
-                  >
-                    Be First to Access → Join Waitlist
-                  </Button>
+                  {user ? (
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Button 
+                          onClick={() => navigate('/dashboard')}
+                          className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold px-8 py-3 rounded-xl"
+                        >
+                          Continue to Dashboard
+                        </Button>
+                        {isAdminUser && (
+                          <Button 
+                            asChild
+                            variant="outline"
+                            className="border-primary/30 text-primary-foreground hover:bg-primary/10 font-semibold px-8 py-3 rounded-xl"
+                          >
+                            <Link to="/admin/waitlist">View Waitlist</Link>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <Button 
+                      size="lg"
+                      onClick={() => setShowWaitlistModal(true)}
+                      className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      Be First to Access → Join Waitlist
+                    </Button>
+                  )}
                 </Card>
               </div>
             </div>
