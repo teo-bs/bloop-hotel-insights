@@ -227,9 +227,8 @@ export default function Index() {
       <div className="pointer-events-none absolute inset-0 noise-overlay" aria-hidden="true" />
 
       {/* Navigation - Mobile vs Desktop */}
-      {isMobile ? (
-        /* Mobile: Hamburger menu in top-right */
-        <div className="fixed right-4 top-4 z-30">
+      {isMobile ? (/* Mobile: Hamburger menu in top-right */
+    <div className="fixed right-4 top-4 z-30">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20">
@@ -248,44 +247,30 @@ export default function Index() {
                   </a>
                 </div>
                 <div className="border-t border-white/10 pt-6 space-y-3">
-                  {authLoading ? (
-                    <Button variant="ghost" className="w-full justify-start" disabled>
+                  {authLoading ? <Button variant="ghost" className="w-full justify-start" disabled>
                       <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                       Loading...
-                    </Button>
-                  ) : session ? (
-                    <Button variant="default" className="w-full" onClick={() => redirectToApp('/dashboard')}>
+                    </Button> : session ? <Button variant="default" className="w-full" onClick={() => redirectToApp('/dashboard')}>
                       Go to Dashboard
-                    </Button>
-                  ) : (
-                    <>
+                    </Button> : <>
                       <Button variant="default" className="w-full" onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))}>
                         Join Waitlist
                       </Button>
-                    </>
-                  )}
+                    </>}
                 </div>
               </div>
             </SheetContent>
           </Sheet>
-        </div>
-      ) : (
-        <>
+        </div>) : <>
           {/* Desktop: Top-right auth buttons */}
           <div className="fixed right-6 top-6 z-30">
-            {authLoading ? (
-              <Button variant="ghost" className="rounded-full" disabled>
+            {authLoading ? <Button variant="ghost" className="rounded-full" disabled>
                 <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              </Button>
-            ) : session ? (
-              <Button id="btn-top-dashboard" variant="ghost" className="rounded-full" onClick={() => redirectToApp('/dashboard')}>
+              </Button> : session ? <Button id="btn-top-dashboard" variant="ghost" className="rounded-full" onClick={() => redirectToApp('/dashboard')}>
                 Go to Dashboard
-              </Button>
-            ) : (
-              <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))}>
+              </Button> : <Button id="btn-top-login" variant="ghost" className="rounded-full" onClick={() => document.dispatchEvent(new CustomEvent("waitlist:open"))}>
                 Join Waitlist
-              </Button>
-            )}
+              </Button>}
           </div>
 
           {/* Desktop: Glassmorphic centered nav - sleeker design */}
@@ -302,8 +287,7 @@ export default function Index() {
               </div>
             </div>
           </nav>
-        </>
-      )}
+        </>}
 
       {/* Centered Hero - Added top padding to push content below floating nav */}
       <section className="relative z-10 flex items-center justify-center min-h-screen pt-24">
@@ -501,7 +485,7 @@ export default function Index() {
                 </div>
 
                 <div className="mt-6 border-t border-white/10 pt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="text-xs text-muted-foreground">Data from Google. <span className="hidden sm:inline">No credit card required.</span></div>
+                  
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                      <Button id="btn-save-preview" onClick={handleSave} disabled={saving} aria-label="Save to dashboard (free)" className="rounded-full" variant="hero">
                        {saving ? <span className="inline-flex items-center gap-2">
@@ -509,9 +493,7 @@ export default function Index() {
                            Saving…
                          </span> : user ? "Save to dashboard" : "Save to dashboard (free)"}
                      </Button>
-                    <Button id="btn-upgrade-gbp" variant="glass" className="rounded-full" onClick={() => openIntegrationsModal()}>
-                      Connect Business Profile
-                    </Button>
+                    
                   </div>
                 </div>
               </div>}
