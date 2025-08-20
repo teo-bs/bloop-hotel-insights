@@ -530,21 +530,56 @@ export default function Dashboard() {
           <div className="space-y-6">
             <ForYouTodayModal tasks={mockTasks} />
             
-            {/* Padu AI Card */}
-            <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                    <Lightbulb className="w-6 h-6 text-white" />
+            {/* Padu AI Card - Enhanced */}
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 shadow-[0_12px_48px_rgba(147,51,234,0.15)] hover:shadow-[0_16px_64px_rgba(147,51,234,0.25)] transition-all duration-300 rounded-2xl relative overflow-hidden flex-1">
+              {/* Subtle animated background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 animate-pulse" />
+              
+              <CardContent className="p-8 relative z-10 flex flex-col items-center text-center space-y-6 min-h-[200px] justify-center">
+                {/* Enhanced Icon */}
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <Lightbulb className="w-10 h-10 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">Padu AI</h3>
-                    <p className="text-sm text-slate-600">Your AI agents coming soon</p>
+                  {/* Glow effect */}
+                  <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-600/20 blur-lg -z-10" />
+                </div>
+                
+                {/* Enhanced Content */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center gap-3">
+                    <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                      Padu AI
+                    </h3>
+                    <Badge className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 animate-bounce">
+                      Coming Soon
+                    </Badge>
+                  </div>
+                  
+                  <p className="text-purple-700 font-medium text-base">
+                    Your AI agents are almost here
+                  </p>
+                  
+                  <p className="text-slate-600 text-sm max-w-xs leading-relaxed">
+                    Intelligent AI agents will automatically analyze your reviews, generate insights, and suggest actionable improvements.
+                  </p>
+                </div>
+                
+                {/* Preview Features */}
+                <div className="grid grid-cols-1 gap-2 w-full max-w-xs text-xs">
+                  <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span>Smart review analysis</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span>Automated insights</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span>Action recommendations</span>
                   </div>
                 </div>
-                <Badge variant="outline" className="text-xs px-3 py-1 bg-purple-50 text-purple-700 border-purple-200">
-                  Coming soon
-                </Badge>
               </CardContent>
             </Card>
           </div>
