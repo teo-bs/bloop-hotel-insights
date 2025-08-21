@@ -6,7 +6,8 @@
  * Checks if we're in Lovable preview environment
  */
 export function isLovablePreview(): boolean {
-  return window.location.hostname.includes('lovableproject.com');
+  const hostname = window.location.hostname;
+  return hostname.includes('lovableproject.com') || hostname.includes('sandbox.lovable.dev');
 }
 
 /**
@@ -30,7 +31,7 @@ export function getAppDomain(): string {
   const port = window.location.port;
   
   // Handle Lovable preview URLs - stay on same domain
-  if (hostname.includes('lovableproject.com')) {
+  if (isLovablePreview()) {
     return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
   }
   
@@ -62,7 +63,7 @@ export function getRootDomain(): string {
   const port = window.location.port;
   
   // Handle Lovable preview URLs - stay on same domain
-  if (hostname.includes('lovableproject.com')) {
+  if (isLovablePreview()) {
     return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
   }
   
@@ -88,7 +89,7 @@ export function redirectToApp(path: string = '/dashboard'): void {
   const hostname = window.location.hostname;
   
   // In Lovable environment, don't redirect - just navigate
-  if (hostname.includes('lovableproject.com')) {
+  if (isLovablePreview()) {
     window.location.href = path;
     return;
   }
@@ -104,7 +105,7 @@ export function redirectToRoot(path: string = '/'): void {
   const hostname = window.location.hostname;
   
   // In Lovable environment, don't redirect - just navigate
-  if (hostname.includes('lovableproject.com')) {
+  if (isLovablePreview()) {
     window.location.href = path;
     return;
   }
