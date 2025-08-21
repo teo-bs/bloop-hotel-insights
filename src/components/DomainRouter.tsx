@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { isAppSubdomain, redirectToApp, redirectToRoot } from "@/utils/domain";
+import { isAppSubdomain, isLovablePreview, redirectToApp, redirectToRoot } from "@/utils/domain";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -21,9 +21,48 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
  * Router that handles domain-based routing
  * - Root domain: Landing page only
  * - App subdomain: Authenticated app routes
+ * - Lovable preview: Unified routing for testing
  */
 export default function DomainRouter() {
   const isApp = isAppSubdomain();
+  const isPreview = isLovablePreview();
+
+  // In Lovable preview, show all routes without authentication for testing
+  if (isPreview) {
+    return (
+      <Routes>
+        {/* Landing page */}
+        <Route 
+          path="/" 
+          element={
+            <LandingLayout>
+              <Index />
+            </LandingLayout>
+          } 
+        />
+        
+        {/* Auth routes */}
+        <Route path="/auth" element={<AuthGuard />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
+        
+        {/* App routes without authentication for preview */}
+        <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+        <Route path="/upload" element={<DashboardLayout><UploadPage /></DashboardLayout>} />
+        <Route path="/reviews" element={<DashboardLayout><ReviewsPage /></DashboardLayout>} />
+        <Route path="/insights" element={<WaitlistPreview />} />
+        <Route path="/reports" element={<WaitlistPreview />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/:section" element={<Settings />} />
+        <Route path="/settings/:section/:subsection" element={<Settings />} />
+        <Route path="/waitlist-preview" element={<WaitlistPreview />} />
+        <Route path="/admin/waitlist" element={<AdminWaitlist />} />
+        
+        {/* Catch all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    );
+  }
 
   if (isApp) {
     // App subdomain routes

@@ -3,13 +3,20 @@
  */
 
 /**
+ * Checks if we're in Lovable preview environment
+ */
+export function isLovablePreview(): boolean {
+  return window.location.hostname.includes('lovableproject.com');
+}
+
+/**
  * Checks if we're on the app subdomain (e.g., app.getpadu.com, app.localhost:3000)
  */
 export function isAppSubdomain(): boolean {
   const hostname = window.location.hostname;
-  // Handle Lovable preview URLs
-  if (hostname.includes('lovableproject.com')) {
-    return true; // Treat all Lovable URLs as app subdomain
+  // In Lovable preview, don't use domain separation
+  if (isLovablePreview()) {
+    return false;
   }
   return hostname.startsWith('app.') || hostname === 'localhost' || hostname === '127.0.0.1';
 }
