@@ -203,12 +203,12 @@ export default function ReviewsPage() {
   const onSentimentToggle = (val: string) => setReviewFilters({ sentiment: (val || "all") as any });
 
   return (
-    <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">Reviews</h1>
+    <div className="container mx-auto px-4 md:px-6 xl:px-8 py-4 md:py-8 space-y-6 md:space-y-8">
+      {/* Header - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Reviews</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={resetReviewFilters} aria-label="Clear filters">
+          <Button variant="outline" size="sm" onClick={resetReviewFilters} aria-label="Clear filters" className="text-sm">
             <X className="h-4 w-4 mr-2" /> Clear Filters
           </Button>
         </div>
@@ -238,7 +238,7 @@ export default function ReviewsPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-slate-800">General Overview</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Guest Sentiment */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -381,7 +381,7 @@ export default function ReviewsPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-slate-800">Reviews</h2>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Platform Cards */}
           <div className="space-y-4">
             {/* Google */}

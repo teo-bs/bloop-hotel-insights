@@ -17,11 +17,11 @@ export default function SettingsLayout({
 
   return (
     <div className="min-h-screen bg-gpt5-gradient animate-gpt5-pan">
-      <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Left Sidebar */}
-          <div className="w-80 flex-shrink-0">
-            <div className="sticky top-24">
+      <div className="container mx-auto px-4 md:px-6 xl:px-8 py-4 md:py-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Left Sidebar - Responsive */}
+          <div className="lg:w-80 lg:flex-shrink-0">
+            <div className="lg:sticky lg:top-24">
               <SettingsSidebar
                 activeSection={activeSection}
                 activeSubsection={activeSubsection}

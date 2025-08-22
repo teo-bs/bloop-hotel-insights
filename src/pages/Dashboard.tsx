@@ -249,18 +249,18 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="container mx-auto px-4 md:px-6 xl:px-8 py-8 space-y-8">
+    <div className="container mx-auto px-4 md:px-6 xl:px-8 py-4 md:py-8 space-y-6 md:space-y-8">
         {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-slate-900">
-              Hi {firstName}, here's how {hotelName} is performing
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
+              Hi {firstName}, here's how <span className="hidden sm:inline">{hotelName}</span><span className="sm:hidden">your hotel</span> is performing
             </h1>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end">
             <Select defaultValue="30" onValueChange={(v) => console.log("Date range:", v)}>
-              <SelectTrigger className="w-40 rounded-full border-slate-200/60 bg-white/70">
+              <SelectTrigger className="w-36 sm:w-40 rounded-full border-slate-200/60 bg-white/70 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -272,25 +272,25 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* KPI Cards - Fixed Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* KPI Cards - Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Avg Guest Rating */}
           <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-            <CardContent className="p-6 flex flex-col justify-between h-[140px]">
+            <CardContent className="p-4 md:p-6 flex flex-col justify-between h-[120px] md:h-[140px]">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <Star className="w-4 h-4 text-slate-700" />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <Star className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" />
                   </div>
-                  <span className="text-sm font-medium text-slate-700">Avg Guest Rating</span>
+                  <span className="text-xs md:text-sm font-medium text-slate-700">Avg Guest Rating</span>
                 </div>
-                <Badge variant="outline" className="text-xs px-2 py-1 text-green-700 bg-green-50 border-green-200">
-                  <TrendingUp className="w-3 h-3 mr-1" />
+                <Badge variant="outline" className="text-xs px-1.5 md:px-2 py-0.5 md:py-1 text-green-700 bg-green-50 border-green-200">
+                  <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
                   +0.2
                 </Badge>
               </div>
               <div className="space-y-1">
-                <div className={`text-3xl font-bold tracking-tight transition-all duration-300 ${
+                <div className={`text-2xl md:text-3xl font-bold tracking-tight transition-all duration-300 ${
                   metrics.avgRating === 0 ? "text-slate-400" : "text-slate-900"
                 }`}>
                   {metrics.avgRating > 0 ? metrics.avgRating.toFixed(1) : '—'}
@@ -302,15 +302,15 @@ export default function Dashboard() {
 
           {/* Total Reviews */}
           <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-            <CardContent className="p-6 flex flex-col justify-between h-[140px]">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Users className="w-4 h-4 text-slate-700" />
+            <CardContent className="p-4 md:p-6 flex flex-col justify-between h-[120px] md:h-[140px]">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" />
                 </div>
-                <span className="text-sm font-medium text-slate-700">Total Reviews</span>
+                <span className="text-xs md:text-sm font-medium text-slate-700">Total Reviews</span>
               </div>
               <div className="space-y-1">
-                <div className={`text-3xl font-bold tracking-tight transition-all duration-300 ${
+                <div className={`text-2xl md:text-3xl font-bold tracking-tight transition-all duration-300 ${
                   metrics.totalReviews === 0 ? "text-slate-400" : "text-slate-900"
                 }`}>
                   {metrics.totalReviews || '—'}
@@ -322,21 +322,21 @@ export default function Dashboard() {
 
           {/* % Positive */}
           <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-            <CardContent className="p-6 flex flex-col justify-between h-[140px]">
+            <CardContent className="p-4 md:p-6 flex flex-col justify-between h-[120px] md:h-[140px]">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-slate-700" />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" />
                   </div>
-                  <span className="text-sm font-medium text-slate-700">% Positive</span>
+                  <span className="text-xs md:text-sm font-medium text-slate-700">% Positive</span>
                 </div>
-                <Badge variant="outline" className="text-xs px-2 py-1 text-green-700 bg-green-50 border-green-200">
-                  <TrendingUp className="w-3 h-3 mr-1" />
+                <Badge variant="outline" className="text-xs px-1.5 md:px-2 py-0.5 md:py-1 text-green-700 bg-green-50 border-green-200">
+                  <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
                   +5%
                 </Badge>
               </div>
               <div className="space-y-1">
-                <div className={`text-3xl font-bold tracking-tight transition-all duration-300 ${
+                <div className={`text-2xl md:text-3xl font-bold tracking-tight transition-all duration-300 ${
                   metrics.pctPositive === 0 ? "text-slate-400" : "text-slate-900"
                 }`}>
                   {metrics.pctPositive > 0 ? `${metrics.pctPositive.toFixed(0)}%` : '—'}
@@ -348,20 +348,20 @@ export default function Dashboard() {
 
           {/* Top Insight */}
           <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-            <CardContent className="p-6 flex flex-col justify-between h-[140px]">
+            <CardContent className="p-4 md:p-6 flex flex-col justify-between h-[120px] md:h-[140px]">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <Lightbulb className="w-4 h-4 text-slate-700" />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <Lightbulb className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" />
                   </div>
-                  <span className="text-sm font-medium text-slate-700">Top Insight</span>
+                  <span className="text-xs md:text-sm font-medium text-slate-700">Top Insight</span>
                 </div>
-                <Badge variant="outline" className="text-xs px-2 py-1 text-yellow-700 bg-yellow-50 border-yellow-200">
+                <Badge variant="outline" className="text-xs px-1.5 md:px-2 py-0.5 md:py-1 text-yellow-700 bg-yellow-50 border-yellow-200">
                   Medium
                 </Badge>
               </div>
               <div className="space-y-1">
-                <div className={`text-lg font-bold tracking-tight transition-all duration-300 ${
+                <div className={`text-base md:text-lg font-bold tracking-tight transition-all duration-300 ${
                   metrics.topTopic === "—" ? "text-slate-400" : "text-slate-900"
                 }`}>
                   {metrics.topTopic === "—" ? "No insights yet" : "Breakfast Quality"}
@@ -372,22 +372,22 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Performance Chart - Fixed */}
+        {/* Performance Chart - Responsive */}
         <Card className="bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <CardHeader className="pb-4 p-4 md:p-6">
+            <div className="flex flex-col gap-4">
               <div>
-                <CardTitle className="text-2xl font-bold text-slate-900">Performance Evolution</CardTitle>
+                <CardTitle className="text-xl md:text-2xl font-bold text-slate-900">Performance Evolution</CardTitle>
                 <p className="text-sm text-slate-600 mt-1">Track how your guest experience changes over time</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2 overflow-x-auto pb-2">
                 {periods.map((period) => (
                   <Button
                     key={period.value}
                     variant={selectedPeriod === period.value ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedPeriod(period.value)}
-                    className="rounded-full text-xs"
+                    className="rounded-full text-xs flex-shrink-0"
                   >
                     {period.label}
                   </Button>
@@ -395,25 +395,25 @@ export default function Dashboard() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6 pt-0">
+          <CardContent className="p-4 md:p-6 pt-0">
             <Tabs value={chartTab} onValueChange={setChartTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="trend" className="text-sm">Trend</TabsTrigger>
-                <TabsTrigger value="sentiment" className="text-sm">Sentiment</TabsTrigger>
-                <TabsTrigger value="sources" className="text-sm">Sources</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 mb-4 md:mb-6">
+                <TabsTrigger value="trend" className="text-xs md:text-sm">Trend</TabsTrigger>
+                <TabsTrigger value="sentiment" className="text-xs md:text-sm">Sentiment</TabsTrigger>
+                <TabsTrigger value="sources" className="text-xs md:text-sm">Sources</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="trend" className="h-80">
+              <TabsContent value="trend" className="h-64 md:h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData.trend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(2,6,23,0.06)" />
                     <XAxis 
                       dataKey="date" 
-                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      tick={{ fill: '#64748B', fontSize: 11 }}
                       tickLine={{ stroke: '#CBD5E1' }}
                     />
                     <YAxis 
-                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      tick={{ fill: '#64748B', fontSize: 11 }}
                       tickLine={{ stroke: '#CBD5E1' }}
                       domain={[0, 5]}
                     />
@@ -437,17 +437,17 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </TabsContent>
               
-              <TabsContent value="sentiment" className="h-80">
+              <TabsContent value="sentiment" className="h-64 md:h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData.sentiment}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(2,6,23,0.06)" />
                     <XAxis 
                       dataKey="date" 
-                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      tick={{ fill: '#64748B', fontSize: 11 }}
                       tickLine={{ stroke: '#CBD5E1' }}
                     />
                     <YAxis 
-                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      tick={{ fill: '#64748B', fontSize: 11 }}
                       tickLine={{ stroke: '#CBD5E1' }}
                     />
                     <Tooltip
@@ -486,17 +486,17 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </TabsContent>
               
-              <TabsContent value="sources" className="h-80">
+              <TabsContent value="sources" className="h-64 md:h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData.sources}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(2,6,23,0.06)" />
                     <XAxis 
                       dataKey="source" 
-                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      tick={{ fill: '#64748B', fontSize: 11 }}
                       tickLine={{ stroke: '#CBD5E1' }}
                     />
                     <YAxis 
-                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      tick={{ fill: '#64748B', fontSize: 11 }}
                       tickLine={{ stroke: '#CBD5E1' }}
                     />
                     <Tooltip
@@ -519,8 +519,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Two Column Layout - Consolidated */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Two Column Layout - Responsive */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Left Column - Top Insights Modal */}
           <div className="lg:col-span-2">
             <TopInsightsModal insights={insights} isLoading={isLoading} />
@@ -532,33 +532,33 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Padu AI Card - Full Width */}
+        {/* Padu AI Card - Responsive */}
         <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 shadow-[0_12px_48px_rgba(147,51,234,0.15)] hover:shadow-[0_16px_64px_rgba(147,51,234,0.25)] transition-all duration-300 rounded-2xl relative overflow-hidden">
           {/* Subtle animated background */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 animate-pulse" />
           
-          <CardContent className="p-8 relative z-10 flex flex-col items-center text-center space-y-6 min-h-[200px] justify-center">
+          <CardContent className="p-6 md:p-8 relative z-10 flex flex-col items-center text-center space-y-4 md:space-y-6 min-h-[180px] md:min-h-[200px] justify-center">
             {/* Enhanced Icon */}
             <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                <Lightbulb className="w-10 h-10 text-white" />
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <Lightbulb className="w-8 h-8 md:w-10 md:h-10 text-white" />
               </div>
               {/* Glow effect */}
               <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-600/20 blur-lg -z-10" />
             </div>
             
             {/* Enhanced Content */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-center gap-3">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <div className="space-y-2 md:space-y-3">
+              <div className="flex items-center justify-center gap-2 md:gap-3">
+                <h3 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                   Padu AI
                 </h3>
-                <Badge className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 animate-bounce">
+                <Badge className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 animate-bounce text-xs">
                   Coming Soon
                 </Badge>
               </div>
               
-              <p className="text-purple-700 font-medium text-base">
+              <p className="text-purple-700 font-medium text-sm md:text-base">
                 Your AI agents are almost here
               </p>
               
@@ -568,17 +568,17 @@ export default function Dashboard() {
             </div>
             
             {/* Preview Features */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-2xl text-xs">
-              <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 w-full max-w-2xl text-xs">
+              <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-2 md:p-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0" />
                 <span>Smart review analysis</span>
               </div>
-              <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+              <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-2 md:p-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0" />
                 <span>Automated insights</span>
               </div>
-              <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+              <div className="flex items-center gap-2 text-purple-600 bg-white/50 rounded-lg p-2 md:p-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0" />
                 <span>Action recommendations</span>
               </div>
             </div>

@@ -45,20 +45,20 @@ function ChartWidget({ data }: ChartWidgetProps) {
   return (
     <div className="w-full h-full">
       <Card className="w-full h-full bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
+        <CardHeader className="pb-4 p-4 md:p-6">
+          <div className="flex flex-col gap-4">
             <div>
-              <CardTitle className="text-lg font-bold text-slate-900">{data.title}</CardTitle>
+              <CardTitle className="text-base md:text-lg font-bold text-slate-900">{data.title}</CardTitle>
               <p className="text-sm text-slate-600 mt-1">{data.subtitle}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2 overflow-x-auto pb-2">
               {periods.map((period) => (
                 <Button
                   key={period.value}
                   variant={selectedPeriod === period.value ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedPeriod(period.value)}
-                  className="rounded-lg text-xs h-8 px-3"
+                  className="rounded-lg text-xs h-7 md:h-8 px-2 md:px-3 flex-shrink-0"
                 >
                   {period.label}
                 </Button>
@@ -67,7 +67,7 @@ function ChartWidget({ data }: ChartWidgetProps) {
           </div>
         </CardHeader>
         
-        <CardContent className="h-[calc(100%-120px)]">
+        <CardContent className="h-[300px] md:h-[calc(100%-140px)] p-4 md:p-6 pt-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
             <TabsList className="grid w-full grid-cols-3 mb-4 bg-slate-100">
               <TabsTrigger value="trend" className="text-xs">Rating</TabsTrigger>

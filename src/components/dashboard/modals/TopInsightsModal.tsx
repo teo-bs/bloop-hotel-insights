@@ -45,7 +45,7 @@ export default memo(function TopInsightsModal({ insights, isLoading }: TopInsigh
           </CardContent>
         </Card>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Lightbulb className="w-6 h-6 text-amber-500" />

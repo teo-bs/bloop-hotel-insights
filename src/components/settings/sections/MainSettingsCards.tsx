@@ -48,8 +48,8 @@ export default function MainSettingsCards({ onSectionChange }: MainSettingsCards
         </p>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Cards Grid - Responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {settingsCards.map((card) => {
           const Icon = card.icon;
           return (
