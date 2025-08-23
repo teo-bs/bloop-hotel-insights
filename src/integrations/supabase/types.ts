@@ -14,6 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
+      import_errors: {
+        Row: {
+          created_at: string
+          error_message: string
+          error_type: string
+          id: string
+          import_job_id: string
+          row_data: Json | null
+          row_number: number
+        }
+        Insert: {
+          created_at?: string
+          error_message: string
+          error_type: string
+          id?: string
+          import_job_id: string
+          row_data?: Json | null
+          row_number: number
+        }
+        Update: {
+          created_at?: string
+          error_message?: string
+          error_type?: string
+          id?: string
+          import_job_id?: string
+          row_data?: Json | null
+          row_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_errors_import_job_id_fkey"
+            columns: ["import_job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_jobs: {
+        Row: {
+          column_mapping: Json | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          failed_rows: number | null
+          file_size: number | null
+          filename: string
+          id: string
+          imported_rows: number | null
+          integration_id: string
+          processed_rows: number | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["import_job_status"]
+          total_rows: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          column_mapping?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          failed_rows?: number | null
+          file_size?: number | null
+          filename: string
+          id?: string
+          imported_rows?: number | null
+          integration_id: string
+          processed_rows?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["import_job_status"]
+          total_rows?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          column_mapping?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          failed_rows?: number | null
+          file_size?: number | null
+          filename?: string
+          id?: string
+          imported_rows?: number | null
+          integration_id?: string
+          processed_rows?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["import_job_status"]
+          total_rows?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_accounts: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          created_at: string
+          credentials_encrypted: string | null
+          expires_at: string | null
+          id: string
+          integration_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          credentials_encrypted?: string | null
+          expires_at?: string | null
+          id?: string
+          integration_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          credentials_encrypted?: string | null
+          expires_at?: string | null
+          id?: string
+          integration_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          created_at: string
+          id: string
+          last_sync_at: string | null
+          metadata: Json | null
+          platform: string
+          status: Database["public"]["Enums"]["integration_status"]
+          total_reviews: number | null
+          type: Database["public"]["Enums"]["integration_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform: string
+          status?: Database["public"]["Enums"]["integration_status"]
+          total_reviews?: number | null
+          type?: Database["public"]["Enums"]["integration_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform?: string
+          status?: Database["public"]["Enums"]["integration_status"]
+          total_reviews?: number | null
+          type?: Database["public"]["Enums"]["integration_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       review_sources: {
         Row: {
           created_at: string
@@ -124,7 +307,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      import_job_status:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "cancelled"
+      integration_status: "not_connected" | "connected" | "error" | "syncing"
+      integration_type: "csv" | "api"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -251,6 +441,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      import_job_status: [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
+      integration_status: ["not_connected", "connected", "error", "syncing"],
+      integration_type: ["csv", "api"],
+    },
   },
 } as const
