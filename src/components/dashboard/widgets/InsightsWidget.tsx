@@ -45,49 +45,50 @@ function InsightsWidget({ data }: InsightsWidgetProps) {
   return (
     <div className="w-full h-full">
       <Card className="w-full h-full bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-2xl">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center">
-              <Lightbulb className="w-4 h-4 text-yellow-700" />
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
+              <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-700" />
             </div>
-            <div>
-              <CardTitle className="text-lg font-bold text-slate-900">{data.title}</CardTitle>
-              <p className="text-sm text-slate-600">{data.subtitle}</p>
+            <div className="min-w-0">
+              <CardTitle className="text-base sm:text-lg font-bold text-slate-900 truncate">{data.title}</CardTitle>
+              <p className="text-xs sm:text-sm text-slate-600 truncate">{data.subtitle}</p>
             </div>
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-4 h-[calc(100%-120px)] overflow-y-auto">
+        <CardContent className="space-y-3 sm:space-y-4 h-[calc(100%-100px)] sm:h-[calc(100%-120px)] overflow-y-auto">
           {mockInsights.map((insight, index) => (
             <div 
               key={insight.id} 
-              className="p-4 rounded-xl bg-white/60 border border-slate-100 hover:bg-white/80 transition-all duration-200"
+              className="p-3 sm:p-4 rounded-xl bg-white/60 border border-slate-100 hover:bg-white/80 transition-all duration-200"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <h4 className="font-semibold text-slate-900 text-sm leading-tight">{insight.title}</h4>
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight flex-1 min-w-0">{insight.title}</h4>
                   <Badge 
                     variant="outline" 
-                    className={`text-xs px-2 py-1 font-medium ${getImpactColor(insight.impact)}`}
+                    className={`text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 font-medium flex-shrink-0 ${getImpactColor(insight.impact)}`}
                   >
                     {insight.impact}
                   </Badge>
                 </div>
                 
-                <p className="text-sm text-slate-600 leading-relaxed">{insight.description}</p>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{insight.description}</p>
                 
-                <div className="flex items-center justify-between pt-1">
-                  <div className="text-xs text-slate-400">
-                    Based on recent reviews
+                <div className="flex items-center justify-between pt-1 gap-2">
+                  <div className="text-xs text-slate-400 flex-shrink-0">
+                    Based on reviews
                   </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg h-7 px-2 text-xs"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg h-6 sm:h-7 px-1.5 sm:px-2 text-xs flex-shrink-0"
                   >
-                    View details
-                    <ArrowRight className="ml-1 h-3 w-3" />
+                    <span className="hidden sm:inline">View details</span>
+                    <span className="sm:hidden">View</span>
+                    <ArrowRight className="ml-0.5 sm:ml-1 h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   </Button>
                 </div>
               </div>
