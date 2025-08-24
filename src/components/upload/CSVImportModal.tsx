@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Download, Upload, FileText, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import Papa from "papaparse";
 import { ParseMessage } from "@/workers/csvParser";
 
 interface CSVImportModalProps {
@@ -30,13 +31,13 @@ interface ImportStats {
   errors: number;
 }
 
-const REQUIRED_FIELDS = ['provider', 'rating', 'created_at'];
+const REQUIRED_FIELDS = ['platform', 'rating', 'date'];
 const ALL_FIELDS = [
-  'provider', 'external_review_id', 'rating', 'text', 'language', 
-  'created_at', 'response_text', 'responded_at'
+  'platform', 'external_review_id', 'rating', 'text', 'language', 
+  'date', 'response_text', 'responded_at', 'title', 'sentiment'
 ];
 
-const VALID_PROVIDERS = new Set(['google', 'tripadvisor', 'booking']);
+const VALID_PLATFORMS = new Set(['google', 'tripadvisor', 'booking']);
 
 export default function CSVImportModal({ open, onOpenChange }: CSVImportModalProps) {
   const [step, setStep] = useState<'upload' | 'mapping' | 'import' | 'success'>('upload');
@@ -76,7 +77,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
   }, [open]);
 
   const downloadTemplate = useCallback(() => {
-    const headers = ['provider', 'external_review_id', 'rating', 'text', 'language', 'created_at', 'response_text', 'responded_at'];
+    const headers = ['platform', 'external_review_id', 'rating', 'text', 'language', 'date', 'response_text', 'responded_at'];
     const exampleRows = [
       ['google', 'ChdDSUhNMG9nS0VJQ0FnSUQ2cU5UQW53RRAB', '5', 'Amazing hotel with great service!', 'en', '2025-07-22T14:05:00Z', 'Thank you for your wonderful review!', '2025-07-23T09:00:00Z'],
       ['tripadvisor', '12345678', '4', 'Nice place, good location. Room was clean.', 'en', '2025-07-21T18:30:00Z', '', '']
@@ -172,15 +173,15 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
         }
       });
 
-      // Validate provider
-      const providerColumn = Object.entries(columnMapping).find(([, target]) => target === 'provider')?.[0];
-      if (providerColumn && row[providerColumn]) {
-        const provider = row[providerColumn].toLowerCase().trim();
-        if (!VALID_PROVIDERS.has(provider)) {
+      // Validate platform
+      const platformColumn = Object.entries(columnMapping).find(([, target]) => target === 'platform')?.[0];
+      if (platformColumn && row[platformColumn]) {
+        const platform = row[platformColumn].toLowerCase().trim();
+        if (!VALID_PLATFORMS.has(platform)) {
           errors.push({
             row: rowIndex + 1,
-            column: 'provider',
-            message: `Invalid provider '${provider}'. Must be google, tripadvisor, or booking`
+            column: 'platform',
+            message: `Invalid platform '${platform}'. Must be google, tripadvisor, or booking`
           });
         }
       }
@@ -198,14 +199,14 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
         }
       }
 
-      // Validate created_at
-      const dateColumn = Object.entries(columnMapping).find(([, target]) => target === 'created_at')?.[0];
+      // Validate date
+      const dateColumn = Object.entries(columnMapping).find(([, target]) => target === 'date')?.[0];
       if (dateColumn && row[dateColumn]) {
         const date = new Date(row[dateColumn]);
         if (isNaN(date.getTime())) {
           errors.push({
             row: rowIndex + 1,
-            column: 'created_at',
+            column: 'date',
             message: `Invalid date format. Use ISO 8601 (e.g., 2025-07-22T14:05:00Z)`
           });
         }
@@ -216,8 +217,8 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
     return errors.length === 0;
   }, [preview, columnMapping]);
 
-  const generateSurrogateId = async (provider: string, createdAt: string, text: string): Promise<string> => {
-    const data = `${provider}|${createdAt}|${text}`;
+  const generateSurrogateId = async (platform: string, date: string, text: string): Promise<string> => {
+    const data = `${platform}|${date}|${text}`;
     const encoder = new TextEncoder();
     const hash = await crypto.subtle.digest('SHA-256', encoder.encode(data));
     return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -271,22 +272,22 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
               let value = row[csvCol];
               
               // Special processing
-              if (dbField === 'provider') {
+              if (dbField === 'platform') {
                 value = value.toLowerCase().trim();
               } else if (dbField === 'rating') {
                 value = parseInt(value);
-              } else if (dbField === 'created_at' || dbField === 'responded_at') {
-                value = new Date(value).toISOString();
+              } else if (dbField === 'date' || dbField === 'responded_at') {
+                value = new Date(value).toISOString().split('T')[0]; // Date only for 'date' field
               }
               
               processedRow[dbField] = value;
             }
 
             // Generate surrogate ID if external_review_id is missing
-            if (!processedRow.external_review_id && processedRow.provider && processedRow.created_at && processedRow.text) {
+            if (!processedRow.external_review_id && processedRow.platform && processedRow.date && processedRow.text) {
               processedRow.external_review_id = await generateSurrogateId(
-                processedRow.provider,
-                processedRow.created_at,
+                processedRow.platform,
+                processedRow.date,
                 processedRow.text
               );
             }
@@ -303,7 +304,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
           const { data, error } = await supabase
             .from('reviews')
             .upsert(processedRows, { 
-              onConflict: 'user_id,provider,external_review_id',
+              onConflict: 'user_id,platform,external_review_id',
               ignoreDuplicates: false 
             })
             .select('*');
@@ -429,7 +430,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
                 <CardHeader>
                   <CardTitle>Column Mapping & Preview</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Map your CSV columns to review fields. Required: provider, rating, created_at
+                    Map your CSV columns to review fields. Required: platform, rating, date
                   </p>
                 </CardHeader>
                 <CardContent>
