@@ -231,9 +231,12 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          external_review_id: string | null
           id: string
           platform: string
           rating: number
+          responded_at: string | null
+          response_text: string | null
           sentiment: string
           text: string
           title: string | null
@@ -244,9 +247,12 @@ export type Database = {
         Insert: {
           created_at?: string
           date: string
+          external_review_id?: string | null
           id?: string
           platform: string
           rating: number
+          responded_at?: string | null
+          response_text?: string | null
           sentiment: string
           text: string
           title?: string | null
@@ -257,9 +263,12 @@ export type Database = {
         Update: {
           created_at?: string
           date?: string
+          external_review_id?: string | null
           id?: string
           platform?: string
           rating?: number
+          responded_at?: string | null
+          response_text?: string | null
           sentiment?: string
           text?: string
           title?: string | null

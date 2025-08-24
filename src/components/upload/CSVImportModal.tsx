@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Download, Upload, FileText, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
-import Papa from "papaparse";
 import { ParseMessage } from "@/workers/csvParser";
 
 interface CSVImportModalProps {
@@ -114,7 +113,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
     setParseProgress(0);
 
     // Create Web Worker for parsing
-    workerRef.current = new Worker(new URL('@/workers/csvParser.ts', import.meta.url), { type: 'module' });
+    workerRef.current = new Worker('/src/workers/csvParser.js', { type: 'module' });
     
     workerRef.current.onmessage = (e) => {
       const message: ParseMessage = e.data;
@@ -235,14 +234,20 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
       const allRows: any[] = [];
       
       await new Promise<void>((resolve, reject) => {
+        const Papa = (window as any).Papa;
+        if (!Papa) {
+          reject(new Error('Papa Parse not available'));
+          return;
+        }
+        
         Papa.parse(file, {
           header: true,
           skipEmptyLines: 'greedy',
-          step: (result) => {
+          step: (result: any) => {
             allRows.push(result.data);
           },
           complete: () => resolve(),
-          error: (error) => reject(error)
+          error: (error: any) => reject(error)
         });
       });
 
