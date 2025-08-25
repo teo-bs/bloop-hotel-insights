@@ -32,8 +32,8 @@ interface ImportStats {
 
 const REQUIRED_FIELDS = ['platform', 'rating', 'date'];
 const ALL_FIELDS = [
-  'platform', 'external_review_id', 'rating', 'text', 'language', 
-  'date', 'response_text', 'responded_at', 'title', 'sentiment'
+  'platform', 'external_review_id', 'rating', 'text', 
+  'date', 'response_text', 'responded_at', 'title'
 ];
 
 const VALID_PLATFORMS = new Set(['google', 'tripadvisor', 'booking']);
@@ -76,10 +76,10 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
   }, [open]);
 
   const downloadTemplate = useCallback(() => {
-    const headers = ['platform', 'external_review_id', 'rating', 'text', 'language', 'date', 'response_text', 'responded_at'];
+    const headers = ['platform', 'external_review_id', 'rating', 'text', 'date', 'response_text', 'responded_at'];
     const exampleRows = [
-      ['google', 'ChdDSUhNMG9nS0VJQ0FnSUQ2cU5UQW53RRAB', '5', 'Amazing hotel with great service!', 'en', '2025-07-22T14:05:00Z', 'Thank you for your wonderful review!', '2025-07-23T09:00:00Z'],
-      ['tripadvisor', '12345678', '4', 'Nice place, good location. Room was clean.', 'en', '2025-07-21T18:30:00Z', '', '']
+      ['google', 'ChdDSUhNMG9nS0VJQ0FnSUQ2cU5UQW53RRAB', '5', 'Amazing hotel with great service!', '2025-07-22', 'Thank you for your wonderful review!', '2025-07-23T09:00:00Z'],
+      ['tripadvisor', '12345678', '4', 'Nice place, good location. Room was clean.', '2025-07-21', '', '']
     ];
     
     const csvContent = [headers, ...exampleRows]
@@ -113,7 +113,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
     setParseProgress(0);
 
     // Create Web Worker for parsing
-    workerRef.current = new Worker('/src/workers/csvParser.js', { type: 'module' });
+    workerRef.current = new Worker('/public/csvParser.js');
     
     workerRef.current.onmessage = (e) => {
       const message: ParseMessage = e.data;
@@ -230,25 +230,44 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
     setImportProgress(0);
     
     try {
-      // Re-parse the entire file to get all data
+      // Re-parse the entire file to get all data using Worker
       const allRows: any[] = [];
       
       await new Promise<void>((resolve, reject) => {
-        const Papa = (window as any).Papa;
-        if (!Papa) {
-          reject(new Error('Papa Parse not available'));
-          return;
-        }
+        const fullParseWorker = new Worker('/public/csvParser.js');
         
-        Papa.parse(file, {
-          header: true,
-          skipEmptyLines: 'greedy',
-          step: (result: any) => {
-            allRows.push(result.data);
-          },
-          complete: () => resolve(),
-          error: (error: any) => reject(error)
-        });
+        fullParseWorker.onmessage = (e) => {
+          const message: ParseMessage = e.data;
+          if (message.type === 'complete') {
+            // Need to re-parse the full file, not just preview
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+              const text = fileReader.result as string;
+              const rows = text.split('\n').slice(1); // Skip header
+              const headers = text.split('\n')[0].split(',').map(h => h.replace(/"/g, ''));
+              
+              rows.forEach(row => {
+                if (row.trim()) {
+                  const values = row.split(',').map(v => v.replace(/"/g, ''));
+                  const rowObj: any = {};
+                  headers.forEach((header, i) => {
+                    rowObj[header] = values[i] || '';
+                  });
+                  allRows.push(rowObj);
+                }
+              });
+              
+              fullParseWorker.terminate();
+              resolve();
+            };
+            fileReader.readAsText(file);
+          } else if (message.type === 'error') {
+            fullParseWorker.terminate();
+            reject(new Error(message.error));
+          }
+        };
+        
+        fullParseWorker.postMessage({ file });
       });
 
       // Process rows in chunks of 1000
@@ -270,6 +289,10 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
               user_id: user.id,
             };
 
+            // Set default values for required fields
+            processedRow.sentiment = 'neutral';
+            processedRow.topics = [];
+
             // Map columns
             for (const [csvCol, dbField] of Object.entries(columnMapping)) {
               if (dbField === 'ignore' || !row[csvCol]) continue;
@@ -281,8 +304,13 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
                 value = value.toLowerCase().trim();
               } else if (dbField === 'rating') {
                 value = parseInt(value);
-              } else if (dbField === 'date' || dbField === 'responded_at') {
-                value = new Date(value).toISOString().split('T')[0]; // Date only for 'date' field
+              } else if (dbField === 'date') {
+                // For date field, ensure proper date format
+                const date = new Date(value);
+                value = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+              } else if (dbField === 'responded_at') {
+                // For timestamp field, keep full ISO format
+                value = new Date(value).toISOString();
               }
               
               processedRow[dbField] = value;
@@ -374,9 +402,9 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
                     <Download className="h-4 w-4 mr-2" />
                     Download CSV Template
                   </Button>
-                  <p className="text-sm text-muted-foreground">
-                    Dates must be ISO 8601 (e.g., 2025-07-22T14:05:00Z).
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                     Use YYYY-MM-DD format for dates (e.g., 2025-07-22).
+                   </p>
                 </CardContent>
               </Card>
 
