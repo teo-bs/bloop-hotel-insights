@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import GlobalActions from "./components/GlobalActions";
 import IntegrationsModal from "@/components/integrations/IntegrationsModal";
-import CSVUploadModal from "@/components/upload/CSVUploadModal";
+import CSVUploadModal from "@/components/integrations/CSVUploadModal";
 import AuthModal from "@/components/auth/AuthModal";
 import DomainRouter from "@/components/DomainRouter";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -24,7 +24,7 @@ const App = () => (
           {/* Global modals */}
           <AuthModal />
           <IntegrationsModal />
-          <CSVUploadModal />
+          
           {/* Domain-aware routing */}
           <DomainRouter />
         </AuthProvider>

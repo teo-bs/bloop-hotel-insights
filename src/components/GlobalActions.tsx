@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import AuthModal from "./auth/AuthModal";
 import IntegrationsModal from "./integrations/IntegrationsModal";
-import CSVUploadModal from "./upload/CSVUploadModal";
+import CSVUploadModal from "./integrations/CSVUploadModal";
 import WaitlistModal from "./waitlist/WaitlistModal";
+import type { Platform } from "@/stores/integrations";
 
 export default function GlobalActions() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -10,6 +11,7 @@ export default function GlobalActions() {
   const [authIntent, setAuthIntent] = useState<any>(null);
   const [integrationsModalOpen, setIntegrationsModalOpen] = useState(false);
   const [csvUploadModalOpen, setCsvUploadModalOpen] = useState(false);
+  const [csvUploadPlatform, setCsvUploadPlatform] = useState<Platform | null>(null);
   const [waitlistModalOpen, setWaitlistModalOpen] = useState(false);
 
   useEffect(() => {
@@ -21,26 +23,39 @@ export default function GlobalActions() {
     };
 
     const handleIntegrationsModalOpen = () => setIntegrationsModalOpen(true);
-    const handleCsvUploadModalOpen = () => setCsvUploadModalOpen(true);
+    const handleCsvUploadModalOpen = (e: CustomEvent) => {
+      const { platform } = e.detail || {};
+      setCsvUploadPlatform(platform);
+      setCsvUploadModalOpen(true);
+    };
     const handleWaitlistModalOpen = () => setWaitlistModalOpen(true);
 
     document.addEventListener("auth:open", handleAuthModalOpen as EventListener);
     document.addEventListener("integrations:open", handleIntegrationsModalOpen);
-    document.addEventListener("csv-upload:open", handleCsvUploadModalOpen);
+    document.addEventListener("csv-upload:open", handleCsvUploadModalOpen as EventListener);
+    document.addEventListener("open-csv-upload-modal", handleCsvUploadModalOpen as EventListener);
     document.addEventListener("waitlist:open", handleWaitlistModalOpen);
 
     return () => {
       document.removeEventListener("auth:open", handleAuthModalOpen as EventListener);
       document.removeEventListener("integrations:open", handleIntegrationsModalOpen);
-      document.removeEventListener("csv-upload:open", handleCsvUploadModalOpen);
+      document.removeEventListener("csv-upload:open", handleCsvUploadModalOpen as EventListener);
+      document.removeEventListener("open-csv-upload-modal", handleCsvUploadModalOpen as EventListener);
       document.removeEventListener("waitlist:open", handleWaitlistModalOpen);
     };
   }, []);
 
   return (
-    <WaitlistModal 
-      open={waitlistModalOpen} 
-      onOpenChange={setWaitlistModalOpen} 
-    />
+    <>
+      <WaitlistModal 
+        open={waitlistModalOpen} 
+        onOpenChange={setWaitlistModalOpen} 
+      />
+      <CSVUploadModal
+        platform={csvUploadPlatform}
+        open={csvUploadModalOpen}
+        onOpenChange={setCsvUploadModalOpen}
+      />
+    </>
   );
 }
