@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      hotel_members: {
+        Row: {
+          created_at: string | null
+          hotel_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          hotel_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          hotel_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_members_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotels: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       import_errors: {
         Row: {
           created_at: string
@@ -277,6 +324,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      reviews_new: {
+        Row: {
+          author: string | null
+          created_at: string
+          external_review_id: string | null
+          hotel_id: string | null
+          id: number
+          inserted_at: string | null
+          language: string | null
+          provider: string
+          rating: number | null
+          responded_at: string | null
+          response_text: string | null
+          text: string | null
+        }
+        Insert: {
+          author?: string | null
+          created_at: string
+          external_review_id?: string | null
+          hotel_id?: string | null
+          id?: number
+          inserted_at?: string | null
+          language?: string | null
+          provider: string
+          rating?: number | null
+          responded_at?: string | null
+          response_text?: string | null
+          text?: string | null
+        }
+        Update: {
+          author?: string | null
+          created_at?: string
+          external_review_id?: string | null
+          hotel_id?: string | null
+          id?: number
+          inserted_at?: string | null
+          language?: string | null
+          provider?: string
+          rating?: number | null
+          responded_at?: string | null
+          response_text?: string | null
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_new_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       waitlist: {
         Row: {
