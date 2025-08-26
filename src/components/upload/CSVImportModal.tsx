@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Download, Upload, FileText, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { ParseMessage } from "@/workers/csvParser";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CSVImportModalProps {
   open: boolean;
@@ -55,6 +56,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
   
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
 
@@ -355,6 +357,13 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
       }
 
       setImportStats({ inserted, updated, skipped, errors });
+      
+      // Invalidate analytics queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['reviews:totals'] });
+      queryClient.invalidateQueries({ queryKey: ['reviews:avg'] });
+      queryClient.invalidateQueries({ queryKey: ['reviews:byPlatform'] });
+      queryClient.invalidateQueries({ queryKey: ['reviews:timeseries'] });
+      
       setStep('success');
       
       toast({ 
