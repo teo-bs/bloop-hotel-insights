@@ -115,7 +115,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
     setParseProgress(0);
 
     // Create Web Worker for parsing
-    workerRef.current = new Worker('/public/csvParser.js');
+    workerRef.current = new Worker('/csvParser.js');
     
     workerRef.current.onmessage = (e) => {
       const message: ParseMessage = e.data;
@@ -236,7 +236,7 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
       const allRows: any[] = [];
       
       await new Promise<void>((resolve, reject) => {
-        const fullParseWorker = new Worker('/public/csvParser.js');
+        const fullParseWorker = new Worker('/csvParser.js');
         
         fullParseWorker.onmessage = (e) => {
           const message: ParseMessage = e.data;
