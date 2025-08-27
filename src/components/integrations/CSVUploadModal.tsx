@@ -125,9 +125,32 @@ export default function CSVUploadModal({ platform, open, onOpenChange }: CSVUplo
     if (!platform) return;
     
     const template = CSV_TEMPLATES[platform];
-    const csvContent = template.headers.join(",") + "\n" + 
-      "2024-01-15,5,\"Great service and friendly staff!\",\"Excellent Experience\",\"John Doe\"," + platform + ",\"Thank you for your review!\",2024-01-16\n" +
-      "2024-01-14,4,\"Good food but slow service\",\"Good overall\",\"Jane Smith\"," + platform + ",,";
+    
+    // Create comprehensive sample data based on platform
+    let sampleRows = [];
+    
+    if (platform === "google") {
+      sampleRows = [
+        "2024-01-15,5,\"Excellent service! The staff was incredibly friendly and went above and beyond to make our stay comfortable. The room was spotless and the amenities exceeded our expectations.\",\"Outstanding Experience\",\"Sarah Johnson\",google,\"Thank you so much for your wonderful review! We're thrilled to hear you had such a great experience.\",2024-01-16",
+        "2024-01-14,4,\"Good location and decent facilities. The breakfast was tasty but could use more variety. Overall satisfied with the value for money.\",\"Good value for money\",\"Mike Thompson\",google,\"Thanks for your feedback! We'll definitely consider expanding our breakfast options.\",2024-01-15",
+        "2024-01-13,3,\"Average experience. Room was clean but quite small. Check-in process took longer than expected.\",\"Average stay\",\"Emma Davis\",google,,",
+        "2024-01-12,5,\"Amazing place! Beautiful views, excellent food, and top-notch service. Will definitely come back!\",\"Perfect getaway\",\"David Wilson\",google,\"We're so glad you enjoyed your stay with us! Looking forward to welcoming you back soon.\",2024-01-13"
+      ];
+    } else if (platform === "tripadvisor") {
+      sampleRows = [
+        "2024-01-15,5,\"Fantastic hotel with great amenities and service. Highly recommended!\",\"Highly Recommend\",\"John Smith\",\"New York, USA\",tripadvisor",
+        "2024-01-14,4,\"Nice place, good location. Some minor issues but overall positive experience.\",\"Good Experience\",\"Maria Garcia\",\"Madrid, Spain\",tripadvisor",
+        "2024-01-13,3,\"Average hotel. Nothing special but decent for the price.\",\"Decent Stay\",\"Robert Brown\",\"London, UK\",tripadvisor"
+      ];
+    } else if (platform === "booking") {
+      sampleRows = [
+        "2024-01-15,5,\"Perfect stay! Everything was exactly as described and the staff was very helpful.\",\"Lisa Anderson\",booking",
+        "2024-01-14,4,\"Good hotel with comfortable rooms. Would stay again.\",\"James Wilson\",booking",
+        "2024-01-13,3,\"Acceptable accommodation. Clean but basic amenities.\",\"Anna Mueller\",booking"
+      ];
+    }
+    
+    const csvContent = template.headers.join(",") + "\n" + sampleRows.join("\n");
     
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -139,7 +162,7 @@ export default function CSVUploadModal({ platform, open, onOpenChange }: CSVUplo
 
     toast({
       title: "Template downloaded",
-      description: `${template.name} CSV template has been downloaded.`,
+      description: `${template.name} CSV template with sample data has been downloaded.`,
     });
   }, [platform, toast]);
 
@@ -411,6 +434,16 @@ export default function CSVUploadModal({ platform, open, onOpenChange }: CSVUplo
                     <Download className="h-4 w-4 mr-2" />
                     Download Template
                   </Button>
+                </div>
+
+                <div className="p-4 bg-muted/30 rounded-lg border">
+                  <h4 className="font-medium mb-2">CSV Format Requirements</h4>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p><strong>Required fields:</strong> Date (YYYY-MM-DD), Rating (1-5), Review Text, Platform</p>
+                    <p><strong>Optional fields:</strong> Review Title, Author Name, Author Location, Reply Text, Reply Date</p>
+                    <p><strong>Date format:</strong> Use YYYY-MM-DD format (e.g., 2024-01-15)</p>
+                    <p><strong>Text fields:</strong> Wrap in quotes if they contain commas</p>
+                  </div>
                 </div>
 
                 <div

@@ -126,6 +126,39 @@ function IntegrationCard({ integration }: { integration: Integration }) {
                 Upload CSV
               </Button>
               
+              {platform === "google" && (
+                <Button 
+                  onClick={() => {
+                    // Trigger download template directly
+                    const template = {
+                      name: "Google Business Profile",
+                      filename: "google_reviews_template.csv",
+                      headers: ["Date", "Rating", "Review Text", "Review Title", "Author Name", "Platform", "Reply Text", "Reply Date"]
+                    };
+                    
+                    const csvContent = template.headers.join(",") + "\n" + 
+                      "2024-01-15,5,\"Excellent service! The staff was incredibly friendly and went above and beyond to make our stay comfortable. The room was spotless and the amenities exceeded our expectations.\",\"Outstanding Experience\",\"Sarah Johnson\",google,\"Thank you so much for your wonderful review! We're thrilled to hear you had such a great experience.\",2024-01-16\n" +
+                      "2024-01-14,4,\"Good location and decent facilities. The breakfast was tasty but could use more variety. Overall satisfied with the value for money.\",\"Good value for money\",\"Mike Thompson\",google,\"Thanks for your feedback! We'll definitely consider expanding our breakfast options.\",2024-01-15\n" +
+                      "2024-01-13,3,\"Average experience. Room was clean but quite small. Check-in process took longer than expected.\",\"Average stay\",\"Emma Davis\",google,,\n" +
+                      "2024-01-12,5,\"Amazing place! Beautiful views, excellent food, and top-notch service. Will definitely come back!\",\"Perfect getaway\",\"David Wilson\",google,\"We're so glad you enjoyed your stay with us! Looking forward to welcoming you back soon.\",2024-01-13";
+                    
+                    const blob = new Blob([csvContent], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = template.filename;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Download Template
+                </Button>
+              )}
+              
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -147,7 +180,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
             </div>
             
             <p className="text-xs text-muted-foreground">
-              We'll import your full review history and keep it organized.
+              {platform === "google" ? "Download the template to see the expected format, then upload your Google Business reviews." : "We'll import your full review history and keep it organized."}
             </p>
           </>
         )}
