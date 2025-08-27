@@ -100,6 +100,8 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
   }, [toast]);
 
   const handleFileSelect = useCallback((selectedFile: File) => {
+    console.log('File selected:', selectedFile.name, selectedFile.size);
+    
     if (!selectedFile.name.toLowerCase().endsWith('.csv')) {
       toast({ title: "Invalid file", description: "Please select a CSV file.", variant: "destructive" });
       return;
@@ -114,41 +116,69 @@ export default function CSVImportModal({ open, onOpenChange }: CSVImportModalPro
     setIsParsing(true);
     setParseProgress(0);
 
-    // Create Web Worker for parsing
-    workerRef.current = new Worker('/csvParser.js');
+    console.log('Creating Web Worker...');
     
-    workerRef.current.onmessage = (e) => {
-      const message: ParseMessage = e.data;
+    try {
+      // Create Web Worker for parsing
+      workerRef.current = new Worker('/csvParser.js');
       
-      switch (message.type) {
-        case 'progress':
-          setParseProgress((message.parsed / Math.max(message.total, message.parsed)) * 100);
-          break;
-        case 'complete':
-          setPreview(message.preview);
-          setHeaders(message.headers);
-          setTotalRows(message.total);
-          setIsParsing(false);
-          
-          // Auto-map identical headers
-          const autoMapping: Record<string, string> = {};
-          message.headers.forEach(header => {
-            const normalizedHeader = header.toLowerCase().trim();
-            if (ALL_FIELDS.includes(normalizedHeader)) {
-              autoMapping[header] = normalizedHeader;
-            }
-          });
-          setColumnMapping(autoMapping);
-          setStep('mapping');
-          break;
-        case 'error':
-          setIsParsing(false);
-          toast({ title: "Parse error", description: message.error, variant: "destructive" });
-          break;
-      }
-    };
+      workerRef.current.onerror = (error) => {
+        console.error('Web Worker error:', error);
+        setIsParsing(false);
+        toast({ title: "Worker error", description: "Failed to initialize CSV parser.", variant: "destructive" });
+      };
+      
+      workerRef.current.onmessage = (e) => {
+        console.log('Worker message:', e.data);
+        const message: ParseMessage = e.data;
+        
+        switch (message.type) {
+          case 'progress':
+            console.log('Progress:', message.parsed, message.total);
+            setParseProgress((message.parsed / Math.max(message.total, message.parsed)) * 100);
+            break;
+          case 'complete':
+            console.log('Parse complete:', message.preview.length, 'rows');
+            setPreview(message.preview);
+            setHeaders(message.headers);
+            setTotalRows(message.total);
+            setIsParsing(false);
+            
+            // Auto-map identical headers
+            const autoMapping: Record<string, string> = {};
+            message.headers.forEach(header => {
+              const normalizedHeader = header.toLowerCase().trim();
+              if (ALL_FIELDS.includes(normalizedHeader)) {
+                autoMapping[header] = normalizedHeader;
+              }
+            });
+            setColumnMapping(autoMapping);
+            setStep('mapping');
+            
+            toast({ 
+              title: "File parsed successfully", 
+              description: `Found ${message.total} rows with ${message.headers.length} columns` 
+            });
+            break;
+          case 'error':
+            console.error('Parse error:', message.error);
+            setIsParsing(false);
+            toast({ title: "Parse error", description: message.error, variant: "destructive" });
+            break;
+        }
+      };
 
-    workerRef.current.postMessage({ file: selectedFile });
+      console.log('Sending file to worker...');
+      workerRef.current.postMessage({ file: selectedFile });
+    } catch (error) {
+      console.error('Failed to create Web Worker:', error);
+      setIsParsing(false);
+      toast({ 
+        title: "Worker initialization failed", 
+        description: "Unable to start CSV parser. Please try again.", 
+        variant: "destructive" 
+      });
+    }
   }, [toast]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
